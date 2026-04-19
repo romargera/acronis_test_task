@@ -581,6 +581,15 @@ body {
   gap: 8px;
 }
 
+.title-link {
+  color: var(--acv-color-link-primary);
+  text-decoration: underline;
+}
+
+.title-link:hover {
+  color: var(--acv-color-link-hover);
+}
+
 .dashboard-tabs {
   display: flex;
   gap: var(--acv-spacing-small);
