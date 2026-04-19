@@ -14,14 +14,53 @@
         <div class="brand">Acronis Dashboard Prototype</div>
       </header>
       <section class="card">
-        <h1 class="card-title">Choose a screen</h1>
-        <p class="card-subtitle">Interactive prototype with fake but coherent MSP data.</p>
-        <div class="nav-links">
-          <a class="nav-link" href="./operations_dashboard.html">Operations Dashboard</a>
-          <a class="nav-link" href="./business_dashboard.html">Business Growth Dashboard</a>
-          <a class="nav-link" href="./client_360.html">Client 360</a>
+        <h1 class="card-title">Dashboards</h1>
+        <p class="card-subtitle">Interactive prototype with tab navigation. Default tab is Operations.</p>
+        <div class="dashboard-tabs" role="tablist" aria-label="Dashboard tabs">
+          <button class="dashboard-tab active" role="tab" aria-selected="true" data-target="./operations_dashboard.html" type="button">
+            Operations Dashboard
+          </button>
+          <button class="dashboard-tab" role="tab" aria-selected="false" data-target="./business_dashboard.html" type="button">
+            Business Growth Dashboard
+          </button>
+          <button class="dashboard-tab" role="tab" aria-selected="false" data-target="./client_360.html" type="button">
+            Client 360
+          </button>
         </div>
       </section>
+      <section class="dashboard-tab-panel" role="tabpanel" aria-label="Selected dashboard">
+        <iframe
+          id="dashboardFrame"
+          class="dashboard-frame"
+          src="./operations_dashboard.html"
+          title="Operations Dashboard"
+          loading="lazy"
+        ></iframe>
+      </section>
     </main>
+    <script>
+      (function () {
+        const tabs = Array.from(document.querySelectorAll(".dashboard-tab"));
+        const frame = document.getElementById("dashboardFrame");
+
+        function activateTab(tab) {
+          const target = tab.getAttribute("data-target");
+          frame.src = target;
+          frame.title = tab.textContent.trim();
+
+          tabs.forEach(function (item) {
+            const isActive = item === tab;
+            item.classList.toggle("active", isActive);
+            item.setAttribute("aria-selected", isActive ? "true" : "false");
+          });
+        }
+
+        tabs.forEach(function (tab) {
+          tab.addEventListener("click", function () {
+            activateTab(tab);
+          });
+        });
+      })();
+    </script>
   </body>
 </html>
