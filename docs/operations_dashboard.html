@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Acronis Operations Dashboard Prototype</title>
+    <link rel="stylesheet" href="./assets/acv-reset.css" />
+    <link rel="stylesheet" href="./assets/acv-theme-acronis.css" />
+    <link rel="stylesheet" href="./assets/common.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">Acronis Operations Center</div>
+        <nav class="nav-links" aria-label="Prototype navigation">
+          <a class="nav-link active" href="./operations_dashboard.html">Operations</a>
+          <a class="nav-link" href="./business_dashboard.html">Business Growth</a>
+          <a class="nav-link" href="./client_360.html">Client 360</a>
+        </nav>
+      </header>
+
+      <section class="filters" aria-label="Dashboard filters">
+        <select id="severityFilter" class="select" aria-label="Severity filter">
+          <option value="all">All severities</option>
+          <option value="critical">Critical only</option>
+          <option value="high">High and above</option>
+          <option value="medium">Medium and above</option>
+        </select>
+        <select id="serviceFilter" class="select" aria-label="Service filter">
+          <option value="all">All services</option>
+          <option value="backup">Backup</option>
+          <option value="edr">EDR</option>
+          <option value="m365">M365 Backup</option>
+          <option value="patch">Patch</option>
+          <option value="dlp">DLP</option>
+        </select>
+        <select id="regionFilter" class="select" aria-label="Region filter">
+          <option value="all">All regions</option>
+          <option value="NA">North America</option>
+          <option value="EU">Europe</option>
+          <option value="APAC">APAC</option>
+        </select>
+      </section>
+
+      <section class="kpi-grid" id="kpiGrid" aria-label="Operations KPI cards"></section>
+
+      <section class="grid grid-2">
+        <article class="card">
+          <div class="section-actions">
+            <h2 class="card-title">Cross-Tenant Risk Heatmap</h2>
+            <span class="card-subtitle" id="tenantCountLabel"></span>
+          </div>
+          <div class="heatmap" id="heatmap" role="list"></div>
+        </article>
+
+        <article class="card">
+          <div class="section-actions">
+            <h2 class="card-title">AI Morning Briefing</h2>
+            <button id="briefToggle" class="btn btn-secondary" type="button">Show Top 5</button>
+          </div>
+          <p class="card-subtitle">Priority-ranked actions generated from overnight telemetry.</p>
+          <div id="briefingList" class="grid"></div>
+        </article>
+      </section>
+
+      <section class="split">
+        <article class="card">
+          <h2 class="card-title">Posture Trends (7/30/90 View)</h2>
+          <div class="legend">
+            <span class="legend-item"><span class="dot dot-primary"></span> Backup success</span>
+            <span class="legend-item"><span class="dot dot-warning"></span> Patch compliance</span>
+            <span class="legend-item"><span class="dot dot-danger"></span> Threat activity</span>
+          </div>
+          <div class="chart-wrap">
+            <div id="trendBackup"></div>
+            <div id="trendPatch"></div>
+            <div id="trendThreats"></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2 class="card-title">Critical Alerts Feed</h2>
+          <p class="card-subtitle">Real-time simulation: new alerts are injected every ~20s.</p>
+          <div class="alert-list" id="alertsFeed"></div>
+        </article>
+      </section>
+
+      <section id="detailPanel" class="detail-panel" aria-live="polite"></section>
+    </main>
+
+    <div class="toast" id="toast" aria-live="assertive"></div>
+
+    <script src="./assets/data.js"></script>
+    <script src="./assets/helpers.js"></script>
+    <script>
+      (function () {
+        const data = window.AcronisDemoData;
+        const utils = window.DemoUtils;
+        const filters = {
+          severity: "all",
+          service: "all",
+          region: "all"
+        };
+        const state = {
+          selectedId: null,
+          showTopOnly: true,
+          dynamicAlerts: utils.sortAlerts(data.tenants)
+        };
+
+        const severityThreshold = {
+          all: 1,
+          medium: 2,
+          high: 3,
+          critical: 4
+        };
+
+        const elements = {
+          kpiGrid: document.getElementById("kpiGrid"),
+          heatmap: document.getElementById("heatmap"),
+          tenantCountLabel: document.getElementById("tenantCountLabel"),
+          briefingList: document.getElementById("briefingList"),
+          alertsFeed: document.getElementById("alertsFeed"),
+          detailPanel: document.getElementById("detailPanel"),
+          trendBackup: document.getElementById("trendBackup"),
+          trendPatch: document.getElementById("trendPatch"),
+          trendThreats: document.getElementById("trendThreats")
+        };
+
+        document.getElementById("severityFilter").addEventListener("change", function (event) {
+          filters.severity = event.target.value;
+          render();
+        });
+
+        document.getElementById("serviceFilter").addEventListener("change", function (event) {
+          filters.service = event.target.value;
+          render();
+        });
+
+        document.getElementById("regionFilter").addEventListener("change", function (event) {
+          filters.region = event.target.value;
+          render();
+        });
+
+        document.getElementById("briefToggle").addEventListener("click", function () {
+          state.showTopOnly = !state.showTopOnly;
+          this.textContent = state.showTopOnly ? "Show Top 5" : "Show All";
+          renderBriefing(filteredTenants());
+        });
+
+        function matchesFilters(tenant) {
+          if (filters.region !== "all" && tenant.region !== filters.region) return false;
+          if (filters.service !== "all" && !tenant.services[filters.service]) return false;
+          const riskWeight = utils.levelWeights[tenant.riskLevel] || 0;
+          if (riskWeight < severityThreshold[filters.severity]) return false;
+          return true;
+        }
+
+        function filteredTenants() {
+          return data.tenants.filter(matchesFilters).sort(utils.byRiskDesc);
+        }
+
+        function renderKpis(tenants) {
+          const totalEndpoints = tenants.reduce(function (acc, tenant) {
+            return acc + tenant.endpoints;
+          }, 0);
+          const avgPosture = tenants.length
+            ? tenants.reduce(function (acc, tenant) {
+                return acc + tenant.postureScore;
+              }, 0) / tenants.length
+            : 0;
+          const criticalTenants = tenants.filter(function (tenant) {
+            return tenant.riskLevel === "critical";
+          }).length;
+          const openAlerts = tenants.reduce(function (acc, tenant) {
+            return acc + tenant.openCriticalAlerts;
+          }, 0);
+
+          elements.kpiGrid.innerHTML = [
+            { label: "Managed Tenants", value: tenants.length, trend: "-2 vs last week", trendClass: "kpi-trend-positive" },
+            { label: "Endpoints In Scope", value: totalEndpoints, trend: "+4.2% growth", trendClass: "kpi-trend-positive" },
+            { label: "Avg Posture Score", value: Math.round(avgPosture), trend: "-3 points WoW", trendClass: "kpi-trend-negative" },
+            { label: "Critical Exposure", value: criticalTenants + " tenants", trend: openAlerts + " open critical alerts", trendClass: "kpi-trend-negative" }
+          ]
+            .map(function (item) {
+              return `
+                <div class="kpi-card">
+                  <div class="kpi-label">${item.label}</div>
+                  <div class="kpi-value">${item.value}</div>
+                  <div class="tiny ${item.trendClass}">${item.trend}</div>
+                </div>`;
+            })
+            .join("");
+        }
+
+        function renderHeatmap(tenants) {
+          elements.tenantCountLabel.textContent = `${tenants.length} tenants in current filter`;
+
+          if (!tenants.length) {
+            elements.heatmap.innerHTML = `<div class="empty-state">No tenants match current filters.</div>`;
+            return;
+          }
+
+          elements.heatmap.innerHTML = tenants
+            .map(function (tenant) {
+              return `
+                <button class="${utils.tenantClass(tenant.riskLevel)}" data-id="${tenant.id}" role="listitem" type="button">
+                  <strong>${tenant.name}</strong>
+                  <span class="tiny">${tenant.region} • ${tenant.endpoints} endpoints</span>
+                  <span class="${utils.riskClass(tenant.riskLevel)}">${tenant.riskLevel.toUpperCase()}</span>
+                </button>`;
+            })
+            .join("");
+
+          elements.heatmap.querySelectorAll("[data-id]").forEach(function (button) {
+            button.addEventListener("click", function () {
+              state.selectedId = this.getAttribute("data-id");
+              renderDetail();
+            });
+          });
+        }
+
+        function renderBriefing(tenants) {
+          const ranked = tenants
+            .slice()
+            .sort(function (a, b) {
+              return utils.riskScore(b) - utils.riskScore(a);
+            })
+            .slice(0, state.showTopOnly ? 5 : tenants.length);
+
+          if (!ranked.length) {
+            elements.briefingList.innerHTML = `<div class="empty-state">No actionable items for current filters.</div>`;
+            return;
+          }
+
+          elements.briefingList.innerHTML = ranked
+            .map(function (tenant, idx) {
+              return `
+                <button class="brief-item" data-id="${tenant.id}" type="button">
+                  <div class="section-actions">
+                    <span class="${utils.riskClass(tenant.riskLevel)}">P${idx + 1}</span>
+                    <strong>${tenant.name}</strong>
+                  </div>
+                  <div class="tiny">${tenant.openCriticalAlerts} critical alerts, SLA ${tenant.slaCompliance}%, patch ${tenant.patchCompliance}%</div>
+                  <div>Recommended action: assign patch wave + exec check-in before next QBR.</div>
+                </button>`;
+            })
+            .join("");
+
+          elements.briefingList.querySelectorAll("[data-id]").forEach(function (item) {
+            item.addEventListener("click", function () {
+              state.selectedId = this.getAttribute("data-id");
+              renderDetail();
+            });
+          });
+        }
+
+        function renderTrends() {
+          const backup = utils.createSparkline(data.opsTrends.backup, { width: 380, height: 78 }).replace("risk-spark", "risk-spark");
+          const patch = utils.createSparkline(data.opsTrends.patch, { width: 380, height: 78 }).replace("risk-spark", "risk-spark risk-spark-alt");
+          const threats = utils.createSparkline(data.opsTrends.threats, { width: 380, height: 78 }).replace("risk-spark", "risk-spark risk-spark-danger");
+
+          elements.trendBackup.innerHTML = `<div class="tiny">Backup success trend</div>${backup}`;
+          elements.trendPatch.innerHTML = `<div class="tiny">Patch compliance trend</div>${patch}`;
+          elements.trendThreats.innerHTML = `<div class="tiny">Threat activity trend</div>${threats}`;
+        }
+
+        function renderAlerts(tenants) {
+          const visibleIds = new Set(tenants.map(function (tenant) {
+            return tenant.id;
+          }));
+          const alerts = state.dynamicAlerts.filter(function (item) {
+            return visibleIds.has(item.tenantId);
+          });
+
+          if (!alerts.length) {
+            elements.alertsFeed.innerHTML = `<div class="empty-state">No alerts in scope.</div>`;
+            return;
+          }
+
+          elements.alertsFeed.innerHTML = alerts.slice(0, 10).map(function (alert) {
+            return `
+              <button class="alert-item" data-id="${alert.tenantId}" type="button">
+                <div class="section-actions">
+                  <span class="${utils.riskClass(alert.severity)}">${alert.severity.toUpperCase()}</span>
+                  <strong>${alert.tenantName}</strong>
+                </div>
+                <div>${alert.text}</div>
+              </button>`;
+          }).join("");
+
+          elements.alertsFeed.querySelectorAll("[data-id]").forEach(function (item) {
+            item.addEventListener("click", function () {
+              state.selectedId = this.getAttribute("data-id");
+              renderDetail();
+            });
+          });
+        }
+
+        function renderDetail() {
+          const tenant = state.selectedId ? utils.getTenantById(state.selectedId) : null;
+          if (!tenant) {
+            elements.detailPanel.classList.remove("open");
+            elements.detailPanel.innerHTML = "";
+            return;
+          }
+
+          const serviceChips = Object.keys(tenant.services)
+            .filter(function (service) {
+              return tenant.services[service];
+            })
+            .map(function (service) {
+              return `<span class="service-chip">${service.toUpperCase()}</span>`;
+            })
+            .join("");
+
+          const endpointRows = [
+            { name: "Windows Server Cluster", backup: tenant.backupSuccess - 4, patch: tenant.patchCompliance - 6, threat: Math.max(1, tenant.openCriticalAlerts) },
+            { name: "Workstations Pool", backup: tenant.backupSuccess + 3, patch: tenant.patchCompliance - 2, threat: Math.max(0, tenant.openCriticalAlerts - 1) },
+            { name: "Cloud Workloads", backup: tenant.backupSuccess + 5, patch: tenant.patchCompliance + 1, threat: Math.max(0, tenant.openCriticalAlerts - 2) }
+          ];
+
+          elements.detailPanel.classList.add("open");
+          elements.detailPanel.innerHTML = `
+            <div class="section-actions">
+              <h2 class="card-title">Tenant Drill-Down: ${tenant.name}</h2>
+              <span class="${utils.riskClass(tenant.riskLevel)}">${tenant.riskLevel.toUpperCase()}</span>
+            </div>
+            <div class="card-subtitle">${tenant.region} • ${tenant.segment} • ${tenant.endpoints} endpoints</div>
+            <div class="section-actions">${serviceChips}</div>
+            <div class="signal-grid">
+              <div class="signal-tile"><div class="tiny">Posture score</div><strong>${tenant.postureScore}/100</strong></div>
+              <div class="signal-tile"><div class="tiny">Backup success</div><strong>${tenant.backupSuccess}%</strong></div>
+              <div class="signal-tile"><div class="tiny">Patch compliance</div><strong>${tenant.patchCompliance}%</strong></div>
+              <div class="signal-tile"><div class="tiny">SLA compliance</div><strong>${tenant.slaCompliance}%</strong></div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Workload</th>
+                  <th>Backup</th>
+                  <th>Patch</th>
+                  <th>Open Threats</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${endpointRows
+                  .map(function (row) {
+                    return `<tr><td>${row.name}</td><td>${row.backup}%</td><td>${row.patch}%</td><td>${row.threat}</td></tr>`;
+                  })
+                  .join("")}
+              </tbody>
+            </table>
+            <div class="section-actions">
+              <button class="btn btn-primary" id="openClient360" type="button">Open Client 360</button>
+              <button class="btn btn-secondary" id="dispatchAction" type="button">Dispatch to Tier 2</button>
+            </div>
+          `;
+
+          document.getElementById("openClient360").addEventListener("click", function () {
+            window.location.href = `./client_360.html?tenant=${tenant.id}&source=ops`;
+          });
+
+          document.getElementById("dispatchAction").addEventListener("click", function () {
+            utils.toast(`Escalation package for ${tenant.name} sent to Tier 2 queue`);
+          });
+        }
+
+        function injectLiveAlert() {
+          const candidates = data.tenants.filter(function (tenant) {
+            return tenant.riskLevel === "critical" || tenant.riskLevel === "high";
+          });
+          const tenant = candidates[Math.floor(Math.random() * candidates.length)];
+          const templates = [
+            "EDR anomaly burst detected on 2 endpoints",
+            "Backup retry failed on protected server",
+            "Patch job exceeded maintenance window"
+          ];
+
+          state.dynamicAlerts.unshift({
+            tenantId: tenant.id,
+            tenantName: tenant.name,
+            severity: Math.random() > 0.45 ? "critical" : "high",
+            text: templates[Math.floor(Math.random() * templates.length)],
+            level: 4
+          });
+
+          state.dynamicAlerts = state.dynamicAlerts.slice(0, 30);
+          renderAlerts(filteredTenants());
+          utils.toast(`New ${tenant.name} alert pre-triaged by AI`);
+        }
+
+        function render() {
+          const tenants = filteredTenants();
+          renderKpis(tenants);
+          renderHeatmap(tenants);
+          renderBriefing(tenants);
+          renderTrends();
+          renderAlerts(tenants);
+          renderDetail();
+        }
+
+        render();
+        window.setInterval(injectLiveAlert, 21000);
+      })();
+    </script>
+  </body>
+</html>
