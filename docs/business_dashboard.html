@@ -9,94 +9,134 @@
     <link rel="stylesheet" href="./assets/common.css" />
   </head>
   <body>
-    <main class="app-shell">
-      <section class="filters" aria-label="Business filters">
-        <select id="periodFilter" class="select" aria-label="Period filter">
-          <option value="30d">Last 30 days</option>
-          <option value="90d" selected>Last 90 days</option>
-          <option value="365d">Last 12 months</option>
-        </select>
-        <select id="segmentFilter" class="select" aria-label="Segment filter">
-          <option value="all">All segments</option>
-          <option value="Regulated">Regulated</option>
-          <option value="Healthcare">Healthcare</option>
-          <option value="Professional Services">Professional Services</option>
-          <option value="Logistics">Logistics</option>
-          <option value="Retail">Retail</option>
-          <option value="Education">Education</option>
-        </select>
-        <select id="riskFilter" class="select" aria-label="Risk filter">
-          <option value="all">All risk levels</option>
-          <option value="critical">Critical only</option>
-          <option value="high">High and above</option>
-          <option value="medium">Medium and above</option>
-        </select>
-      </section>
+    <main class="dashboard-shell">
+      <aside class="acronis-sidebar" aria-label="Product navigation">
+        <div class="sidebar-brand">
+          <div class="sidebar-brand-top">Acronis</div>
+          <div class="sidebar-brand-bottom">Cyber Protect</div>
+        </div>
+        <div class="sidebar-block">
+          <div class="sidebar-group">DASHBOARD</div>
+          <div class="sidebar-item">Overview</div>
+          <div class="sidebar-item">Alerts</div>
+          <div class="sidebar-item">Activities</div>
+          <div class="sidebar-item">Threat feed</div>
+        </div>
+        <div class="sidebar-block">
+          <div class="sidebar-item active">Business insights</div>
+          <div class="sidebar-item">Revenue</div>
+          <div class="sidebar-item">Churn risk</div>
+          <div class="sidebar-item">Benchmarks</div>
+        </div>
+      </aside>
 
-      <section class="kpi-grid" id="kpiGrid"></section>
-
-      <section class="grid grid-2">
-        <article class="card">
-          <div class="section-actions">
-            <h2 class="card-title">MRR Trend & Forecast</h2>
-            <span class="card-subtitle" id="periodLabel"></span>
+      <div class="dashboard-content">
+        <header class="dashboard-header">
+          <h1 class="page-title">Business Overview</h1>
+          <div class="header-actions" aria-label="Header actions">
+            <button class="icon-action" type="button" aria-label="Apps">◻</button>
+            <button class="icon-action" type="button" aria-label="Help">?</button>
+            <button class="icon-action" type="button" aria-label="Account">◉</button>
           </div>
-          <div id="revenueTrend" class="chart-wrap"></div>
-          <div class="tiny">Stubbed forecast shown with static assumptions; real version should pull from PSA + usage billing tables.</div>
-        </article>
+        </header>
 
-        <article class="card">
-          <div class="section-actions">
-            <h2 class="card-title">Churn Risk Radar</h2>
-            <span class="card-subtitle" id="radarSummary"></span>
+        <section class="content-toolbar">
+          <div class="toolbar-icon">⤴</div>
+          <div class="toolbar-links">
+            <button class="toolbar-link" type="button">Add widget</button>
+            <button class="toolbar-link" type="button">Download</button>
+            <button class="toolbar-link" type="button">Send</button>
           </div>
-          <svg id="riskMap" class="risk-map" viewBox="0 0 560 240" role="img" aria-label="Churn risk bubble map"></svg>
-          <div class="legend">
-            <span class="legend-item"><span class="dot dot-danger"></span> Critical</span>
-            <span class="legend-item"><span class="dot dot-warning"></span> High</span>
-            <span class="legend-item"><span class="dot dot-primary"></span> Medium/Low</span>
-          </div>
-        </article>
-      </section>
+        </section>
 
-      <section class="split">
-        <article class="card">
-          <h2 class="card-title">Upsell Opportunity Pipeline</h2>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Client</th>
-                <th>Opportunity</th>
-                <th>Est. MRR uplift</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="upsellTable"></tbody>
-          </table>
-        </article>
+        <section class="filters" aria-label="Business filters">
+          <select id="periodFilter" class="select" aria-label="Period filter">
+            <option value="30d">Last 30 days</option>
+            <option value="90d" selected>Last 90 days</option>
+            <option value="365d">Last 12 months</option>
+          </select>
+          <select id="segmentFilter" class="select" aria-label="Segment filter">
+            <option value="all">All segments</option>
+            <option value="Regulated">Regulated</option>
+            <option value="Healthcare">Healthcare</option>
+            <option value="Professional Services">Professional Services</option>
+            <option value="Logistics">Logistics</option>
+            <option value="Retail">Retail</option>
+            <option value="Education">Education</option>
+          </select>
+          <select id="riskFilter" class="select" aria-label="Risk filter">
+            <option value="all">All risk levels</option>
+            <option value="critical">Critical only</option>
+            <option value="high">High and above</option>
+            <option value="medium">Medium and above</option>
+          </select>
+        </section>
 
-        <article class="card">
-          <h2 class="card-title">Margin Leakage</h2>
-          <div id="marginList" class="metric-bars"></div>
-        </article>
-      </section>
+        <section class="kpi-grid" id="kpiGrid"></section>
 
-      <section class="grid grid-2">
-        <article class="card">
-          <h2 class="card-title">Peer Benchmark Snapshot</h2>
-          <div id="benchmarkList" class="metric-bars"></div>
-        </article>
+        <section class="grid grid-2">
+          <article class="card">
+            <div class="section-actions">
+              <h2 class="card-title">MRR Trend & Forecast</h2>
+              <span class="card-subtitle" id="periodLabel"></span>
+            </div>
+            <div id="revenueTrend" class="chart-wrap"></div>
+            <div class="tiny">Stubbed forecast shown with static assumptions; real version should pull from PSA + usage billing tables.</div>
+          </article>
 
-        <article class="card">
-          <div class="section-actions">
-            <h2 class="card-title">AI Recommended Actions</h2>
-            <span class="badge badge-high" id="premiumGateLabel">3 hidden premium insights</span>
-          </div>
-          <div id="actionList" class="actions-list"></div>
-        </article>
-      </section>
+          <article class="card">
+            <div class="section-actions">
+              <h2 class="card-title">Churn Risk Radar</h2>
+              <span class="card-subtitle" id="radarSummary"></span>
+            </div>
+            <svg id="riskMap" class="risk-map" viewBox="0 0 560 240" role="img" aria-label="Churn risk bubble map"></svg>
+            <div class="legend">
+              <span class="legend-item"><span class="dot dot-danger"></span> Critical</span>
+              <span class="legend-item"><span class="dot dot-warning"></span> High</span>
+              <span class="legend-item"><span class="dot dot-primary"></span> Medium/Low</span>
+            </div>
+          </article>
+        </section>
 
-      <section id="detailPanel" class="detail-panel"></section>
+        <section class="split">
+          <article class="card">
+            <h2 class="card-title">Upsell Opportunity Pipeline</h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Opportunity</th>
+                  <th>Est. MRR uplift</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="upsellTable"></tbody>
+            </table>
+          </article>
+
+          <article class="card">
+            <h2 class="card-title">Margin Leakage</h2>
+            <div id="marginList" class="metric-bars"></div>
+          </article>
+        </section>
+
+        <section class="grid grid-2">
+          <article class="card">
+            <h2 class="card-title">Peer Benchmark Snapshot</h2>
+            <div id="benchmarkList" class="metric-bars"></div>
+          </article>
+
+          <article class="card">
+            <div class="section-actions">
+              <h2 class="card-title">AI Recommended Actions</h2>
+              <span class="badge badge-high" id="premiumGateLabel">3 hidden premium insights</span>
+            </div>
+            <div id="actionList" class="actions-list"></div>
+          </article>
+        </section>
+
+        <section id="detailPanel" class="detail-panel"></section>
+      </div>
     </main>
 
     <div id="qbrModal" class="modal-backdrop" aria-hidden="true">
