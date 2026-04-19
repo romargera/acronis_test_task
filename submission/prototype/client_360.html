@@ -9,94 +9,54 @@
     <link rel="stylesheet" href="./assets/common.css" />
   </head>
   <body>
-    <main class="dashboard-shell">
-      <aside class="acronis-sidebar" aria-label="Product navigation">
-        <div class="sidebar-brand">
-          <div class="sidebar-brand-top">Acronis</div>
-          <div class="sidebar-brand-bottom">Cyber Protect</div>
-        </div>
-        <div class="sidebar-block">
-          <div class="sidebar-group">DASHBOARD</div>
-          <div class="sidebar-item">Overview</div>
-          <div class="sidebar-item">Alerts</div>
-          <div class="sidebar-item">Activities</div>
-          <div class="sidebar-item">Threat feed</div>
-        </div>
-        <div class="sidebar-block">
-          <div class="sidebar-item active">Client 360</div>
-          <div class="sidebar-item">Coverage</div>
-          <div class="sidebar-item">Risk timeline</div>
-          <div class="sidebar-item">QBR</div>
-        </div>
-      </aside>
+    <main class="app-shell">
+      <section class="filters" aria-label="Client selector">
+        <select id="tenantPicker" class="select" aria-label="Tenant picker"></select>
+        <button class="btn btn-secondary" id="backToSource" type="button">Back to source</button>
+      </section>
 
-      <div class="dashboard-content">
-        <header class="dashboard-header">
-          <h1 class="page-title">Client 360</h1>
-          <div class="header-actions" aria-label="Header actions">
-            <button class="icon-action" type="button" aria-label="Apps">◻</button>
-            <button class="icon-action" type="button" aria-label="Help">?</button>
-            <button class="icon-action" type="button" aria-label="Account">◉</button>
-          </div>
-        </header>
+      <section class="client-hero" id="hero"></section>
 
-        <section class="content-toolbar">
-          <div class="toolbar-icon">⤴</div>
-          <div class="toolbar-links">
-            <button class="toolbar-link" type="button">Generate QBR</button>
-            <button class="toolbar-link" type="button">Download</button>
-            <button class="toolbar-link" type="button">Send</button>
-          </div>
-        </section>
-
-        <section class="filters" aria-label="Client selector">
-          <select id="tenantPicker" class="select" aria-label="Tenant picker"></select>
-          <button class="btn btn-secondary" id="backToSource" type="button">Back to source</button>
-        </section>
-
-        <section class="client-hero" id="hero"></section>
-
-        <section class="grid grid-2">
-          <article class="card">
-            <div class="section-actions">
-              <h2 class="card-title">Signals Timeline</h2>
-              <div class="pill-tabs" id="timelineTabs">
-                <button class="pill-tab active" type="button" data-type="all">All</button>
-                <button class="pill-tab" type="button" data-type="risk">Risk</button>
-                <button class="pill-tab" type="button" data-type="ops">Ops</button>
-                <button class="pill-tab" type="button" data-type="biz">Business</button>
-              </div>
+      <section class="grid grid-2">
+        <article class="card">
+          <div class="section-actions">
+            <h2 class="card-title">Signals Timeline</h2>
+            <div class="pill-tabs" id="timelineTabs">
+              <button class="pill-tab active" type="button" data-type="all">All</button>
+              <button class="pill-tab" type="button" data-type="risk">Risk</button>
+              <button class="pill-tab" type="button" data-type="ops">Ops</button>
+              <button class="pill-tab" type="button" data-type="biz">Business</button>
             </div>
-            <div id="timeline" class="timeline"></div>
-          </article>
+          </div>
+          <div id="timeline" class="timeline"></div>
+        </article>
 
-          <article class="card">
-            <h2 class="card-title">Service Coverage & Gaps</h2>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Service</th>
-                  <th>Status</th>
-                  <th>Impact</th>
-                </tr>
-              </thead>
-              <tbody id="servicesTable"></tbody>
-            </table>
-          </article>
-        </section>
+        <article class="card">
+          <h2 class="card-title">Service Coverage & Gaps</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Status</th>
+                <th>Impact</th>
+              </tr>
+            </thead>
+            <tbody id="servicesTable"></tbody>
+          </table>
+        </article>
+      </section>
 
-        <section class="split">
-          <article class="card">
-            <h2 class="card-title">Posture Breakdown</h2>
-            <div id="postureBars" class="metric-bars"></div>
-          </article>
+      <section class="split">
+        <article class="card">
+          <h2 class="card-title">Posture Breakdown</h2>
+          <div id="postureBars" class="metric-bars"></div>
+        </article>
 
-          <article class="card">
-            <h2 class="card-title">AI Actions Queue</h2>
-            <div id="actionsList" class="actions-list"></div>
-          </article>
-        </section>
-      </div>
+        <article class="card">
+          <h2 class="card-title">AI Actions Queue</h2>
+          <div id="actionsList" class="actions-list"></div>
+        </article>
+      </section>
     </main>
 
     <div id="qbrModal" class="modal-backdrop" aria-hidden="true">

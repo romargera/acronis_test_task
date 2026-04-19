@@ -9,115 +9,74 @@
     <link rel="stylesheet" href="./assets/common.css" />
   </head>
   <body>
-    <main class="dashboard-shell">
-      <aside class="acronis-sidebar" aria-label="Product navigation">
-        <div class="sidebar-brand">
-          <div class="sidebar-brand-top">Acronis</div>
-          <div class="sidebar-brand-bottom">Cyber Protect</div>
-        </div>
-        <div class="sidebar-block">
-          <div class="sidebar-group">DASHBOARD</div>
-          <div class="sidebar-item active">Overview</div>
-          <div class="sidebar-item">Alerts</div>
-          <div class="sidebar-item">Activities</div>
-          <div class="sidebar-item">Threat feed</div>
-        </div>
-        <div class="sidebar-block">
-          <div class="sidebar-item">Workloads</div>
-          <div class="sidebar-item">Plans</div>
-          <div class="sidebar-item">Anti-malware protection</div>
-          <div class="sidebar-item">Software management</div>
-          <div class="sidebar-item">Backup storage</div>
-        </div>
-      </aside>
+    <main class="app-shell">
+      <section class="filters" aria-label="Dashboard filters">
+        <select id="severityFilter" class="select" aria-label="Severity filter">
+          <option value="all">All severities</option>
+          <option value="critical">Critical only</option>
+          <option value="high">High and above</option>
+          <option value="medium">Medium and above</option>
+        </select>
+        <select id="serviceFilter" class="select" aria-label="Service filter">
+          <option value="all">All services</option>
+          <option value="backup">Backup</option>
+          <option value="edr">EDR</option>
+          <option value="m365">M365 Backup</option>
+          <option value="patch">Patch</option>
+          <option value="dlp">DLP</option>
+        </select>
+        <select id="regionFilter" class="select" aria-label="Region filter">
+          <option value="all">All regions</option>
+          <option value="NA">North America</option>
+          <option value="EU">Europe</option>
+          <option value="APAC">APAC</option>
+        </select>
+      </section>
 
-      <div class="dashboard-content">
-        <header class="dashboard-header">
-          <h1 class="page-title">Overview</h1>
-          <div class="header-actions" aria-label="Header actions">
-            <button class="icon-action" type="button" aria-label="Apps">◻</button>
-            <button class="icon-action" type="button" aria-label="Help">?</button>
-            <button class="icon-action" type="button" aria-label="Account">◉</button>
+      <section class="kpi-grid" id="kpiGrid" aria-label="Operations KPI cards"></section>
+
+      <section class="grid grid-2">
+        <article class="card">
+          <div class="section-actions">
+            <h2 class="card-title">Cross-Tenant Risk Heatmap</h2>
+            <span class="card-subtitle" id="tenantCountLabel"></span>
           </div>
-        </header>
+          <div class="heatmap" id="heatmap" role="list"></div>
+        </article>
 
-        <section class="content-toolbar">
-          <div class="toolbar-icon">⤴</div>
-          <div class="toolbar-links">
-            <button class="toolbar-link" type="button">Add widget</button>
-            <button class="toolbar-link" type="button">Download</button>
-            <button class="toolbar-link" type="button">Send</button>
+        <article class="card">
+          <div class="section-actions">
+            <h2 class="card-title">AI Morning Briefing</h2>
+            <button id="briefToggle" class="btn btn-secondary" type="button">Show Top 5</button>
           </div>
-        </section>
+          <p class="card-subtitle">Priority-ranked actions generated from overnight telemetry.</p>
+          <div id="briefingList" class="grid"></div>
+        </article>
+      </section>
 
-        <section class="filters" aria-label="Dashboard filters">
-          <select id="severityFilter" class="select" aria-label="Severity filter">
-            <option value="all">All severities</option>
-            <option value="critical">Critical only</option>
-            <option value="high">High and above</option>
-            <option value="medium">Medium and above</option>
-          </select>
-          <select id="serviceFilter" class="select" aria-label="Service filter">
-            <option value="all">All services</option>
-            <option value="backup">Backup</option>
-            <option value="edr">EDR</option>
-            <option value="m365">M365 Backup</option>
-            <option value="patch">Patch</option>
-            <option value="dlp">DLP</option>
-          </select>
-          <select id="regionFilter" class="select" aria-label="Region filter">
-            <option value="all">All regions</option>
-            <option value="NA">North America</option>
-            <option value="EU">Europe</option>
-            <option value="APAC">APAC</option>
-          </select>
-        </section>
+      <section class="split">
+        <article class="card">
+          <h2 class="card-title">Posture Trends (7/30/90 View)</h2>
+          <div class="legend">
+            <span class="legend-item"><span class="dot dot-primary"></span> Backup success</span>
+            <span class="legend-item"><span class="dot dot-warning"></span> Patch compliance</span>
+            <span class="legend-item"><span class="dot dot-danger"></span> Threat activity</span>
+          </div>
+          <div class="chart-wrap">
+            <div id="trendBackup"></div>
+            <div id="trendPatch"></div>
+            <div id="trendThreats"></div>
+          </div>
+        </article>
 
-        <section class="kpi-grid" id="kpiGrid" aria-label="Operations KPI cards"></section>
+        <article class="card">
+          <h2 class="card-title">Critical Alerts Feed</h2>
+          <p class="card-subtitle">Real-time simulation: new alerts are injected every ~20s.</p>
+          <div class="alert-list" id="alertsFeed"></div>
+        </article>
+      </section>
 
-        <section class="grid grid-2">
-          <article class="card">
-            <div class="section-actions">
-              <h2 class="card-title">Cross-Tenant Risk Heatmap</h2>
-              <span class="card-subtitle" id="tenantCountLabel"></span>
-            </div>
-            <div class="heatmap" id="heatmap" role="list"></div>
-          </article>
-
-          <article class="card">
-            <div class="section-actions">
-              <h2 class="card-title">AI Morning Briefing</h2>
-              <button id="briefToggle" class="btn btn-secondary" type="button">Show Top 5</button>
-            </div>
-            <p class="card-subtitle">Priority-ranked actions generated from overnight telemetry.</p>
-            <div id="briefingList" class="grid"></div>
-          </article>
-        </section>
-
-        <section class="split">
-          <article class="card">
-            <h2 class="card-title">Posture Trends (7/30/90 View)</h2>
-            <div class="legend">
-              <span class="legend-item"><span class="dot dot-primary"></span> Backup success</span>
-              <span class="legend-item"><span class="dot dot-warning"></span> Patch compliance</span>
-              <span class="legend-item"><span class="dot dot-danger"></span> Threat activity</span>
-            </div>
-            <div class="chart-wrap">
-              <div id="trendBackup"></div>
-              <div id="trendPatch"></div>
-              <div id="trendThreats"></div>
-            </div>
-          </article>
-
-          <article class="card">
-            <h2 class="card-title">Critical Alerts Feed</h2>
-            <p class="card-subtitle">Real-time simulation: new alerts are injected every ~20s.</p>
-            <div class="alert-list" id="alertsFeed"></div>
-          </article>
-        </section>
-
-        <section id="detailPanel" class="detail-panel" aria-live="polite"></section>
-      </div>
+      <section id="detailPanel" class="detail-panel" aria-live="polite"></section>
     </main>
 
     <div class="toast" id="toast" aria-live="assertive"></div>
