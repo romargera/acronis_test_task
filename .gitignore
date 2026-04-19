@@ -1,0 +1,5 @@
+# local artifacts
+.DS_Store
+
+# cloned reference repo (too large for submission)
+ui-component-library/

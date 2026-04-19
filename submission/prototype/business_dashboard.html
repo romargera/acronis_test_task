@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Acronis Business Growth Dashboard Prototype</title>
+    <link rel="stylesheet" href="./assets/acv-reset.css" />
+    <link rel="stylesheet" href="./assets/acv-theme-acronis.css" />
+    <link rel="stylesheet" href="./assets/common.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">Acronis Business Intelligence</div>
+        <nav class="nav-links" aria-label="Prototype navigation">
+          <a class="nav-link" href="./operations_dashboard.html">Operations</a>
+          <a class="nav-link active" href="./business_dashboard.html">Business Growth</a>
+          <a class="nav-link" href="./client_360.html">Client 360</a>
+        </nav>
+      </header>
+
+      <section class="filters" aria-label="Business filters">
+        <select id="periodFilter" class="select" aria-label="Period filter">
+          <option value="30d">Last 30 days</option>
+          <option value="90d" selected>Last 90 days</option>
+          <option value="365d">Last 12 months</option>
+        </select>
+        <select id="segmentFilter" class="select" aria-label="Segment filter">
+          <option value="all">All segments</option>
+          <option value="Regulated">Regulated</option>
+          <option value="Healthcare">Healthcare</option>
+          <option value="Professional Services">Professional Services</option>
+          <option value="Logistics">Logistics</option>
+          <option value="Retail">Retail</option>
+          <option value="Education">Education</option>
+        </select>
+        <select id="riskFilter" class="select" aria-label="Risk filter">
+          <option value="all">All risk levels</option>
+          <option value="critical">Critical only</option>
+          <option value="high">High and above</option>
+          <option value="medium">Medium and above</option>
+        </select>
+      </section>
+
+      <section class="kpi-grid" id="kpiGrid"></section>
+
+      <section class="grid grid-2">
+        <article class="card">
+          <div class="section-actions">
+            <h2 class="card-title">MRR Trend & Forecast</h2>
+            <span class="card-subtitle" id="periodLabel"></span>
+          </div>
+          <div id="revenueTrend" class="chart-wrap"></div>
+          <div class="tiny">Stubbed forecast shown with static assumptions; real version should pull from PSA + usage billing tables.</div>
+        </article>
+
+        <article class="card">
+          <div class="section-actions">
+            <h2 class="card-title">Churn Risk Radar</h2>
+            <span class="card-subtitle" id="radarSummary"></span>
+          </div>
+          <svg id="riskMap" class="risk-map" viewBox="0 0 560 240" role="img" aria-label="Churn risk bubble map"></svg>
+          <div class="legend">
+            <span class="legend-item"><span class="dot dot-danger"></span> Critical</span>
+            <span class="legend-item"><span class="dot dot-warning"></span> High</span>
+            <span class="legend-item"><span class="dot dot-primary"></span> Medium/Low</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="split">
+        <article class="card">
+          <h2 class="card-title">Upsell Opportunity Pipeline</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Opportunity</th>
+                <th>Est. MRR uplift</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="upsellTable"></tbody>
+          </table>
+        </article>
+
+        <article class="card">
+          <h2 class="card-title">Margin Leakage</h2>
+          <div id="marginList" class="metric-bars"></div>
+        </article>
+      </section>
+
+      <section class="grid grid-2">
+        <article class="card">
+          <h2 class="card-title">Peer Benchmark Snapshot</h2>
+          <div id="benchmarkList" class="metric-bars"></div>
+        </article>
+
+        <article class="card">
+          <div class="section-actions">
+            <h2 class="card-title">AI Recommended Actions</h2>
+            <span class="badge badge-high" id="premiumGateLabel">3 hidden premium insights</span>
+          </div>
+          <div id="actionList" class="actions-list"></div>
+        </article>
+      </section>
+
+      <section id="detailPanel" class="detail-panel"></section>
+    </main>
+
+    <div id="qbrModal" class="modal-backdrop" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="QBR preview">
+        <div class="section-actions">
+          <h2 class="card-title">QBR Draft Preview</h2>
+          <button class="btn btn-secondary" id="closeQbrModal" type="button">Close</button>
+        </div>
+        <div id="qbrContent" class="qbr-output"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" aria-live="assertive"></div>
+
+    <script src="./assets/data.js"></script>
+    <script src="./assets/helpers.js"></script>
+    <script>
+      (function () {
+        const data = window.AcronisDemoData;
+        const utils = window.DemoUtils;
+
+        const filters = {
+          period: "90d",
+          segment: "all",
+          risk: "all"
+        };
+
+        const state = {
+          selectedId: null
+        };
+
+        const severityThreshold = {
+          all: 1,
+          medium: 2,
+          high: 3,
+          critical: 4
+        };
+
+        const el = {
+          kpiGrid: document.getElementById("kpiGrid"),
+          periodLabel: document.getElementById("periodLabel"),
+          revenueTrend: document.getElementById("revenueTrend"),
+          riskMap: document.getElementById("riskMap"),
+          radarSummary: document.getElementById("radarSummary"),
+          upsellTable: document.getElementById("upsellTable"),
+          marginList: document.getElementById("marginList"),
+          benchmarkList: document.getElementById("benchmarkList"),
+          actionList: document.getElementById("actionList"),
+          detailPanel: document.getElementById("detailPanel"),
+          premiumGateLabel: document.getElementById("premiumGateLabel"),
+          qbrModal: document.getElementById("qbrModal"),
+          qbrContent: document.getElementById("qbrContent")
+        };
+
+        document.getElementById("periodFilter").addEventListener("change", function (event) {
+          filters.period = event.target.value;
+          render();
+        });
+        document.getElementById("segmentFilter").addEventListener("change", function (event) {
+          filters.segment = event.target.value;
+          render();
+        });
+        document.getElementById("riskFilter").addEventListener("change", function (event) {
+          filters.risk = event.target.value;
+          render();
+        });
+
+        document.getElementById("closeQbrModal").addEventListener("click", function () {
+          el.qbrModal.classList.remove("open");
+        });
+        el.qbrModal.addEventListener("click", function (event) {
+          if (event.target === el.qbrModal) {
+            el.qbrModal.classList.remove("open");
+          }
+        });
+
+        function inScope(tenant) {
+          if (filters.segment !== "all" && tenant.segment !== filters.segment) return false;
+          return (utils.levelWeights[tenant.riskLevel] || 0) >= severityThreshold[filters.risk];
+        }
+
+        function scopedTenants() {
+          return data.tenants.filter(inScope).sort(utils.byRiskDesc);
+        }
+
+        function renderKpis(tenants) {
+          const totalMRR = tenants.reduce(function (acc, tenant) {
+            return acc + tenant.mrr;
+          }, 0);
+
+          const atRiskMRR = tenants
+            .filter(function (tenant) {
+              return tenant.riskLevel === "critical" || tenant.riskLevel === "high";
+            })
+            .reduce(function (acc, tenant) {
+              return acc + tenant.mrr;
+            }, 0);
+
+          const projectedUpsell = tenants.reduce(function (acc, tenant) {
+            return (
+              acc +
+              (tenant.opportunities || []).reduce(function (sum, item) {
+                return sum + item.impact;
+              }, 0)
+            );
+          }, 0);
+
+          const avgMargin = tenants.length
+            ? tenants.reduce(function (acc, tenant) {
+                return acc + tenant.marginPct;
+              }, 0) / tenants.length
+            : 0;
+
+          el.kpiGrid.innerHTML = [
+            { label: "Portfolio MRR", value: utils.formatCurrency(totalMRR), trend: "+6.4% QoQ", trendClass: "kpi-trend-positive" },
+            { label: "At-Risk MRR", value: utils.formatCurrency(atRiskMRR), trend: "3 clients need intervention", trendClass: "kpi-trend-negative" },
+            { label: "Projected Upsell", value: utils.formatCurrency(projectedUpsell), trend: "coverage-gap derived", trendClass: "kpi-trend-positive" },
+            { label: "Avg Gross Margin", value: avgMargin.toFixed(1) + "%", trend: "below SLI top quartile", trendClass: "kpi-trend-negative" }
+          ]
+            .map(function (item) {
+              return `
+                <div class="kpi-card">
+                  <div class="kpi-label">${item.label}</div>
+                  <div class="kpi-value">${item.value}</div>
+                  <div class="tiny ${item.trendClass}">${item.trend}</div>
+                </div>`;
+            })
+            .join("");
+        }
+
+        function renderRevenue() {
+          const series = data.revenueSeries[filters.period];
+          el.periodLabel.textContent = filters.period === "30d" ? "30-day trend" : filters.period === "90d" ? "90-day trend" : "12-month trend";
+          el.revenueTrend.innerHTML = utils.createSparkline(series, { width: 520, height: 140 }).replace("mini-chart", "big-chart");
+        }
+
+        function bubbleColor(level) {
+          if (level === "critical") return "#f15354";
+          if (level === "high") return "#f29f05";
+          if (level === "medium") return "#2f86eb";
+          return "#3ebc72";
+        }
+
+        function renderRiskMap(tenants) {
+          if (!tenants.length) {
+            el.riskMap.innerHTML = "";
+            el.radarSummary.textContent = "No clients in scope";
+            return;
+          }
+
+          const maxTenure = Math.max.apply(
+            null,
+            tenants.map(function (tenant) {
+              return tenant.tenureMonths;
+            })
+          );
+          const maxMRR = Math.max.apply(
+            null,
+            tenants.map(function (tenant) {
+              return tenant.mrr;
+            })
+          );
+
+          const highRisk = tenants.filter(function (tenant) {
+            return tenant.riskLevel === "critical" || tenant.riskLevel === "high";
+          });
+
+          el.radarSummary.textContent = `${highRisk.length} high-risk clients • ${utils.formatCurrency(
+            highRisk.reduce(function (acc, tenant) {
+              return acc + tenant.mrr;
+            }, 0)
+          )} at stake`;
+
+          const circles = tenants
+            .map(function (tenant) {
+              const x = 42 + (tenant.tenureMonths / maxTenure) * 476;
+              const y = 212 - (tenant.mrr / maxMRR) * 174;
+              const radius = 7 + ((utils.levelWeights[tenant.riskLevel] || 1) - 1) * 3;
+              return `
+                <g class="risk-dot" data-id="${tenant.id}">
+                  <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${radius}" fill="${bubbleColor(
+                tenant.riskLevel
+              )}" fill-opacity="0.75" stroke="#0b1220" stroke-opacity="0.18"></circle>
+                  <text x="${(x + 10).toFixed(1)}" y="${(y - 6).toFixed(1)}" font-size="10" fill="#24324d">${tenant.name}</text>
+                </g>`;
+            })
+            .join("");
+
+          el.riskMap.innerHTML = `
+            <line x1="36" y1="212" x2="536" y2="212" stroke="#aab4ca" />
+            <line x1="42" y1="16" x2="42" y2="218" stroke="#aab4ca" />
+            <text x="44" y="228" font-size="10" fill="#5d6f8c">Tenure (months)</text>
+            <text x="5" y="20" font-size="10" fill="#5d6f8c">MRR</text>
+            ${circles}
+          `;
+
+          el.riskMap.querySelectorAll(".risk-dot").forEach(function (node) {
+            node.addEventListener("click", function () {
+              state.selectedId = this.getAttribute("data-id");
+              renderDetail();
+            });
+          });
+        }
+
+        function renderUpsellTable(tenants) {
+          const rows = [];
+          tenants.forEach(function (tenant) {
+            (tenant.opportunities || []).forEach(function (opportunity) {
+              rows.push({
+                tenantId: tenant.id,
+                tenant: tenant.name,
+                opportunity: opportunity.name,
+                impact: opportunity.impact
+              });
+            });
+          });
+
+          rows.sort(function (a, b) {
+            return b.impact - a.impact;
+          });
+
+          if (!rows.length) {
+            el.upsellTable.innerHTML = '<tr><td colspan="4" class="tiny">No upsell opportunities in scope.</td></tr>';
+            return;
+          }
+
+          el.upsellTable.innerHTML = rows
+            .slice(0, 8)
+            .map(function (row) {
+              return `
+                <tr>
+                  <td>${row.tenant}</td>
+                  <td>${row.opportunity}</td>
+                  <td>${utils.formatCurrency(row.impact)}</td>
+                  <td><button class="link-btn" type="button" data-id="${row.tenantId}">Inspect</button></td>
+                </tr>`;
+            })
+            .join("");
+
+          el.upsellTable.querySelectorAll("[data-id]").forEach(function (button) {
+            button.addEventListener("click", function () {
+              state.selectedId = this.getAttribute("data-id");
+              renderDetail();
+            });
+          });
+        }
+
+        function renderMargin(tenants) {
+          if (!tenants.length) {
+            el.marginList.innerHTML = '<div class="empty-state">No data for current filters.</div>';
+            return;
+          }
+
+          const maxMRR = Math.max.apply(
+            null,
+            tenants.map(function (tenant) {
+              return tenant.mrr;
+            })
+          );
+
+          el.marginList.innerHTML = tenants
+            .slice()
+            .sort(function (a, b) {
+              return a.marginPct - b.marginPct;
+            })
+            .slice(0, 6)
+            .map(function (tenant) {
+              return `
+                <div class="metric-row">
+                  <div class="section-actions">
+                    <strong>${tenant.name}</strong>
+                    <span class="tiny">Margin ${tenant.marginPct}%</span>
+                  </div>
+                  ${utils.createBar(tenant.mrr, maxMRR)}
+                </div>`;
+            })
+            .join("");
+        }
+
+        function renderBenchmark() {
+          const benchmark = data.benchmark;
+          const rows = [
+            {
+              title: "EBITDA %",
+              you: benchmark.ebitda.you,
+              median: benchmark.ebitda.median,
+              top: benchmark.ebitda.topQuartile,
+              postfix: "%"
+            },
+            {
+              title: "Service Gross Margin",
+              you: benchmark.margin.you,
+              median: benchmark.margin.median,
+              top: benchmark.margin.topQuartile,
+              postfix: "%"
+            },
+            {
+              title: "Revenue / Endpoint",
+              you: benchmark.arpu.you,
+              median: benchmark.arpu.median,
+              top: benchmark.arpu.topQuartile,
+              postfix: "$"
+            },
+            {
+              title: "Tickets / Tech / Month",
+              you: benchmark.ticketsPerTech.you,
+              median: benchmark.ticketsPerTech.median,
+              top: benchmark.ticketsPerTech.topQuartile,
+              postfix: ""
+            }
+          ];
+
+          el.benchmarkList.innerHTML = rows
+            .map(function (row) {
+              const max = Math.max(row.you, row.median, row.top);
+              return `
+                <div class="metric-row">
+                  <div class="tiny">${row.title}</div>
+                  <div class="legend">
+                    <span class="legend-item"><span class="dot dot-primary"></span>You: ${row.you}${row.postfix}</span>
+                    <span class="legend-item"><span class="dot dot-muted"></span>Median: ${row.median}${row.postfix}</span>
+                    <span class="legend-item"><span class="dot dot-warning"></span>Top quartile: ${row.top}${row.postfix}</span>
+                  </div>
+                  <div class="bar-track"><div class="bar-fill" style="width:${Math.round((row.you / max) * 100)}%"></div></div>
+                </div>`;
+            })
+            .join("");
+        }
+
+        function renderActions(tenants) {
+          const actions = tenants
+            .map(function (tenant) {
+              const topOpportunity = (tenant.opportunities || [])[0];
+              if (!topOpportunity) return null;
+              return {
+                tenantId: tenant.id,
+                tenant: tenant.name,
+                text: `${tenant.name}: package ${topOpportunity.name} with retention call`,
+                impact: topOpportunity.impact + Math.round(tenant.mrr * 0.05)
+              };
+            })
+            .filter(Boolean)
+            .sort(function (a, b) {
+              return b.impact - a.impact;
+            });
+
+          const visible = actions.slice(0, 4);
+          const hiddenCount = Math.max(actions.length - visible.length, 3);
+          el.premiumGateLabel.textContent = `${hiddenCount} hidden premium insights`;
+
+          el.actionList.innerHTML = visible
+            .map(function (action) {
+              return `
+                <div class="action-item">
+                  <div><strong>${action.tenant}</strong></div>
+                  <div>${action.text}</div>
+                  <div class="tiny">Estimated monthly impact: ${utils.formatCurrency(action.impact)}</div>
+                  <div class="section-actions">
+                    <button class="btn btn-primary" type="button" data-open="${action.tenantId}">Take Action</button>
+                    <button class="btn btn-secondary" type="button" data-open-qbr="${action.tenantId}">Generate QBR</button>
+                  </div>
+                </div>`;
+            })
+            .join("");
+
+          el.actionList.querySelectorAll("[data-open]").forEach(function (button) {
+            button.addEventListener("click", function () {
+              state.selectedId = this.getAttribute("data-open");
+              renderDetail();
+              utils.toast("Action queued in pipeline");
+            });
+          });
+
+          el.actionList.querySelectorAll("[data-open-qbr]").forEach(function (button) {
+            button.addEventListener("click", function () {
+              openQbr(this.getAttribute("data-open-qbr"));
+            });
+          });
+        }
+
+        function renderDetail() {
+          const tenant = state.selectedId ? utils.getTenantById(state.selectedId) : null;
+          if (!tenant) {
+            el.detailPanel.classList.remove("open");
+            el.detailPanel.innerHTML = "";
+            return;
+          }
+
+          const signals = [
+            { label: "SLA compliance", value: tenant.slaCompliance + "%" },
+            { label: "Ticket reopen rate", value: tenant.reopenRate + "%" },
+            { label: "Escalation rate", value: tenant.escalationRate + "%" },
+            { label: "QBR attendance drop", value: tenant.qbrAttendanceDrop + " qtrs" },
+            { label: "Billing disputes", value: String(tenant.billingDisputes) }
+          ];
+
+          el.detailPanel.classList.add("open");
+          el.detailPanel.innerHTML = `
+            <div class="section-actions">
+              <h2 class="card-title">Client Drill-Down: ${tenant.name}</h2>
+              <span class="${utils.riskClass(tenant.riskLevel)}">${tenant.riskLevel.toUpperCase()}</span>
+            </div>
+            <div class="card-subtitle">MRR ${utils.formatCurrency(tenant.mrr)} • Margin ${tenant.marginPct}% • Tenure ${tenant.tenureMonths} months</div>
+            <div class="signal-grid">
+              ${signals
+                .map(function (signal) {
+                  return `<div class="signal-tile"><div class="tiny">${signal.label}</div><strong>${signal.value}</strong></div>`;
+                })
+                .join("")}
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-primary" id="openClient360" type="button">Open Client 360</button>
+              <button class="btn btn-secondary" id="openQbr" type="button">Preview QBR Draft</button>
+            </div>
+          `;
+
+          document.getElementById("openClient360").addEventListener("click", function () {
+            window.location.href = `./client_360.html?tenant=${tenant.id}&source=biz`;
+          });
+          document.getElementById("openQbr").addEventListener("click", function () {
+            openQbr(tenant.id);
+          });
+        }
+
+        function openQbr(tenantId) {
+          const tenant = utils.getTenantById(tenantId);
+          if (!tenant) return;
+          el.qbrContent.innerHTML = `
+            <h3>${tenant.name} — Executive Summary</h3>
+            <p><strong>Current health:</strong> ${tenant.riskLevel.toUpperCase()} risk, posture ${tenant.postureScore}/100, SLA ${tenant.slaCompliance}%.</p>
+            <p><strong>Top risks:</strong> reopen rate ${tenant.reopenRate}%, escalation ${tenant.escalationRate}%, ${tenant.billingDisputes} billing dispute(s).</p>
+            <p><strong>Forward plan (next 90 days):</strong> deploy patch hardening, sponsor-level check-in, propose ${
+              (tenant.opportunities[0] && tenant.opportunities[0].name) || "service expansion"
+            } package (est. +${utils.formatCurrency((tenant.opportunities[0] && tenant.opportunities[0].impact) || 250)} MRR).</p>
+            <div class="tiny">Generated from demo data. Export and CRM sync are stubbed in prototype.</div>
+          `;
+          el.qbrModal.classList.add("open");
+        }
+
+        function render() {
+          const tenants = scopedTenants();
+          renderKpis(tenants);
+          renderRevenue();
+          renderRiskMap(tenants);
+          renderUpsellTable(tenants);
+          renderMargin(tenants);
+          renderBenchmark();
+          renderActions(tenants);
+          renderDetail();
+        }
+
+        render();
+      })();
+    </script>
+  </body>
+</html>
