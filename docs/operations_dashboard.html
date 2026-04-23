@@ -342,14 +342,9 @@
               </tbody>
             </table>
             <div class="section-actions">
-              <button class="btn btn-primary" id="openClient360" type="button">Open Client 360</button>
-              <button class="btn btn-secondary" id="dispatchAction" type="button">Dispatch to Tier 2</button>
+              <button class="btn btn-primary" id="dispatchAction" type="button">Dispatch to Tier 2</button>
             </div>
           `;
-
-          document.getElementById("openClient360").addEventListener("click", function () {
-            window.location.href = `./client_360.html?tenant=${tenant.id}&source=ops`;
-          });
 
           document.getElementById("dispatchAction").addEventListener("click", function () {
             utils.toast(`Escalation package for ${tenant.name} sent to Tier 2 queue`);

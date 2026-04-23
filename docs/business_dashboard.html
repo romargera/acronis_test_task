@@ -508,14 +508,10 @@
                 .join("")}
             </div>
             <div class="section-actions">
-              <button class="btn btn-primary" id="openClient360" type="button">Open Client 360</button>
-              <button class="btn btn-secondary" id="openQbr" type="button">Preview QBR Draft</button>
+              <button class="btn btn-primary" id="openQbr" type="button">Preview QBR Draft</button>
             </div>
           `;
 
-          document.getElementById("openClient360").addEventListener("click", function () {
-            window.location.href = `./client_360.html?tenant=${tenant.id}&source=biz`;
-          });
           document.getElementById("openQbr").addEventListener("click", function () {
             openQbr(tenant.id);
           });

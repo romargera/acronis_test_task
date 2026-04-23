@@ -1,6 +1,6 @@
 # PRD: Acronis Intelligence Dashboards for MSPs (v2 — Research-Enriched)
 
-> **Purpose**: Complete Product Requirements Document for two Acronis dashboards + Client 360 page. Self-contained — another AI model can generate all prototype deliverables from this single document. All quantitative claims are backed by Perplexity Deep Research (12 queries, 100+ sources, April 2026).
+> **Purpose**: Complete Product Requirements Document for two Acronis dashboards. Self-contained — another AI model can generate all prototype deliverables from this single document. All quantitative claims are backed by Perplexity Deep Research (12 queries, 100+ sources, April 2026).
 
 ---
 
@@ -363,7 +363,7 @@ Weights: w_backup=0.30, w_patch=0.25, w_threat=0.30, w_posture=0.15
 - Collapsible sidebar navigation (icons + labels)
 - Top bar with global filters + user context
 - Main content area with widget grid
-- Navigation between Ops, Business, and Client 360
+- Navigation between Ops and Business dashboards
 
 ### Operations Dashboard — Prototype Spec
 
@@ -452,7 +452,7 @@ Weights: w_backup=0.30, w_patch=0.25, w_threat=0.30, w_posture=0.15
    - **Risk Signals Timeline**: "SLA compliance dropped to 72% (Mar)", "QBR attendance: CFO absent 2 consecutive (Feb)", "Ticket reopen rate 3× baseline (Jan)", "After-hours support spike (Dec)"
    - Services map: enrolled vs. available
    - AI recommended actions: "Schedule QBR within 2 weeks", "Propose M365 backup add-on ($500/mo)", "Executive sponsor outreach (not account manager) — signals seriousness"
-   - "Generate QBR Report" link → navigates to Client 360
+   - "Generate QBR Report" button → opens in-page modal preview (stubbed export flow)
 
 **Fake Data**: Generate 20 realistic client names:
 - 3 high churn risk (using validated signal combinations): Metro Law Partners (SLA + QBR drop), Cascade Manufacturing (escalation spike + billing dispute), Summit Healthcare (endpoint contraction + champion reassignment)
@@ -460,39 +460,15 @@ Weights: w_backup=0.30, w_patch=0.25, w_threat=0.30, w_posture=0.15
 - 2 negative margin (high ticket volume relative to MRR)
 - 10 healthy with varied profiles
 
-### Client 360 Page — Prototype Spec
+### Optional Extension (+2 Hours): Client 360 Page
 
-**Page: Full Client Deep Dive** (accessed from either dashboard's drill-down)
+If there is an extra 2-hour slot after the core scope is complete, add a third page as a tenant deep-dive:
 
-1. **Header**: Client name, logo placeholder, MRR, tenure, churn risk score badge, trend arrow
-2. **Event Timeline** (full width, scrollable):
-   - Events plotted chronologically: backup failures (red dots), security incidents (orange), patches applied (green), QBRs (blue diamonds), tickets opened/closed (gray)
-   - Hover reveals event detail
-   - Visual density communicates client health at a glance
-3. **Services Matrix** (left column):
-   - Visual grid: Backup ✅, EDR ✅, M365 Backup ❌, Patch Mgmt ✅, DLP ❌
-   - Missing services show "Add Service" CTA with estimated MRR impact
-   - Coverage % badge
-4. **Risk Signals Panel** (right column):
-   - AI-generated summary: "This client's risk level has been elevated since March 2026. Key drivers: backup success rate dropped from 98% to 82%, 3 SLA misses in the last 30 days, executive sponsor stopped attending QBRs."
-   - Signal cards: each with trend sparkline showing direction
-5. **Posture Radar Chart**:
-   - 5-axis radar: Backup, Patches, Threats, M365, Endpoints
-   - Current vs. 30 days ago overlay (shows drift direction)
-6. **QBR Report Generator**:
-   - "Generate QBR Report" button (prominent CTA)
-   - On click: modal shows preview of auto-generated report with sections:
-     - **Executive Summary**: Top 3 wins, top 1 risk, single most important action item
-     - **Incidents Resolved**: ticket count, MTTR, SLA %
-     - **Security Posture**: threats blocked, patch compliance, vulnerability trend
-     - **Recommendations**: forward-looking (80%), tied to specific next actions
-     - **Next 90 Days**: strategic roadmap items
-   - "Copy to Clipboard" / "Download PDF" buttons (stubbed with toast notification)
-   - Structure follows retention best practice: 80% forward-looking, 20% backward-looking
-7. **AI Recommended Actions** (bottom cards):
-   - "Schedule QBR within 2 weeks — executive sponsor outreach recommended"
-   - "Propose M365 backup ($500/mo upsell) — client has 47 unprotected mailboxes"
-   - "Escalate: 3 consecutive SLA misses — trigger proactive service review"
+1. **Client profile header**: risk, MRR, tenure, trend context.
+2. **Signals timeline**: major operational and business risk events in sequence.
+3. **Services matrix**: active vs. missing services with upsell prompts.
+4. **QBR generation surface**: one-click report preview + export stub.
+5. **Cross-dashboard linking**: open from Operations and Business drill-down with `tenant` query param.
 
 ### Interactions to Implement
 
@@ -507,8 +483,8 @@ Weights: w_backup=0.30, w_patch=0.25, w_threat=0.30, w_posture=0.15
 | 7 | Click upsell CTA → show confirmation toast | Biz | Action |
 | 8 | Period selector → update revenue chart + metrics | Biz | Filter |
 | 9 | Toggle peer benchmark metrics | Biz | Toggle |
-| 10 | Sidebar navigation between Ops, Biz, and Client 360 | All | Nav |
-| 11 | Generate QBR Report → modal with preview | Client 360 | Modal |
+| 10 | Tab navigation between Ops and Business | Global | Nav |
+| 11 | Generate QBR Report → modal with preview | Business | Modal |
 | 12 | Cards fade-in on page load (staggered 100ms) | All | Animation |
 | 13 | Risk tiles pulse subtly when critical | Ops | Animation |
 | 14 | Number counters animate on period change | Biz | Animation |
@@ -533,8 +509,7 @@ Weights: w_backup=0.30, w_patch=0.25, w_threat=0.30, w_posture=0.15
 1. Unzip the archive
 2. Open `operations-dashboard.html` in any modern browser (Chrome, Firefox, Edge)
 3. Open `business-growth-dashboard.html` in any modern browser
-4. Open `client-360.html` in any modern browser
-5. No server or build step required — everything runs client-side
+4. No server or build step required — everything runs client-side
 
 ## What's Real vs. Stubbed
 | Feature | Status |

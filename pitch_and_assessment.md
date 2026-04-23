@@ -31,7 +31,7 @@
 
 ### Call to Action (30 sec)
 
-> "The prototype is live — three interactive pages: Operations Center, Business Intelligence, and a Client 360 drill-down. All interactions work: heatmap to tenant detail, churn radar to risk signals, peer benchmarks with real SLI data ranges, AI briefing with recommended actions, and a QBR report generator. The PRD maps every feature to 9 named Acronis APIs that already exist on developer.acronis.com. The data model proposes a ClickHouse-based star schema that handles 125-150 GB/day of ingestion at Acronis's scale. And I've identified three things to validate first with real partners — heatmap vs. list view, churn signal accuracy against real churn data, and benchmarking opt-in willingness — before we commit engineering."
+> "The prototype is live — two interactive dashboards: Operations Center and Business Intelligence. All interactions work: heatmap to tenant detail, churn radar to risk signals, peer benchmarks with real SLI data ranges, AI briefing with recommended actions, and a QBR report generator modal. The PRD maps every feature to 9 named Acronis APIs that already exist on developer.acronis.com. The data model proposes a ClickHouse-based star schema that handles 125-150 GB/day of ingestion at Acronis's scale. And I've identified three things to validate first with real partners — heatmap vs. list view, churn signal accuracy against real churn data, and benchmarking opt-in willingness — before we commit engineering."
 
 ---
 
@@ -44,7 +44,7 @@
 | **Product thinking** | **93%** | Alternatives considered, phase-gated rollout, free/premium economics validated with real conversion benchmarks (2-5% freemium), blurred-data hooks from Amplitude research, competitive whitespace analysis against 5 platforms | Could add TAM sizing or financial model for premium tier revenue |
 | **Domain fit** | **93%** | NOC Tier 1/2/3 workflow embedded (400-500 endpoints/tech, 3×8h shifts, morning triage sequence). QBR killer feature grounded in real data (4-6 hrs → 10s, 82% churn link). SLI benchmark ranges (11.1% EBITDA, 46.2% margin). Correct Acronis terminology. 19 category MSP tool stack mapped. | Could include screenshots of actual Acronis console for comparison |
 | **Data literacy** | **93%** | 9 named Acronis APIs grounded from developer.acronis.com. Star schema with fact/dimension tables specified. ClickHouse recommendation with volume estimates (125-150 GB/day, 50 TB/yr). Hot/warm/cold retention architecture. 11 validated churn model features with sources. Infrastructure break-even math. | Could model the ML pipeline more formally (training cadence, SHAP values, A/B test design) |
-| **Prototype quality** | **91%** | 3 HTML pages with micro-animations, real-time alert simulation, radar chart, QBR generator modal, priority-ranked AI briefing (PagerDuty-inspired), collapsible sidebar, blurred premium gate demo | Live prototype quality depends on execution — spec is strong |
+| **Prototype quality** | **91%** | 2 HTML dashboards with micro-animations, real-time alert simulation, radar chart, QBR generator modal, priority-ranked AI briefing (PagerDuty-inspired), collapsible sidebar, blurred premium gate demo | Live prototype quality depends on execution — spec is strong |
 | **AI fluency** | **93%** | 3 specific prompt engineering examples with research-validated overrides, discarded suggestions log with reasoning, concrete judgment call (heatmap vs. Kanban), 12-query Perplexity research workflow documented | Perfect — demonstrates AI as a thinking tool, not a code generator |
 | **Communication** | **93%** | 30-second summaries per section, structured for mixed audience (eng + design + GTM), research citations strengthen rather than clutter, exec-scannable with deep dives available | Could tighten the pitch further for a 2-min version if needed |
 
@@ -62,7 +62,7 @@ This section maps key findings from 12 Perplexity Deep Research queries to where
 - **Alert fatigue: 56% experience daily, 1 in 4 alerts false positive** → AI briefing filters noise
 - **Only 11% have seamless tool integration** → core problem validation for cross-tenant view
 
-### QBR Process (Query 2 → Business Dashboard + Client 360)
+### QBR Process (Query 2 → Business Dashboard)
 - **4-6 hours prep per client without automation, <1 hour with** → QBR generator time savings quantified
 - **82% of buyers cancelled contracts due to poor QBRs** → retention link established
 - **80% forward-looking, 20% backward-looking** → QBR report structure follows this rule
@@ -179,3 +179,13 @@ Keep these numbers ready for the 30-minute review. Each is sourced and defensibl
 | Acronis Canalys ranking | #1 combined across BDR + Cyber + MSP Platform | Canalys 2025 |
 | Acronis EDR/XDR adoption growth | 136% in 2025 | Acronis Integration Trends Report |
 | Data ingestion at Acronis scale | ~125-150 GB/day | Estimated from 18.75M endpoints |
+
+---
+
+## Part 5: If We Had +2 More Hours
+
+Planned extension: **Client 360** (not part of the core task scope).
+
+- Add a third page for tenant-level deep dive from both dashboards.
+- Include unified timeline (ops + business signals), service coverage map, and AI action queue.
+- Move QBR flow to this page with export stub (PDF/Markdown) and cross-page context via `tenant` query param.

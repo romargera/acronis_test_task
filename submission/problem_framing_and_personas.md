@@ -16,9 +16,9 @@
   3. Where margin leaks exist compared to peer benchmarks.
 - Why it matters: MSP owners often see technical status but not commercial risk early enough; this dashboard links service signals to business outcomes.
 
-## Shared Drill-Down: Client 360
+## Optional Extension (+2 hours): Client 360
 - Who it is for: Both personas when they need customer-specific context.
 - Top decisions enabled:
   1. Which action to take now (ops hardening, retention outreach, commercial proposal).
   2. What to include in the next QBR with a forward-looking plan.
-- Why it matters: Both operational and commercial workflows converge at tenant level, so one shared detail surface prevents context loss.
+- Why it matters: Both operational and commercial workflows converge at tenant level, so one shared detail surface can reduce context loss.

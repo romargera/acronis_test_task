@@ -211,10 +211,10 @@ Layer 3 (Aggregation): Materialized views for dashboard KPIs + ML feature store
 - Churn signals from validated research: ticket reopen rate, escalation frequency, SLA <80%, after-hours support spikes, QBR attendance, billing disputes
 - Premium gating via count-teaser: "3 clients at high churn risk — upgrade to see which ones" (highest-converting hook per Amplitude research)
 
-#### Client 360 Page
+#### Optional Extension (+2 hours): Client 360 Page
 
-- Full deep-dive per client: event timeline, services matrix, posture radar, QBR generator, AI actions
-- Accessed from either dashboard's drill-down
+- Tenant deep-dive page: event timeline, services matrix, posture radar, QBR generator, AI actions.
+- Accessed from either dashboard's drill-down after core 2-dashboard scope is complete.
 
 ---
 
@@ -267,7 +267,7 @@ Layer 3 (Aggregation): Materialized views for dashboard KPIs + ML feature store
 | 1 | 30 min | Problem framing & personas + alternatives considered |
 | 2 | 1 hour | PRD sections (both dashboards + QBR killer feature) |
 | 3 | 45 min | Data sources & model (API-grounded + DW architecture) |
-| 4 | 3-4 hours | Interactive prototypes (3 HTML pages: Ops + Biz + Client 360) |
+| 4 | 3-4 hours | Interactive prototypes (2 HTML pages: Ops + Biz) |
 | 5 | 30 min | AI workflow note (with 3 specific prompt examples) |
 | 6 | 30 min | Assumptions, risks, validation |
 | 7 | 30 min | Final polish, README, QA |
@@ -297,6 +297,6 @@ Layer 3 (Aggregation): Materialized views for dashboard KPIs + ML feature store
 | **Product thinking** (93%) | Alternatives considered, phase-gated rollout, free/premium economics validated (2-5% freemium baseline, $2-5/tenant pricing, <1% break-even), blurred-data conversion hooks from Amplitude research |
 | **Domain fit** (93%) | NOC tier workflow (Tier 1/2/3 morning routine mapped), QBR killer feature (4-6 hrs → 10 sec, retention-validated), correct terminology (tenants, workloads, CyberApps), SLI benchmark ranges embedded, specific competitor gaps cited |
 | **Data literacy** (93%) | Grounded in 9 named Acronis APIs, ClickHouse recommendation with volume estimates (125-150 GB/day), star schema fact/dimension model, hot/warm/cold retention, churn model with feature categories from research |
-| **Prototype quality** (91%) | 3 HTML pages, micro-animations, real-time simulation, radar chart, QBR generator modal, priority-ranked AI briefing (PagerDuty-inspired), collapsible sidebar nav |
+| **Prototype quality** (91%) | 2 HTML dashboards, micro-animations, real-time simulation, radar chart, QBR generator modal, priority-ranked AI briefing (PagerDuty-inspired), collapsible sidebar nav |
 | **AI fluency** (93%) | 3 specific prompt engineering examples with research-validated overrides, discarded suggestions log with reasoning, judgment-over-automation framing |
 | **Communication** (93%) | 30-second summaries, structured for mixed audience (eng + design + GTM), research citations where they strengthen the point, no filler |
