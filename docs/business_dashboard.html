@@ -11,50 +11,55 @@
   <body>
     <main class="app-shell">
       <section class="toolbar" aria-label="Business controls">
-        <div class="toolbar-left filters">
-          <select id="periodFilter" class="select" aria-label="Period filter">
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="90d" selected>Last 90 days</option>
-            <option value="180d">Last 180 days</option>
-            <option value="365d">Last 365 days</option>
-          </select>
-          <select id="riskFilter" class="select" aria-label="Risk filter">
-            <option value="all">All risk levels</option>
-            <option value="critical">Critical only</option>
-            <option value="high">High and above</option>
-            <option value="medium">Medium and above</option>
-          </select>
-          <details class="filter-spoiler" id="segmentFilterWrap">
-            <summary id="segmentFilterSummary">All segments</summary>
-            <select id="segmentFilter" class="select spoiler-select" aria-label="Segment filter" multiple>
-              <option value="all" selected>All segments</option>
-              <option value="Regulated">Regulated</option>
-              <option value="Healthcare">Healthcare</option>
-              <option value="Professional Services">Professional Services</option>
-              <option value="Logistics">Logistics</option>
-              <option value="Retail">Retail</option>
-              <option value="Education">Education</option>
+        <div class="toolbar-left">
+          <div class="pill-tabs" aria-label="Dashboard pages">
+            <a class="pill-tab" href="./operations_dashboard.html">Operations</a>
+            <a class="pill-tab active" href="./business_dashboard.html" aria-current="page">Business Growth</a>
+          </div>
+          <div class="filters">
+            <select id="periodFilter" class="select" aria-label="Period filter">
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d" selected>Last 90 days</option>
+              <option value="180d">Last 180 days</option>
+              <option value="365d">Last 365 days</option>
             </select>
-          </details>
-          <details class="filter-spoiler" id="countryFilterWrap">
-            <summary id="countryFilterSummary">All countries</summary>
-            <select id="countryFilter" class="select spoiler-select" aria-label="Country filter" multiple>
-              <option value="all" selected>All countries</option>
-              <option value="United States">United States</option>
-              <option value="Germany">Germany</option>
-              <option value="Netherlands">Netherlands</option>
-              <option value="Canada">Canada</option>
-              <option value="France">France</option>
-              <option value="Singapore">Singapore</option>
-              <option value="Australia">Australia</option>
+            <select id="riskFilter" class="select" aria-label="Risk filter">
+              <option value="all">All risk levels</option>
+              <option value="critical">Critical only</option>
+              <option value="high">High and above</option>
+              <option value="medium">Medium and above</option>
             </select>
-          </details>
+            <details class="filter-spoiler" id="segmentFilterWrap">
+              <summary id="segmentFilterSummary">All segments</summary>
+              <select id="segmentFilter" class="select spoiler-select" aria-label="Segment filter" multiple>
+                <option value="all" selected>All segments</option>
+                <option value="Regulated">Regulated</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Professional Services">Professional Services</option>
+                <option value="Logistics">Logistics</option>
+                <option value="Retail">Retail</option>
+                <option value="Education">Education</option>
+              </select>
+            </details>
+            <details class="filter-spoiler" id="countryFilterWrap">
+              <summary id="countryFilterSummary">All countries</summary>
+              <select id="countryFilter" class="select spoiler-select" aria-label="Country filter" multiple>
+                <option value="all" selected>All countries</option>
+                <option value="United States">United States</option>
+                <option value="Germany">Germany</option>
+                <option value="Netherlands">Netherlands</option>
+                <option value="Canada">Canada</option>
+                <option value="France">France</option>
+                <option value="Singapore">Singapore</option>
+                <option value="Australia">Australia</option>
+              </select>
+            </details>
+          </div>
         </div>
         <section class="quick-actions" aria-label="Quick actions">
           <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
-          <button id="downloadBtn" class="btn btn-secondary" type="button">Download</button>
-          <button id="sendBtn" class="btn btn-secondary" type="button">Send</button>
+          <button id="shareBtn" class="btn btn-secondary" type="button">Share</button>
         </section>
       </section>
       <div class="tiny">Tip: open Segments/Countries and use Ctrl/Cmd + click for multi-select.</div>
@@ -280,11 +285,8 @@
         document.getElementById("addWidgetBtn").addEventListener("click", function () {
           utils.toast("Add widget flow placeholder: business widget catalog opens here");
         });
-        document.getElementById("downloadBtn").addEventListener("click", function () {
-          utils.toast("Download placeholder: export panel opens here");
-        });
-        document.getElementById("sendBtn").addEventListener("click", function () {
-          utils.toast("Send placeholder: sharing dialog opens here");
+        document.getElementById("shareBtn").addEventListener("click", function () {
+          utils.toast("Share placeholder: sharing dialog opens here");
         });
 
         document.getElementById("closeQbrModal").addEventListener("click", function () {

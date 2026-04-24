@@ -12,9 +12,9 @@
     <main class="app-shell">
       <section class="toolbar" aria-label="Dashboard controls">
         <div class="toolbar-left">
-          <div class="pill-tabs" role="tablist" aria-label="Operations modes">
-            <button id="opsV2Tab" class="pill-tab active" type="button" role="tab" aria-selected="true" data-view="v2">Operations v2</button>
-            <button id="opsClassicTab" class="pill-tab" type="button" role="tab" aria-selected="false" data-view="classic">Classic Overview (baseline)</button>
+          <div class="pill-tabs" aria-label="Dashboard pages">
+            <a class="pill-tab active" href="./operations_dashboard.html" aria-current="page">Operations</a>
+            <a class="pill-tab" href="./business_dashboard.html">Business Growth</a>
           </div>
           <div class="filters">
             <select id="windowFilter" class="select" aria-label="Data window filter">
@@ -70,14 +70,42 @@
         </div>
         <section class="quick-actions" aria-label="Quick actions">
           <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
-          <button id="downloadBtn" class="btn btn-secondary" type="button">Download</button>
-          <button id="sendBtn" class="btn btn-secondary" type="button">Send</button>
+          <button id="shareBtn" class="btn btn-secondary" type="button">Share</button>
         </section>
       </section>
       <div class="tiny">Tip: open Services/Regions/Countries and use Ctrl/Cmd + click for multi-select.</div>
 
       <div id="opsV2View" class="dashboard-view">
         <section class="kpi-grid" id="kpiGrid" aria-label="Operations KPI cards"></section>
+
+        <section class="card">
+          <div class="section-actions">
+            <h2 class="card-title">Cyber Protection Overview</h2>
+            <span class="card-subtitle">Baseline production metrics preserved in Operations.</span>
+          </div>
+          <div id="classicTopRow" class="classic-top-grid"></div>
+        </section>
+        <section class="classic-widget-grid">
+          <article class="card">
+            <h2 class="card-title">Monthly Storage Usage</h2>
+            <div class="card-subtitle" id="classicStorageCurrent"></div>
+            <div class="chart-wrap"><div id="classicStorageChart"></div></div>
+          </article>
+          <article class="card">
+            <h2 class="card-title">Status</h2>
+            <div class="classic-donut-row">
+              <div id="classicStatusDonut" class="classic-donut"></div>
+              <div id="classicStatusLegend" class="classic-legend"></div>
+            </div>
+          </article>
+          <article class="card">
+            <h2 class="card-title">Protection Status</h2>
+            <div class="classic-donut-row">
+              <div id="classicProtectionDonut" class="classic-donut"></div>
+              <div id="classicProtectionLegend" class="classic-legend"></div>
+            </div>
+          </article>
+        </section>
 
         <section class="split">
           <article class="card">
@@ -141,37 +169,6 @@
 
         <section id="detailPanel" class="detail-panel" aria-live="polite"></section>
       </div>
-
-      <div id="classicOverviewView" class="dashboard-view" hidden>
-        <section class="card">
-          <div class="section-actions">
-            <h2 class="card-title">Cyber Protection (Parity Baseline)</h2>
-            <span class="card-subtitle">Classic Overview metrics kept for continuity.</span>
-          </div>
-          <div id="classicTopRow" class="classic-top-grid"></div>
-        </section>
-        <section class="classic-widget-grid">
-          <article class="card">
-            <h2 class="card-title">Monthly Storage Usage</h2>
-            <div class="card-subtitle" id="classicStorageCurrent"></div>
-            <div class="chart-wrap"><div id="classicStorageChart"></div></div>
-          </article>
-          <article class="card">
-            <h2 class="card-title">Status</h2>
-            <div class="classic-donut-row">
-              <div id="classicStatusDonut" class="classic-donut"></div>
-              <div id="classicStatusLegend" class="classic-legend"></div>
-            </div>
-          </article>
-          <article class="card">
-            <h2 class="card-title">Protection Status</h2>
-            <div class="classic-donut-row">
-              <div id="classicProtectionDonut" class="classic-donut"></div>
-              <div id="classicProtectionLegend" class="classic-legend"></div>
-            </div>
-          </article>
-        </section>
-      </div>
     </main>
 
     <div class="toast" id="toast" aria-live="assertive"></div>
@@ -190,16 +187,12 @@
           country: ["all"]
         };
         const state = {
-          viewMode: "v2",
           selectedId: null,
           showTopOnly: true,
           heatmapSort: "risk",
           briefingSort: "priority",
           dynamicAlerts: utils.sortAlerts(data.tenants)
         };
-        if (utils.queryParam("view") === "classic") {
-          state.viewMode = "classic";
-        }
 
         const severityThreshold = {
           all: 1,
@@ -209,10 +202,6 @@
         };
 
         const elements = {
-          opsV2View: document.getElementById("opsV2View"),
-          classicOverviewView: document.getElementById("classicOverviewView"),
-          opsV2Tab: document.getElementById("opsV2Tab"),
-          opsClassicTab: document.getElementById("opsClassicTab"),
           kpiGrid: document.getElementById("kpiGrid"),
           heatmap: document.getElementById("heatmap"),
           tenantCountLabel: document.getElementById("tenantCountLabel"),
@@ -230,17 +219,6 @@
           classicProtectionDonut: document.getElementById("classicProtectionDonut"),
           classicProtectionLegend: document.getElementById("classicProtectionLegend")
         };
-
-        function setViewMode(mode) {
-          state.viewMode = mode === "classic" ? "classic" : "v2";
-          const isClassic = state.viewMode === "classic";
-          elements.opsV2View.hidden = isClassic;
-          elements.classicOverviewView.hidden = !isClassic;
-          elements.opsV2Tab.classList.toggle("active", !isClassic);
-          elements.opsClassicTab.classList.toggle("active", isClassic);
-          elements.opsV2Tab.setAttribute("aria-selected", isClassic ? "false" : "true");
-          elements.opsClassicTab.setAttribute("aria-selected", isClassic ? "true" : "false");
-        }
 
         function updateSpoilerLabel(selectId, summaryId, defaultLabel, suffix) {
           const values = utils.parseMultiSelect(document.getElementById(selectId), ["all"]);
@@ -336,17 +314,8 @@
         document.getElementById("addWidgetBtn").addEventListener("click", function () {
           utils.toast("Add widget flow placeholder: widget gallery opens here");
         });
-        document.getElementById("downloadBtn").addEventListener("click", function () {
-          utils.toast("Download placeholder: PDF/CSV export selector opens here");
-        });
-        document.getElementById("sendBtn").addEventListener("click", function () {
-          utils.toast("Send placeholder: report delivery dialog opens here");
-        });
-        elements.opsV2Tab.addEventListener("click", function () {
-          setViewMode("v2");
-        });
-        elements.opsClassicTab.addEventListener("click", function () {
-          setViewMode("classic");
+        document.getElementById("shareBtn").addEventListener("click", function () {
+          utils.toast("Share placeholder: report sharing dialog opens here");
         });
 
         function matchesFilters(tenant) {
@@ -912,7 +881,6 @@
         updateSpoilerLabel("serviceFilter", "serviceFilterSummary", "All services", "services selected");
         updateSpoilerLabel("regionFilter", "regionFilterSummary", "All regions", "regions selected");
         updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
-        setViewMode(state.viewMode);
         render();
         window.setInterval(injectLiveAlert, 21000);
       })();

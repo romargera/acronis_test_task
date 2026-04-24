@@ -59,16 +59,18 @@ body {
 .filters {
   display: flex;
   gap: var(--acv-spacing-small);
-  flex-wrap: wrap;
-  align-items: flex-start;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow-x: auto;
+  padding-bottom: 2px;
 }
 
 .toolbar {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--acv-spacing-small);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -82,8 +84,10 @@ body {
 .toolbar-left {
   display: flex;
   gap: var(--acv-spacing-small);
-  flex-wrap: wrap;
-  align-items: flex-start;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  align-items: center;
 }
 
 .filter-spoiler {
@@ -129,7 +133,8 @@ body {
 .quick-actions {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
   margin-left: auto;
 }
 
@@ -844,6 +849,10 @@ body {
   padding: 6px 10px;
   cursor: pointer;
   font-size: var(--acv-font-size-note);
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .pill-tab.active {
@@ -973,6 +982,22 @@ body {
 }
 
 @media (max-width: 1080px) {
+  .toolbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-left {
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .filters {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
   .grid-3,
   .grid-2 {
     grid-template-columns: 1fr;

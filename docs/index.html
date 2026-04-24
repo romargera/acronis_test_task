@@ -4,60 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Acronis Dashboard Prototype</title>
-    <link rel="stylesheet" href="./assets/acv-reset.css" />
-    <link rel="stylesheet" href="./assets/acv-theme-acronis.css" />
-    <link rel="stylesheet" href="./assets/common.css" />
+    <meta http-equiv="refresh" content="0; url=./operations_dashboard.html" />
+    <script>
+      window.location.replace("./operations_dashboard.html");
+    </script>
   </head>
   <body>
-    <main class="app-shell">
-      <section class="card">
-        <h1 class="card-title">
-          Acronis Dashboard Prototype. Made by
-          <a class="title-link" href="https://www.linkedin.com/in/oempolice/" target="_blank" rel="noopener noreferrer">Roman Babunts</a>
-        </h1>
-        <p class="card-subtitle">Interactive prototype with two dashboard tabs. Default tab is Operations.</p>
-        <div class="dashboard-tabs" role="tablist" aria-label="Dashboard tabs">
-          <button class="dashboard-tab active" role="tab" aria-selected="true" data-target="./operations_dashboard.html" type="button">
-            Operations Dashboard
-          </button>
-          <button class="dashboard-tab" role="tab" aria-selected="false" data-target="./business_dashboard.html" type="button">
-            Business Growth Dashboard
-          </button>
-        </div>
-      </section>
-      <section class="dashboard-tab-panel" role="tabpanel" aria-label="Selected dashboard">
-        <iframe
-          id="dashboardFrame"
-          class="dashboard-frame"
-          src="./operations_dashboard.html"
-          title="Operations Dashboard"
-          loading="lazy"
-        ></iframe>
-      </section>
-    </main>
-    <script>
-      (function () {
-        const tabs = Array.from(document.querySelectorAll(".dashboard-tab"));
-        const frame = document.getElementById("dashboardFrame");
-
-        function activateTab(tab) {
-          const target = tab.getAttribute("data-target");
-          frame.src = target;
-          frame.title = tab.textContent.trim();
-
-          tabs.forEach(function (item) {
-            const isActive = item === tab;
-            item.classList.toggle("active", isActive);
-            item.setAttribute("aria-selected", isActive ? "true" : "false");
-          });
-        }
-
-        tabs.forEach(function (tab) {
-          tab.addEventListener("click", function () {
-            activateTab(tab);
-          });
-        });
-      })();
-    </script>
+    <p><a href="./operations_dashboard.html">Open Operations dashboard</a></p>
   </body>
 </html>
