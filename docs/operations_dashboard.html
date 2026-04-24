@@ -8,59 +8,65 @@
     <link rel="stylesheet" href="./assets/acv-theme-acronis.css" />
     <link rel="stylesheet" href="./assets/common.css" />
   </head>
-  <body>
+  <body class="operations-dashboard">
     <main class="app-shell">
       <section class="toolbar" aria-label="Dashboard controls">
-        <div class="toolbar-left filters">
-          <select id="windowFilter" class="select" aria-label="Data window filter">
-            <option value="7">Last 7 days</option>
-            <option value="30" selected>Last 30 days</option>
-            <option value="90">Last 90 days</option>
-            <option value="180">Last 180 days</option>
-            <option value="365">Last 365 days</option>
-          </select>
-          <select id="severityFilter" class="select" aria-label="Severity filter">
-            <option value="all">All severities</option>
-            <option value="critical">Critical only</option>
-            <option value="high">High and above</option>
-            <option value="medium">Medium and above</option>
-          </select>
-
-          <details class="filter-spoiler" id="serviceFilterWrap">
-            <summary id="serviceFilterSummary">All services</summary>
-            <select id="serviceFilter" class="select spoiler-select" aria-label="Service filter" multiple>
-              <option value="all" selected>All services</option>
-              <option value="backup">Backup</option>
-              <option value="edr">EDR</option>
-              <option value="m365">M365 Backup</option>
-              <option value="patch">Patch</option>
-              <option value="dlp">DLP</option>
+        <div class="toolbar-left">
+          <div class="pill-tabs" role="tablist" aria-label="Operations modes">
+            <button id="opsV2Tab" class="pill-tab active" type="button" role="tab" aria-selected="true" data-view="v2">Operations v2</button>
+            <button id="opsClassicTab" class="pill-tab" type="button" role="tab" aria-selected="false" data-view="classic">Classic Overview (baseline)</button>
+          </div>
+          <div class="filters">
+            <select id="windowFilter" class="select" aria-label="Data window filter">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="180">Last 180 days</option>
+              <option value="365">Last 365 days</option>
             </select>
-          </details>
-
-          <details class="filter-spoiler" id="regionFilterWrap">
-            <summary id="regionFilterSummary">All regions</summary>
-            <select id="regionFilter" class="select spoiler-select" aria-label="Region filter" multiple>
-              <option value="all" selected>All regions</option>
-              <option value="NA">North America</option>
-              <option value="EU">Europe</option>
-              <option value="APAC">APAC</option>
+            <select id="severityFilter" class="select" aria-label="Severity filter">
+              <option value="all">All severities</option>
+              <option value="critical">Critical only</option>
+              <option value="high">High and above</option>
+              <option value="medium">Medium and above</option>
             </select>
-          </details>
 
-          <details class="filter-spoiler" id="countryFilterWrap">
-            <summary id="countryFilterSummary">All countries</summary>
-            <select id="countryFilter" class="select spoiler-select" aria-label="Country filter" multiple>
-              <option value="all" selected>All countries</option>
-              <option value="United States">United States</option>
-              <option value="Germany">Germany</option>
-              <option value="Netherlands">Netherlands</option>
-              <option value="Canada">Canada</option>
-              <option value="France">France</option>
-              <option value="Singapore">Singapore</option>
-              <option value="Australia">Australia</option>
-            </select>
-          </details>
+            <details class="filter-spoiler" id="serviceFilterWrap">
+              <summary id="serviceFilterSummary">All services</summary>
+              <select id="serviceFilter" class="select spoiler-select" aria-label="Service filter" multiple>
+                <option value="all" selected>All services</option>
+                <option value="backup">Backup</option>
+                <option value="edr">EDR</option>
+                <option value="m365">M365 Backup</option>
+                <option value="patch">Patch</option>
+                <option value="dlp">DLP</option>
+              </select>
+            </details>
+
+            <details class="filter-spoiler" id="regionFilterWrap">
+              <summary id="regionFilterSummary">All regions</summary>
+              <select id="regionFilter" class="select spoiler-select" aria-label="Region filter" multiple>
+                <option value="all" selected>All regions</option>
+                <option value="NA">North America</option>
+                <option value="EU">Europe</option>
+                <option value="APAC">APAC</option>
+              </select>
+            </details>
+
+            <details class="filter-spoiler" id="countryFilterWrap">
+              <summary id="countryFilterSummary">All countries</summary>
+              <select id="countryFilter" class="select spoiler-select" aria-label="Country filter" multiple>
+                <option value="all" selected>All countries</option>
+                <option value="United States">United States</option>
+                <option value="Germany">Germany</option>
+                <option value="Netherlands">Netherlands</option>
+                <option value="Canada">Canada</option>
+                <option value="France">France</option>
+                <option value="Singapore">Singapore</option>
+                <option value="Australia">Australia</option>
+              </select>
+            </details>
+          </div>
         </div>
         <section class="quick-actions" aria-label="Quick actions">
           <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
@@ -70,69 +76,102 @@
       </section>
       <div class="tiny">Tip: open Services/Regions/Countries and use Ctrl/Cmd + click for multi-select.</div>
 
-      <section class="kpi-grid" id="kpiGrid" aria-label="Operations KPI cards"></section>
+      <div id="opsV2View" class="dashboard-view">
+        <section class="kpi-grid" id="kpiGrid" aria-label="Operations KPI cards"></section>
 
-      <section class="grid grid-2">
-        <article class="card">
-          <div class="section-actions">
-            <h2 class="card-title">Cross-Tenant Risk Heatmap <span class="info-tip" title="Each tile combines risk level, open critical alerts, and posture score for quick cross-tenant triage.">i</span></h2>
-            <span class="card-subtitle" id="tenantCountLabel"></span>
-            <div class="control-inline">
-              <label for="heatmapSort">Sort</label>
-              <select id="heatmapSort" class="select select-sm" aria-label="Heatmap sort">
-                <option value="risk">Risk (desc)</option>
-                <option value="mrr">MRR (desc)</option>
-                <option value="alerts">Open alerts (desc)</option>
-                <option value="posture">Posture (low first)</option>
-                <option value="name">Client name (A-Z)</option>
-              </select>
+        <section class="split">
+          <article class="card">
+            <h2 class="card-title">Posture Trends (last 7 days) <span class="info-tip" title="Diff and trend are shown versus previous 7-day baseline window.">i</span></h2>
+            <div class="legend">
+              <span class="legend-item"><span class="dot dot-primary"></span> Backup success</span>
+              <span class="legend-item"><span class="dot dot-warning"></span> Patch compliance</span>
+              <span class="legend-item"><span class="dot dot-danger"></span> Threat activity</span>
             </div>
-          </div>
-          <div class="heatmap" id="heatmap" role="list"></div>
-        </article>
-
-        <article class="card">
-          <div class="section-actions">
-            <h2 class="card-title">AI Morning Briefing</h2>
-            <button id="briefToggle" class="btn btn-secondary" type="button">Show Top 5</button>
-            <div class="control-inline">
-              <label for="briefingSort">Sort</label>
-              <select id="briefingSort" class="select select-sm" aria-label="Briefing sort">
-                <option value="priority">Priority score</option>
-                <option value="mrr">MRR (desc)</option>
-                <option value="alerts">Critical alerts</option>
-                <option value="sla">SLA (low first)</option>
-              </select>
+            <div class="chart-wrap">
+              <div id="trendBackup"></div>
+              <div id="trendPatch"></div>
+              <div id="trendThreats"></div>
             </div>
-          </div>
-          <p class="card-subtitle">Priority-ranked actions generated from overnight telemetry.</p>
-          <div id="briefingList" class="grid"></div>
-        </article>
-      </section>
+          </article>
 
-      <section class="split">
-        <article class="card">
-          <h2 class="card-title">Posture Trends (last 7 days) <span class="info-tip" title="Diff and trend are shown versus previous 7-day baseline window.">i</span></h2>
-          <div class="legend">
-            <span class="legend-item"><span class="dot dot-primary"></span> Backup success</span>
-            <span class="legend-item"><span class="dot dot-warning"></span> Patch compliance</span>
-            <span class="legend-item"><span class="dot dot-danger"></span> Threat activity</span>
-          </div>
-          <div class="chart-wrap">
-            <div id="trendBackup"></div>
-            <div id="trendPatch"></div>
-            <div id="trendThreats"></div>
-          </div>
-        </article>
+          <article class="card">
+            <h2 class="card-title">Critical Alerts Feed</h2>
+            <p class="card-subtitle">Real-time simulation: new alerts are injected every ~20s.</p>
+            <div class="alert-list" id="alertsFeed"></div>
+          </article>
+        </section>
 
-        <article class="card">
-          <h2 class="card-title">Critical Alerts Feed</h2>
-          <p class="card-subtitle">Real-time simulation: new alerts are injected every ~20s.</p>
-          <div class="alert-list" id="alertsFeed"></div>
-        </article>
-      </section>
+        <section class="grid grid-2">
+          <article class="card">
+            <div class="section-actions section-actions-top">
+              <h2 class="card-title">Cross-Tenant Risk Heatmap <span class="info-tip" title="Each tile combines risk level, open critical alerts, and posture score for quick cross-tenant triage.">i</span></h2>
+              <span class="card-subtitle" id="tenantCountLabel"></span>
+              <div class="control-inline">
+                <label for="heatmapSort">Sort</label>
+                <select id="heatmapSort" class="select select-sm" aria-label="Heatmap sort">
+                  <option value="risk">Risk (desc)</option>
+                  <option value="mrr">MRR (desc)</option>
+                  <option value="alerts">Open alerts (desc)</option>
+                  <option value="posture">Posture (low first)</option>
+                  <option value="name">Client name (A-Z)</option>
+                </select>
+              </div>
+            </div>
+            <div class="heatmap" id="heatmap" role="list"></div>
+          </article>
 
-      <section id="detailPanel" class="detail-panel" aria-live="polite"></section>
+          <article class="card">
+            <div class="section-actions">
+              <h2 class="card-title">AI Morning Briefing</h2>
+              <button id="briefToggle" class="btn btn-secondary" type="button">Show Top 5</button>
+              <div class="control-inline">
+                <label for="briefingSort">Sort</label>
+                <select id="briefingSort" class="select select-sm" aria-label="Briefing sort">
+                  <option value="priority">Priority score</option>
+                  <option value="mrr">MRR (desc)</option>
+                  <option value="alerts">Critical alerts</option>
+                  <option value="sla">SLA (low first)</option>
+                </select>
+              </div>
+            </div>
+            <p class="card-subtitle">Priority-ranked actions generated from overnight telemetry.</p>
+            <div id="briefingList" class="grid"></div>
+          </article>
+        </section>
+
+        <section id="detailPanel" class="detail-panel" aria-live="polite"></section>
+      </div>
+
+      <div id="classicOverviewView" class="dashboard-view" hidden>
+        <section class="card">
+          <div class="section-actions">
+            <h2 class="card-title">Cyber Protection (Parity Baseline)</h2>
+            <span class="card-subtitle">Classic Overview metrics kept for continuity.</span>
+          </div>
+          <div id="classicTopRow" class="classic-top-grid"></div>
+        </section>
+        <section class="classic-widget-grid">
+          <article class="card">
+            <h2 class="card-title">Monthly Storage Usage</h2>
+            <div class="card-subtitle" id="classicStorageCurrent"></div>
+            <div class="chart-wrap"><div id="classicStorageChart"></div></div>
+          </article>
+          <article class="card">
+            <h2 class="card-title">Status</h2>
+            <div class="classic-donut-row">
+              <div id="classicStatusDonut" class="classic-donut"></div>
+              <div id="classicStatusLegend" class="classic-legend"></div>
+            </div>
+          </article>
+          <article class="card">
+            <h2 class="card-title">Protection Status</h2>
+            <div class="classic-donut-row">
+              <div id="classicProtectionDonut" class="classic-donut"></div>
+              <div id="classicProtectionLegend" class="classic-legend"></div>
+            </div>
+          </article>
+        </section>
+      </div>
     </main>
 
     <div class="toast" id="toast" aria-live="assertive"></div>
@@ -151,12 +190,16 @@
           country: ["all"]
         };
         const state = {
+          viewMode: "v2",
           selectedId: null,
           showTopOnly: true,
           heatmapSort: "risk",
           briefingSort: "priority",
           dynamicAlerts: utils.sortAlerts(data.tenants)
         };
+        if (utils.queryParam("view") === "classic") {
+          state.viewMode = "classic";
+        }
 
         const severityThreshold = {
           all: 1,
@@ -166,6 +209,10 @@
         };
 
         const elements = {
+          opsV2View: document.getElementById("opsV2View"),
+          classicOverviewView: document.getElementById("classicOverviewView"),
+          opsV2Tab: document.getElementById("opsV2Tab"),
+          opsClassicTab: document.getElementById("opsClassicTab"),
           kpiGrid: document.getElementById("kpiGrid"),
           heatmap: document.getElementById("heatmap"),
           tenantCountLabel: document.getElementById("tenantCountLabel"),
@@ -174,8 +221,26 @@
           detailPanel: document.getElementById("detailPanel"),
           trendBackup: document.getElementById("trendBackup"),
           trendPatch: document.getElementById("trendPatch"),
-          trendThreats: document.getElementById("trendThreats")
+          trendThreats: document.getElementById("trendThreats"),
+          classicTopRow: document.getElementById("classicTopRow"),
+          classicStorageCurrent: document.getElementById("classicStorageCurrent"),
+          classicStorageChart: document.getElementById("classicStorageChart"),
+          classicStatusDonut: document.getElementById("classicStatusDonut"),
+          classicStatusLegend: document.getElementById("classicStatusLegend"),
+          classicProtectionDonut: document.getElementById("classicProtectionDonut"),
+          classicProtectionLegend: document.getElementById("classicProtectionLegend")
         };
+
+        function setViewMode(mode) {
+          state.viewMode = mode === "classic" ? "classic" : "v2";
+          const isClassic = state.viewMode === "classic";
+          elements.opsV2View.hidden = isClassic;
+          elements.classicOverviewView.hidden = !isClassic;
+          elements.opsV2Tab.classList.toggle("active", !isClassic);
+          elements.opsClassicTab.classList.toggle("active", isClassic);
+          elements.opsV2Tab.setAttribute("aria-selected", isClassic ? "false" : "true");
+          elements.opsClassicTab.setAttribute("aria-selected", isClassic ? "true" : "false");
+        }
 
         function updateSpoilerLabel(selectId, summaryId, defaultLabel, suffix) {
           const values = utils.parseMultiSelect(document.getElementById(selectId), ["all"]);
@@ -276,6 +341,12 @@
         });
         document.getElementById("sendBtn").addEventListener("click", function () {
           utils.toast("Send placeholder: report delivery dialog opens here");
+        });
+        elements.opsV2Tab.addEventListener("click", function () {
+          setViewMode("v2");
+        });
+        elements.opsClassicTab.addEventListener("click", function () {
+          setViewMode("classic");
         });
 
         function matchesFilters(tenant) {
@@ -487,6 +558,8 @@
             height: 220,
             unit: "%",
             yLabel: "Backup %",
+            xAxisName: "Day",
+            yAxisName: "Backup success",
             xLabels: labels,
             lineClass: "risk-spark",
             pointClass: "line-point",
@@ -498,6 +571,8 @@
             height: 220,
             unit: "%",
             yLabel: "Patch %",
+            xAxisName: "Day",
+            yAxisName: "Patch compliance",
             xLabels: labels,
             lineClass: "risk-spark-alt",
             pointClass: "line-point-alt",
@@ -509,6 +584,8 @@
             height: 220,
             unit: " alerts",
             yLabel: "Critical alerts",
+            xAxisName: "Day",
+            yAxisName: "Alerts",
             xLabels: labels,
             lineClass: "risk-spark-danger",
             pointClass: "line-point-danger",
@@ -519,6 +596,186 @@
           elements.trendBackup.innerHTML = `<div class="tiny">Backup success trend (unit: %, window: ${totalDays}d)</div>${backup}`;
           elements.trendPatch.innerHTML = `<div class="tiny">Patch compliance trend (unit: %, window: ${totalDays}d)</div>${patch}`;
           elements.trendThreats.innerHTML = `<div class="tiny">Threat activity trend (unit: alerts, window: ${totalDays}d)</div>${threats}`;
+          utils.bindChartHover(elements.trendBackup.parentElement);
+        }
+
+        function formatInteger(value) {
+          return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value);
+        }
+
+        function createClassicDonut(container, legendContainer, segments, centerNumber, centerLabel) {
+          const total = segments.reduce(function (acc, item) {
+            return acc + item.value;
+          }, 0);
+          if (!total) {
+            container.innerHTML = '<div class="tiny">No data</div>';
+            legendContainer.innerHTML = '<div class="tiny">No values in current filters.</div>';
+            return;
+          }
+
+          let progress = 0;
+          const gradientStops = segments
+            .map(function (item) {
+              const start = (progress / total) * 360;
+              progress += item.value;
+              const end = (progress / total) * 360;
+              return `${item.color} ${start.toFixed(1)}deg ${end.toFixed(1)}deg`;
+            })
+            .join(", ");
+
+          container.innerHTML = `
+            <div class="classic-donut-ring" style="background:conic-gradient(${gradientStops});">
+              <div class="classic-donut-inner">
+                <div class="classic-donut-number">${formatInteger(centerNumber)}</div>
+                <div class="classic-donut-label">${centerLabel}</div>
+              </div>
+            </div>
+          `;
+
+          legendContainer.innerHTML = segments
+            .map(function (item) {
+              return `<div class="classic-legend-item"><span class="dot" style="background:${item.color}"></span>${item.label} ${formatInteger(item.value)}</div>`;
+            })
+            .join("");
+        }
+
+        function renderClassicOverview(tenants) {
+          if (!tenants.length) {
+            elements.classicTopRow.innerHTML = '<div class="empty-state">No classic metrics in current filters.</div>';
+            elements.classicStorageCurrent.textContent = "";
+            elements.classicStorageChart.innerHTML = '<div class="empty-state">No storage trend in current filters.</div>';
+            createClassicDonut(elements.classicStatusDonut, elements.classicStatusLegend, [], 0, "resources");
+            createClassicDonut(elements.classicProtectionDonut, elements.classicProtectionLegend, [], 0, "machines");
+            return;
+          }
+
+          const totalDays = Number(filters.windowDays);
+          const backedUpTodayGb = tenants.reduce(function (acc, tenant) {
+            return acc + tenant.endpoints * (tenant.backupSuccess / 100) * 0.05;
+          }, 0);
+          const malwareBlocked = tenants.reduce(function (acc, tenant) {
+            return acc + tenant.openCriticalAlerts + tenant.unresolvedIncidents;
+          }, 0);
+          const urlsBlocked = tenants.reduce(function (acc, tenant) {
+            return acc + tenant.openCriticalAlerts * 2 + Math.round(tenant.reopenRate / 12);
+          }, 0);
+          const vulnerabilities = tenants.reduce(function (acc, tenant) {
+            return acc + Math.max(0, Math.round((100 - tenant.patchCompliance) / 4));
+          }, 0);
+          const patchesReady = tenants.reduce(function (acc, tenant) {
+            return acc + Math.max(0, Math.round((100 - tenant.patchCompliance) / 3));
+          }, 0);
+
+          const topMetrics = [
+            {
+              id: "backed-up",
+              label: "Backed up today",
+              value: `${backedUpTodayGb.toFixed(1)} GB`,
+              sub: `${(backedUpTodayGb * 43).toFixed(1)} TB overall compressed size`
+            },
+            {
+              id: "malware",
+              label: "Malware blocked",
+              value: formatInteger(malwareBlocked),
+              sub: `${formatInteger(malwareBlocked * 31)} overall blocked`
+            },
+            {
+              id: "urls",
+              label: "URLs blocked",
+              value: formatInteger(urlsBlocked),
+              sub: `${formatInteger(urlsBlocked * 19)} overall blocked`
+            },
+            {
+              id: "vuln",
+              label: "Existing vulnerabilities",
+              value: formatInteger(vulnerabilities),
+              sub: `${formatInteger(vulnerabilities * 7)} overall found`
+            },
+            {
+              id: "patches",
+              label: "Patches ready to install",
+              value: formatInteger(patchesReady),
+              sub: `${formatInteger(patchesReady * 211)} overall installed`
+            }
+          ];
+
+          elements.classicTopRow.innerHTML = topMetrics
+            .map(function (metric) {
+              return `
+                <button class="classic-kpi-card" type="button" data-classic-kpi="${metric.id}">
+                  <div class="classic-kpi-label">${metric.label}</div>
+                  <div class="classic-kpi-value">${metric.value}</div>
+                  <div class="tiny">${metric.sub}</div>
+                </button>
+              `;
+            })
+            .join("");
+
+          elements.classicTopRow.querySelectorAll("[data-classic-kpi]").forEach(function (button) {
+            button.addEventListener("click", function () {
+              utils.toast("Classic metric drill-down placeholder");
+            });
+          });
+
+          const baseStorage = [102, 154, 196, 224, 242, 278, 305, 334, 352, 331, 379, 403, 426, 452];
+          const storageSeries = buildWindowedSeries(baseStorage, totalDays, false).map(function (value) {
+            return Number((value * 1.4).toFixed(1));
+          });
+          const storageLabels = buildWindowLabels(totalDays, storageSeries.length);
+          const currentStorage = storageSeries[storageSeries.length - 1];
+
+          elements.classicStorageCurrent.textContent = `Current size: ${currentStorage.toFixed(1)} GB`;
+          elements.classicStorageChart.innerHTML = utils.createLineChart(storageSeries, {
+            width: 1080,
+            height: 220,
+            unit: " GB",
+            yLabel: "Storage (GB)",
+            xAxisName: "Day",
+            yAxisName: "Storage",
+            xLabels: storageLabels,
+            lineClass: "risk-spark",
+            pointClass: "line-point",
+            lineColor: "#7ba8e3",
+            areaTint: "rgba(123, 168, 227, 0.12)"
+          });
+          utils.bindChartHover(elements.classicStorageChart);
+
+          const statusSegments = [
+            { label: "Critical", value: tenants.filter(function (tenant) { return tenant.riskLevel === "critical"; }).length, color: "#f15354" },
+            { label: "Error", value: tenants.filter(function (tenant) { return tenant.riskLevel === "high"; }).length, color: "#f29f05" },
+            { label: "Warning", value: tenants.filter(function (tenant) { return tenant.riskLevel === "medium"; }).length, color: "#ffbf47" },
+            { label: "OK", value: tenants.filter(function (tenant) { return tenant.riskLevel === "low"; }).length, color: "#7bc043" }
+          ];
+          createClassicDonut(elements.classicStatusDonut, elements.classicStatusLegend, statusSegments, tenants.length, "Resources");
+
+          const protectedMachines = tenants.reduce(function (acc, tenant) {
+            return acc + Math.round(tenant.endpoints * (tenant.backupSuccess / 100));
+          }, 0);
+          const unmanagedMachines = tenants.reduce(function (acc, tenant) {
+            return acc + Math.round(tenant.endpoints * ((100 - tenant.patchCompliance) / 100));
+          }, 0);
+          const discoveredMachines = Math.max(
+            0,
+            tenants.reduce(function (acc, tenant) {
+              return acc + tenant.unresolvedIncidents;
+            }, 0) * 3
+          );
+          const unprotectedMachines = Math.max(
+            0,
+            tenants.reduce(function (acc, tenant) {
+              return acc + tenant.openCriticalAlerts;
+            }, 0) * 2
+          );
+          const protectionSegments = [
+            { label: "Protected", value: protectedMachines, color: "#7bc043" },
+            { label: "Unprotected", value: unprotectedMachines, color: "#f15354" },
+            { label: "Managed", value: unmanagedMachines, color: "#2f86eb" },
+            { label: "Discovered", value: discoveredMachines, color: "#d2d9e5" }
+          ];
+          const totalMachines = protectionSegments.reduce(function (acc, item) {
+            return acc + item.value;
+          }, 0);
+          createClassicDonut(elements.classicProtectionDonut, elements.classicProtectionLegend, protectionSegments, totalMachines, "Machines");
         }
 
         function renderAlerts(tenants) {
@@ -648,12 +905,14 @@
           renderBriefing(tenants);
           renderTrends();
           renderAlerts(tenants);
+          renderClassicOverview(tenants);
           renderDetail();
         }
 
         updateSpoilerLabel("serviceFilter", "serviceFilterSummary", "All services", "services selected");
         updateSpoilerLabel("regionFilter", "regionFilterSummary", "All regions", "regions selected");
         updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
+        setViewMode(state.viewMode);
         render();
         window.setInterval(injectLiveAlert, 21000);
       })();

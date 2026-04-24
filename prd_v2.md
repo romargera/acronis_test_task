@@ -2,7 +2,7 @@
 
 Author: Roman Babunts.
 
-> Disclaimer and legend
+> NOTE:
 >
 > - Marker `(A)` means an assumption that is not fully validated yet.
 > - Every `(A)` item is listed again in the final **Assumption Register**.
@@ -39,7 +39,7 @@ Baseline parity details are moved to **Appendix 8.4** and **8.5** to keep the co
 
 Make Acronis the default intelligence layer on top of cyber-protection telemetry, so MSP partners can run daily operations and strategic growth decisions from one product surface.
 
-### 2.2 Vision for MCP/MSP partners
+### 2.2 Vision for MSP partners
 
 Give partners a decision cockpit that helps them:
 
@@ -304,7 +304,8 @@ Out-of-scope now:
 - add benchmark display refinement with cohort controls and clearer comparison mode,
 - add benchmark transparency tooltip (cohort size, recency, metric definition),
 - add richer click-through placeholders for KPI drill-down destinations,
-- add event instrumentation plan for validating interaction quality.
+- add event instrumentation plan for validating interaction quality,
+- design migration logic for existing users to mitigate adoption risk if they prefer classic overview behavior (guided onboarding, fallback path, parity callouts, opt-out capture).
 
 Validation questions for that +2h extension:
 
@@ -362,6 +363,8 @@ This rollout framing comes from interview context and is not mandatory output of
 
 - phase focused on modernized dashboard/report baseline,
 - phase focused on warehouse/lake and predictive intelligence expansion,
+- rollout starts with A/B test on new users only (classic vs new operations dashboard),
+- `Classic Overview` remains available as baseline view until Must Keep parity is validated,
 - staged access strategy via early-access cohort before broad rollout.
 
 ### 8.4 Current production baseline

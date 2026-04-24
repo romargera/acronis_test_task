@@ -65,6 +65,14 @@
     return values;
   }
 
+  function escapeAttr(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
   function createLineChart(values, options) {
     const cfg = options || {};
     const width = cfg.width || 360;
@@ -76,6 +84,8 @@
     const pointClass = cfg.pointClass || "line-point";
     const lineColor = cfg.lineColor || "#2f86eb";
     const areaTint = cfg.areaTint || "rgba(47, 134, 235, 0.12)";
+    const xAxisName = cfg.xAxisName || "Time";
+    const yAxisName = cfg.yAxisName || yLabel || "Value";
     const xLabels = cfg.xLabels || values.map(function (_, idx) {
       return String(idx + 1);
     });
@@ -126,7 +136,11 @@
         const x = coord.x.toFixed(1);
         const y = coord.y.toFixed(1);
         const label = xLabels[idx] || `P${idx + 1}`;
-        return `<circle class="${pointClass}" cx="${x}" cy="${y}" r="3"><title>${label}: ${coord.value}${unit ? " " + unit : ""}</title></circle>`;
+        return `<circle class="${pointClass}" cx="${x}" cy="${y}" r="3" data-x-axis="${escapeAttr(xAxisName)}" data-y-axis="${escapeAttr(
+          yAxisName
+        )}" data-x-label="${escapeAttr(label)}" data-y-value="${escapeAttr(coord.value)}" data-unit="${escapeAttr(
+          unit
+        )}"><title>${label}: ${coord.value}${unit ? " " + unit : ""}</title></circle>`;
       })
       .join("");
 
@@ -147,7 +161,11 @@
           const x = pointXByIndex(globalIndex).toFixed(1);
           const y = pointY(value).toFixed(1);
           const label = forecastLabels[idx] || `F${idx + 1}`;
-          return `<circle class="line-point line-point-forecast" cx="${x}" cy="${y}" r="3"><title>${label}: ${value}${unit ? " " + unit : ""}</title></circle>`;
+          return `<circle class="line-point line-point-forecast" cx="${x}" cy="${y}" r="3" data-x-axis="${escapeAttr(
+            xAxisName
+          )}" data-y-axis="${escapeAttr(yAxisName)}" data-x-label="${escapeAttr(label)}" data-y-value="${escapeAttr(
+            value
+          )}" data-unit="${escapeAttr(unit)}"><title>${label}: ${value}${unit ? " " + unit : ""}</title></circle>`;
         })
         .join("");
     }
@@ -178,6 +196,49 @@
         ${circles}
         ${forecastPoints}
       </svg>`;
+  }
+
+  function bindChartHover(scope) {
+    const root = scope || document;
+    const points = root.querySelectorAll("circle.line-point, circle.line-point-alt, circle.line-point-danger, circle.line-point-forecast");
+    if (!points.length) return;
+
+    let tooltip = document.getElementById("chartHoverTooltip");
+    if (!tooltip) {
+      tooltip = document.createElement("div");
+      tooltip.id = "chartHoverTooltip";
+      tooltip.className = "chart-hover-tooltip";
+      document.body.appendChild(tooltip);
+    }
+
+    function moveTooltip(event) {
+      tooltip.style.left = `${event.clientX + 12}px`;
+      tooltip.style.top = `${event.clientY + 12}px`;
+    }
+
+    points.forEach(function (point) {
+      if (point.dataset.hoverBound === "1") return;
+      point.dataset.hoverBound = "1";
+
+      point.addEventListener("mouseenter", function (event) {
+        const xAxis = this.getAttribute("data-x-axis") || "X";
+        const yAxis = this.getAttribute("data-y-axis") || "Y";
+        const xLabel = this.getAttribute("data-x-label") || "";
+        const yValue = this.getAttribute("data-y-value") || "";
+        const unit = this.getAttribute("data-unit") || "";
+        tooltip.innerHTML = `<div><strong>${xAxis}:</strong> ${xLabel}</div><div><strong>${yAxis}:</strong> ${yValue}${unit}</div>`;
+        tooltip.classList.add("show");
+        moveTooltip(event);
+      });
+
+      point.addEventListener("mousemove", function (event) {
+        moveTooltip(event);
+      });
+
+      point.addEventListener("mouseleave", function () {
+        tooltip.classList.remove("show");
+      });
+    });
   }
 
   function createBar(value, max) {
@@ -243,6 +304,7 @@
     byRiskDesc: byRiskDesc,
     createSparkline: createSparkline,
     createLineChart: createLineChart,
+    bindChartHover: bindChartHover,
     parseMultiSelect: parseMultiSelect,
     createBar: createBar,
     getTenantById: getTenantById,

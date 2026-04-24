@@ -421,12 +421,15 @@
             height: 220,
             unit: "k",
             yLabel: "MRR ($k)",
+            xAxisName: "Period",
+            yAxisName: "MRR",
             xLabels: xLabels,
             forecastValues: forecast,
             forecastLabels: ["F+1", "F+2", "F+3"],
             lineColor: "#2f86eb",
             areaTint: "rgba(47, 134, 235, 0.12)"
           });
+          utils.bindChartHover(el.revenueTrend);
         }
 
         function bubbleColor(level) {
