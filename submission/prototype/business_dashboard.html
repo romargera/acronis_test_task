@@ -69,11 +69,11 @@
       <section class="grid grid-2">
         <article class="card">
           <div class="section-actions">
-            <h2 class="card-title">MRR Trend & Forecast <span class="info-tip" title="Forecast is derived from recent trend slope and shown as a dashed continuation line.">i</span></h2>
+            <h2 class="card-title">MRR Trend & Forecast <span class="info-tip" data-info="MRR time series with projected continuation. Forecast is based on recent slope and shown with a dashed line extension.">i</span></h2>
             <span class="card-subtitle" id="periodLabel"></span>
           </div>
           <div id="revenueTrend" class="chart-wrap"></div>
-          <div class="tiny">Unit: $k MRR. Diff baseline shown vs previous period of same duration.</div>
+          <div class="tiny">Unit: $k MRR. Diff baseline shown for the selected period.</div>
         </article>
 
         <article class="card">
@@ -342,9 +342,9 @@
               label: "Portfolio MRR",
               formula: "Sum of monthly recurring revenue across clients in current filter.",
               value: utils.formatCurrency(totalMRR),
-              trend: "+6.4% vs previous quarter",
+              trend: "+6.4%",
               trendClass: "kpi-trend-positive",
-              trendTitle: "Compared to previous quarter."
+              trendTitle: "Window delta for selected period."
             },
             {
               id: "risk-mrr",
@@ -379,7 +379,7 @@
             .map(function (item) {
               return `
                 <button class="kpi-card-button" type="button" data-kpi="${item.id}">
-                  <div class="kpi-label">${item.label}<span class="info-tip" title="${item.formula}">i</span></div>
+                  <div class="kpi-label">${item.label}<span class="info-tip" data-info="${item.formula}">i</span></div>
                   <div class="kpi-value">${item.value}</div>
                   <div class="kpi-diff ${item.trendClass}" title="${item.trendTitle}">${item.trend}</div>
                 </button>`;
@@ -417,7 +417,7 @@
             return Number((series[series.length - 1] + slope * 0.7 * step).toFixed(1));
           });
 
-          el.periodLabel.textContent = `${periodLabel} (diff vs previous ${periodLabel})`;
+          el.periodLabel.textContent = `${periodLabel} window`;
           el.revenueTrend.innerHTML = utils.createLineChart(series, {
             width: 1080,
             height: 220,
@@ -804,6 +804,7 @@
           renderBenchmark();
           renderActions(tenants);
           renderDetail();
+          utils.initInfoTips(document.body);
         }
 
         updateSpoilerLabel("segmentFilter", "segmentFilterSummary", "All segments", "segments selected");

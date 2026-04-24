@@ -73,6 +73,15 @@
       .replace(/>/g, "&gt;");
   }
 
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   function createLineChart(values, options) {
     const cfg = options || {};
     const width = cfg.width || 360;
@@ -241,6 +250,109 @@
     });
   }
 
+  function initInfoTips(scope) {
+    const root = scope || document;
+    const tips = root.querySelectorAll(".info-tip[data-info], .info-tip[title]");
+    if (!tips.length) return;
+
+    let popover = document.getElementById("infoTipPopover");
+    if (!popover) {
+      popover = document.createElement("div");
+      popover.id = "infoTipPopover";
+      popover.className = "info-tip-popover";
+      document.body.appendChild(popover);
+    }
+
+    let activeTip = null;
+
+    function closePopover() {
+      popover.classList.remove("show");
+      if (activeTip) activeTip.setAttribute("aria-expanded", "false");
+      activeTip = null;
+    }
+
+    function placePopover(tip) {
+      const rect = tip.getBoundingClientRect();
+      const maxWidth = 320;
+      let left = rect.left;
+      if (left + maxWidth > window.innerWidth - 12) {
+        left = window.innerWidth - maxWidth - 12;
+      }
+      if (left < 12) left = 12;
+
+      let top = rect.bottom + 10;
+      const popoverHeight = popover.offsetHeight || 90;
+      if (top + popoverHeight > window.innerHeight - 8) {
+        top = rect.top - popoverHeight - 10;
+      }
+      if (top < 8) top = 8;
+
+      popover.style.left = `${left}px`;
+      popover.style.top = `${top}px`;
+    }
+
+    tips.forEach(function (tip) {
+      if (tip.dataset.infoBound === "1") return;
+      tip.dataset.infoBound = "1";
+
+      if (!tip.getAttribute("role")) tip.setAttribute("role", "button");
+      if (!tip.hasAttribute("tabindex")) tip.setAttribute("tabindex", "0");
+      if (!tip.hasAttribute("aria-expanded")) tip.setAttribute("aria-expanded", "false");
+
+      if (!tip.getAttribute("data-info") && tip.getAttribute("title")) {
+        tip.setAttribute("data-info", tip.getAttribute("title"));
+      }
+      tip.removeAttribute("title");
+
+      function togglePopover(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const info = tip.getAttribute("data-info") || "";
+        if (!info) return;
+
+        if (activeTip === tip && popover.classList.contains("show")) {
+          closePopover();
+          return;
+        }
+
+        if (activeTip) activeTip.setAttribute("aria-expanded", "false");
+        activeTip = tip;
+        tip.setAttribute("aria-expanded", "true");
+        popover.innerHTML = `<div>${escapeHtml(info)}</div>`;
+        popover.classList.add("show");
+        placePopover(tip);
+      }
+
+      tip.addEventListener("click", togglePopover);
+      tip.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          togglePopover(event);
+        } else if (event.key === "Escape") {
+          closePopover();
+        }
+      });
+    });
+
+    if (document.body.dataset.infoTipsDocBound !== "1") {
+      document.body.dataset.infoTipsDocBound = "1";
+      document.addEventListener("click", function (event) {
+        if (!event.target.closest(".info-tip") && !event.target.closest(".info-tip-popover")) {
+          closePopover();
+        }
+      });
+      window.addEventListener("resize", function () {
+        if (activeTip && popover.classList.contains("show")) {
+          placePopover(activeTip);
+        }
+      });
+      window.addEventListener("scroll", function () {
+        if (activeTip && popover.classList.contains("show")) {
+          placePopover(activeTip);
+        }
+      }, true);
+    }
+  }
+
   function createBar(value, max) {
     const width = Math.max(3, Math.round((value / max) * 100));
     return `<div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>`;
@@ -305,6 +417,7 @@
     createSparkline: createSparkline,
     createLineChart: createLineChart,
     bindChartHover: bindChartHover,
+    initInfoTips: initInfoTips,
     parseMultiSelect: parseMultiSelect,
     createBar: createBar,
     getTenantById: getTenantById,

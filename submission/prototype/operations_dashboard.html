@@ -87,19 +87,19 @@
         </section>
         <section class="classic-widget-grid">
           <article class="card">
-            <h2 class="card-title">Monthly Storage Usage</h2>
+            <h2 class="card-title">Monthly Storage Usage <span class="info-tip" data-info="Shows historical protected storage volume over time. Values are aggregated from in-scope tenants and normalized to the selected window.">i</span></h2>
             <div class="card-subtitle" id="classicStorageCurrent"></div>
             <div class="chart-wrap"><div id="classicStorageChart"></div></div>
           </article>
           <article class="card">
-            <h2 class="card-title">Status</h2>
+            <h2 class="card-title">Status <span class="info-tip" data-info="Distribution of tenant risk state. Buckets are Critical, Error, Warning, and OK based on current risk-level classification.">i</span></h2>
             <div class="classic-donut-row">
               <div id="classicStatusDonut" class="classic-donut"></div>
               <div id="classicStatusLegend" class="classic-legend"></div>
             </div>
           </article>
           <article class="card">
-            <h2 class="card-title">Protection Status</h2>
+            <h2 class="card-title">Protection Status <span class="info-tip" data-info="Composition of machine protection states: Protected, Unprotected, Managed, and Discovered. Derived from backup, patch, and incident signals.">i</span></h2>
             <div class="classic-donut-row">
               <div id="classicProtectionDonut" class="classic-donut"></div>
               <div id="classicProtectionLegend" class="classic-legend"></div>
@@ -109,7 +109,7 @@
 
         <section class="split">
           <article class="card">
-            <h2 class="card-title">Posture Trends (last 7 days) <span class="info-tip" title="Diff and trend are shown versus previous 7-day baseline window.">i</span></h2>
+            <h2 class="card-title">Posture Trends (last 7 days) <span class="info-tip" data-info="Operational trend lines for backup success, patch compliance, and threat activity. Point values are interactive and reflect the selected time window.">i</span></h2>
             <div class="legend">
               <span class="legend-item"><span class="dot dot-primary"></span> Backup success</span>
               <span class="legend-item"><span class="dot dot-warning"></span> Patch compliance</span>
@@ -132,7 +132,7 @@
         <section class="grid grid-2">
           <article class="card">
             <div class="section-actions section-actions-top">
-              <h2 class="card-title">Cross-Tenant Risk Heatmap <span class="info-tip" title="Each tile combines risk level, open critical alerts, and posture score for quick cross-tenant triage.">i</span></h2>
+              <h2 class="card-title">Cross-Tenant Risk Heatmap <span class="info-tip" data-info="Each tile summarizes tenant risk with scope metadata and current severity badge. Tiles are sortable and clickable for drill-down.">i</span></h2>
               <span class="card-subtitle" id="tenantCountLabel"></span>
               <div class="control-inline">
                 <label for="heatmapSort">Sort</label>
@@ -357,27 +357,27 @@
               label: "Managed Tenants",
               formula: "Count of tenants in current filter scope.",
               value: tenants.length,
-              trend: "-2 vs previous " + filters.windowDays + "d",
+              trend: "-2",
               trendClass: "kpi-trend-positive",
-              trendTitle: "Compared to previous " + filters.windowDays + "-day window."
+              trendTitle: "Window delta for selected " + filters.windowDays + "d period."
             },
             {
               id: "endpoints",
               label: "Endpoints In Scope",
               formula: "Sum of endpoint inventory across in-scope tenants.",
               value: totalEndpoints,
-              trend: "+4.2% vs previous " + filters.windowDays + "d",
+              trend: "+4.2%",
               trendClass: "kpi-trend-positive",
-              trendTitle: "Compared to previous " + filters.windowDays + "-day window."
+              trendTitle: "Window delta for selected " + filters.windowDays + "d period."
             },
             {
               id: "posture",
               label: "Avg Posture Score",
               formula: "Average of tenant posture score (0-100).",
               value: Math.round(avgPosture) + "/100",
-              trend: "-3 pts vs previous " + filters.windowDays + "d",
+              trend: "-3 pts",
               trendClass: "kpi-trend-negative",
-              trendTitle: "Compared to previous " + filters.windowDays + "-day window."
+              trendTitle: "Window delta for selected " + filters.windowDays + "d period."
             },
             {
               id: "critical-exposure",
@@ -394,7 +394,7 @@
             .map(function (item) {
               return `
                 <button class="kpi-card-button" type="button" data-kpi="${item.id}">
-                  <div class="kpi-label">${item.label}<span class="info-tip" title="${item.formula}">i</span></div>
+                  <div class="kpi-label">${item.label}<span class="info-tip" data-info="${item.formula}">i</span></div>
                   <div class="kpi-value">${item.value}</div>
                   <div class="kpi-diff ${item.trendClass}" title="${item.trendTitle}">${item.trend}</div>
                 </button>`;
@@ -452,9 +452,11 @@
             .map(function (tenant) {
               return `
                 <button class="${utils.tenantClass(tenant.riskLevel)}" data-id="${tenant.id}" role="listitem" type="button">
-                  <strong>${tenant.name}</strong>
+                  <div class="tenant-tile-head">
+                    <strong>${tenant.name}</strong>
+                    <span class="${utils.riskClass(tenant.riskLevel)}">${tenant.riskLevel.toUpperCase()}</span>
+                  </div>
                   <span class="tiny">${tenant.country} • ${tenant.region} • ${tenant.endpoints} endpoints</span>
-                  <span class="${utils.riskClass(tenant.riskLevel)}">${tenant.riskLevel.toUpperCase()}</span>
                 </button>`;
             })
             .join("");
@@ -609,29 +611,23 @@
         }
 
         function renderClassicOverview(tenants) {
-          if (!tenants.length) {
-            elements.classicTopRow.innerHTML = '<div class="empty-state">No classic metrics in current filters.</div>';
-            elements.classicStorageCurrent.textContent = "";
-            elements.classicStorageChart.innerHTML = '<div class="empty-state">No storage trend in current filters.</div>';
-            createClassicDonut(elements.classicStatusDonut, elements.classicStatusLegend, [], 0, "resources");
-            createClassicDonut(elements.classicProtectionDonut, elements.classicProtectionLegend, [], 0, "machines");
-            return;
-          }
+          const sourceTenants = tenants.length ? tenants : data.tenants;
+          const usesFallbackScope = !tenants.length;
 
           const totalDays = Number(filters.windowDays);
-          const backedUpTodayGb = tenants.reduce(function (acc, tenant) {
+          const backedUpTodayGb = sourceTenants.reduce(function (acc, tenant) {
             return acc + tenant.endpoints * (tenant.backupSuccess / 100) * 0.05;
           }, 0);
-          const malwareBlocked = tenants.reduce(function (acc, tenant) {
+          const malwareBlocked = sourceTenants.reduce(function (acc, tenant) {
             return acc + tenant.openCriticalAlerts + tenant.unresolvedIncidents;
           }, 0);
-          const urlsBlocked = tenants.reduce(function (acc, tenant) {
+          const urlsBlocked = sourceTenants.reduce(function (acc, tenant) {
             return acc + tenant.openCriticalAlerts * 2 + Math.round(tenant.reopenRate / 12);
           }, 0);
-          const vulnerabilities = tenants.reduce(function (acc, tenant) {
+          const vulnerabilities = sourceTenants.reduce(function (acc, tenant) {
             return acc + Math.max(0, Math.round((100 - tenant.patchCompliance) / 4));
           }, 0);
-          const patchesReady = tenants.reduce(function (acc, tenant) {
+          const patchesReady = sourceTenants.reduce(function (acc, tenant) {
             return acc + Math.max(0, Math.round((100 - tenant.patchCompliance) / 3));
           }, 0);
 
@@ -639,30 +635,35 @@
             {
               id: "backed-up",
               label: "Backed up today",
+              formula: "Daily protected data volume in GB across filtered tenants.",
               value: `${backedUpTodayGb.toFixed(1)} GB`,
               sub: `${(backedUpTodayGb * 43).toFixed(1)} TB overall compressed size`
             },
             {
               id: "malware",
               label: "Malware blocked",
+              formula: "Count of blocked malware events from alerts and unresolved incidents.",
               value: formatInteger(malwareBlocked),
               sub: `${formatInteger(malwareBlocked * 31)} overall blocked`
             },
             {
               id: "urls",
               label: "URLs blocked",
+              formula: "Blocked malicious URL events estimated from alert telemetry and reopen patterns.",
               value: formatInteger(urlsBlocked),
               sub: `${formatInteger(urlsBlocked * 19)} overall blocked`
             },
             {
               id: "vuln",
               label: "Existing vulnerabilities",
+              formula: "Open vulnerability estimate based on current patch compliance deficit.",
               value: formatInteger(vulnerabilities),
               sub: `${formatInteger(vulnerabilities * 7)} overall found`
             },
             {
               id: "patches",
               label: "Patches ready to install",
+              formula: "Patch backlog currently ready for deployment across in-scope assets.",
               value: formatInteger(patchesReady),
               sub: `${formatInteger(patchesReady * 211)} overall installed`
             }
@@ -672,7 +673,7 @@
             .map(function (metric) {
               return `
                 <button class="classic-kpi-card" type="button" data-classic-kpi="${metric.id}">
-                  <div class="classic-kpi-label">${metric.label}</div>
+                  <div class="classic-kpi-label">${metric.label}<span class="info-tip" data-info="${metric.formula}">i</span></div>
                   <div class="classic-kpi-value">${metric.value}</div>
                   <div class="tiny">${metric.sub}</div>
                 </button>
@@ -693,7 +694,9 @@
           const storageLabels = buildWindowLabels(totalDays, storageSeries.length);
           const currentStorage = storageSeries[storageSeries.length - 1];
 
-          elements.classicStorageCurrent.textContent = `Current size: ${currentStorage.toFixed(1)} GB`;
+          elements.classicStorageCurrent.textContent = usesFallbackScope
+            ? `Current size: ${currentStorage.toFixed(1)} GB (fallback all tenants)`
+            : `Current size: ${currentStorage.toFixed(1)} GB`;
           elements.classicStorageChart.innerHTML = utils.createLineChart(storageSeries, {
             width: 1080,
             height: 220,
@@ -710,28 +713,28 @@
           utils.bindChartHover(elements.classicStorageChart);
 
           const statusSegments = [
-            { label: "Critical", value: tenants.filter(function (tenant) { return tenant.riskLevel === "critical"; }).length, color: "#f15354" },
-            { label: "Error", value: tenants.filter(function (tenant) { return tenant.riskLevel === "high"; }).length, color: "#f29f05" },
-            { label: "Warning", value: tenants.filter(function (tenant) { return tenant.riskLevel === "medium"; }).length, color: "#ffbf47" },
-            { label: "OK", value: tenants.filter(function (tenant) { return tenant.riskLevel === "low"; }).length, color: "#7bc043" }
+            { label: "Critical", value: sourceTenants.filter(function (tenant) { return tenant.riskLevel === "critical"; }).length, color: "#f15354" },
+            { label: "Error", value: sourceTenants.filter(function (tenant) { return tenant.riskLevel === "high"; }).length, color: "#f29f05" },
+            { label: "Warning", value: sourceTenants.filter(function (tenant) { return tenant.riskLevel === "medium"; }).length, color: "#ffbf47" },
+            { label: "OK", value: sourceTenants.filter(function (tenant) { return tenant.riskLevel === "low"; }).length, color: "#7bc043" }
           ];
-          createClassicDonut(elements.classicStatusDonut, elements.classicStatusLegend, statusSegments, tenants.length, "Resources");
+          createClassicDonut(elements.classicStatusDonut, elements.classicStatusLegend, statusSegments, sourceTenants.length, "Resources");
 
-          const protectedMachines = tenants.reduce(function (acc, tenant) {
+          const protectedMachines = sourceTenants.reduce(function (acc, tenant) {
             return acc + Math.round(tenant.endpoints * (tenant.backupSuccess / 100));
           }, 0);
-          const unmanagedMachines = tenants.reduce(function (acc, tenant) {
+          const unmanagedMachines = sourceTenants.reduce(function (acc, tenant) {
             return acc + Math.round(tenant.endpoints * ((100 - tenant.patchCompliance) / 100));
           }, 0);
           const discoveredMachines = Math.max(
             0,
-            tenants.reduce(function (acc, tenant) {
+            sourceTenants.reduce(function (acc, tenant) {
               return acc + tenant.unresolvedIncidents;
             }, 0) * 3
           );
           const unprotectedMachines = Math.max(
             0,
-            tenants.reduce(function (acc, tenant) {
+            sourceTenants.reduce(function (acc, tenant) {
               return acc + tenant.openCriticalAlerts;
             }, 0) * 2
           );
@@ -763,9 +766,9 @@
           elements.alertsFeed.innerHTML = alerts.slice(0, 10).map(function (alert) {
             return `
               <button class="alert-item" data-id="${alert.tenantId}" type="button">
-                <div class="section-actions">
-                  <span class="${utils.riskClass(alert.severity)}">${alert.severity.toUpperCase()}</span>
+                <div class="alert-item-head">
                   <strong>${alert.tenantName}</strong>
+                  <span class="${utils.riskClass(alert.severity)}">${alert.severity.toUpperCase()}</span>
                 </div>
                 <div>${alert.text}</div>
               </button>`;
@@ -876,6 +879,7 @@
           renderAlerts(tenants);
           renderClassicOverview(tenants);
           renderDetail();
+          utils.initInfoTips(document.body);
         }
 
         updateSpoilerLabel("serviceFilter", "serviceFilterSummary", "All services", "services selected");
