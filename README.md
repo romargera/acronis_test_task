@@ -5,7 +5,7 @@ This repository is organized for quick reviewer navigation.
 ## Start Here
 - Final PRD: [`prd.md`](./prd.md)
 - Submission package: [`submission/`](./submission/)
-- Interactive prototype (local entry): [`submission/prototype/index.html`](./submission/prototype/index.html)
+- Interactive prototype: https://romargera.github.io/acronis_test_task/
 - GitHub Pages build source: [`docs/`](./docs/)
 
 ## Repository Layout
@@ -23,5 +23,5 @@ This repository is organized for quick reviewer navigation.
 
 ## Reviewer Path (fast)
 1. Read [`prd.md`](./prd.md).
-2. Open [`submission/README.md`](./submission/README.md).
-3. Run the prototype from [`submission/prototype/index.html`](./submission/prototype/index.html).
+2. Run the prototype: https://romargera.github.io/acronis_test_task/
+3. Optional detail: open [`submission/README.md`](./submission/README.md).
