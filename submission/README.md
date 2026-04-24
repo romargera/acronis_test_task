@@ -42,6 +42,8 @@ No build step, no hosting required.
 - Add `Client 360` as a third page (not required by the test task) for cross-dashboard tenant deep dive.
 - Connect Operations/Business drill-down actions to that page with query params (`tenant`, `source`).
 - Expand QBR flow there: timeline + service map + one-click export stub.
+- Rank all widgets by decision importance and validate those priorities as explicit assumptions.
+- Add responsive layout rules for different screen proportions and define accessibility/mobile behavior (focus order, keyboard navigation, contrast, and compact interaction patterns).
 
 ## Design System Usage
 Prototype styling is grounded in Acronis UI Component Library theme assets:
