@@ -3,7 +3,7 @@
 I used AI as a speed multiplier for synthesis and drafting, but kept product judgment and prioritization manual.
 
 ## Where AI accelerated work
-- Consolidated large input docs (`execution_plan.md`, `pitch_and_assessment.md`, `prd_v2.md`) into a narrower MVP scope aligned with the 3-4 hour test constraint.
+- Consolidated large input docs (`notes/execution_plan.md`, `notes/pitch_and_assessment.md`, `prd.md`) into a narrower MVP scope aligned with the 3-4 hour test constraint.
 - Drafted first-pass structures for PRD sections and data model tables.
 - Generated boilerplate interaction logic for prototype pages (filters, drill-down, modal behavior), then manually simplified and corrected.
 

@@ -545,5 +545,4 @@ Speaker 2
 Bye.
 
 Microphone
-What's the Это Acronics, это большая security toст B2B компания. Большая вс<unk>. Что? Сейчас покорам я мальчика. Вот этого мальчика полодинка надо покормить. Пиццы? Заказать пиццу?
-
+[Non-English side conversation redacted as irrelevant to the product discussion.]
