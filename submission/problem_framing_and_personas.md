@@ -13,7 +13,7 @@
 - Top decisions enabled:
   1. Which clients are likely to churn and where to intervene first.
   2. Where the next upsell revenue can come from based on coverage gaps.
-  3. Where margin leaks exist compared to peer benchmarks.
+  3. Where margin leaks exist across the current portfolio.
 - Why it matters: MSP owners often see technical status but not commercial risk early enough; this dashboard links service signals to business outcomes.
 
 ## Optional Extension (+2 hours): Client 360

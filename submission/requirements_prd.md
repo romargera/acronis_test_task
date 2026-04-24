@@ -29,7 +29,7 @@
 ### Goals
 - Surface churn risk before renewal windows.
 - Prioritize realistic upsell opportunities by tenant.
-- Expose margin leakage and benchmark relative performance.
+- Expose margin leakage and portfolio performance trends.
 
 ### Non-Goals
 - Accounting-grade financial reporting.
@@ -39,7 +39,6 @@
 ### Primary User Stories
 - As an MSP owner, I can identify high-risk clients by revenue impact.
 - As a practice lead, I can inspect service coverage gaps and estimate MRR uplift.
-- As an owner, I can review benchmark snapshots to set realistic performance targets.
 - As a manager, I can generate a QBR draft from one click.
 
 ### Success Metrics

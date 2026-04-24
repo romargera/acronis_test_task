@@ -100,7 +100,6 @@
           <div class="section-actions">
             <h2 class="card-title">MRR Trend & Forecast <span class="info-tip" data-info="MRR time series with projected continuation. Forecast is based on recent slope and shown with a dashed line extension.">i</span></h2>
             <span class="card-subtitle" id="periodLabel"></span>
-            <button id="setGoalBtn" class="btn btn-secondary" type="button">Set goal</button>
           </div>
           <div id="revenueTrend" class="chart-wrap"></div>
           <div class="tiny">Unit: $k MRR. Diff baseline shown for the selected period.</div>
@@ -172,21 +171,6 @@
         </article>
       </section>
 
-      <section class="grid grid-2">
-        <article class="card">
-          <h2 class="card-title">Peer Benchmark Snapshot</h2>
-          <div id="benchmarkList" class="metric-bars"></div>
-        </article>
-
-        <article class="card">
-          <div class="section-actions">
-            <h2 class="card-title">AI Recommended Actions</h2>
-            <span class="badge badge-high" id="premiumGateLabel">3 hidden premium insights</span>
-          </div>
-          <div id="actionList" class="actions-list"></div>
-        </article>
-      </section>
-
       <section id="detailPanel" class="detail-panel"></section>
       <section class="page-actions-bottom" aria-label="Bottom actions">
         <button id="addWidgetBottomBtn" class="btn btn-secondary" type="button">Add widget</button>
@@ -253,10 +237,7 @@
           radarSummary: document.getElementById("radarSummary"),
           upsellTable: document.getElementById("upsellTable"),
           marginList: document.getElementById("marginList"),
-          benchmarkList: document.getElementById("benchmarkList"),
-          actionList: document.getElementById("actionList"),
           detailPanel: document.getElementById("detailPanel"),
-          premiumGateLabel: document.getElementById("premiumGateLabel"),
           qbrModal: document.getElementById("qbrModal"),
           qbrContent: document.getElementById("qbrContent"),
           riskRankList: document.getElementById("riskRankList")
@@ -397,9 +378,6 @@
         });
         document.getElementById("shareBtn").addEventListener("click", function () {
           utils.toast("Share placeholder: sharing dialog opens here");
-        });
-        document.getElementById("setGoalBtn").addEventListener("click", function () {
-          utils.toast("Set goal placeholder: define target MRR and owner");
         });
         document.getElementById("resetFiltersBtn").addEventListener("click", function () {
           filters.windowDays = sharedFilterDefaults.windowDays;
@@ -826,107 +804,6 @@
             .join("");
         }
 
-        function renderBenchmark() {
-          const benchmark = data.benchmark;
-          const rows = [
-            {
-              title: "EBITDA %",
-              you: benchmark.ebitda.you,
-              median: benchmark.ebitda.median,
-              top: benchmark.ebitda.topQuartile,
-              postfix: "%"
-            },
-            {
-              title: "Service Gross Margin",
-              you: benchmark.margin.you,
-              median: benchmark.margin.median,
-              top: benchmark.margin.topQuartile,
-              postfix: "%"
-            },
-            {
-              title: "Revenue / Endpoint",
-              you: benchmark.arpu.you,
-              median: benchmark.arpu.median,
-              top: benchmark.arpu.topQuartile,
-              postfix: "$"
-            },
-            {
-              title: "Tickets / Tech / Month",
-              you: benchmark.ticketsPerTech.you,
-              median: benchmark.ticketsPerTech.median,
-              top: benchmark.ticketsPerTech.topQuartile,
-              postfix: ""
-            }
-          ];
-
-          el.benchmarkList.innerHTML = rows
-            .map(function (row) {
-              const max = Math.max(row.you, row.median, row.top);
-              return `
-                <div class="metric-row">
-                  <div class="tiny">${row.title}</div>
-                  <div class="legend">
-                    <span class="legend-item"><span class="dot dot-primary"></span>You: ${row.you}${row.postfix}</span>
-                    <span class="legend-item"><span class="dot dot-muted"></span>Median: ${row.median}${row.postfix}</span>
-                    <span class="legend-item"><span class="dot dot-warning"></span>Top quartile: ${row.top}${row.postfix}</span>
-                  </div>
-                  <div class="bar-track"><div class="bar-fill" style="width:${Math.round((row.you / max) * 100)}%"></div></div>
-                </div>`;
-            })
-            .join("");
-        }
-
-        function renderActions(tenants) {
-          const actions = tenants
-            .map(function (tenant) {
-              const topOpportunity = (tenant.opportunities || [])[0];
-              if (!topOpportunity) return null;
-              return {
-                tenantId: tenant.id,
-                tenant: tenant.name,
-                text: `${tenant.name}: package ${topOpportunity.name} with retention call`,
-                impact: topOpportunity.impact + Math.round(tenant.mrr * 0.05)
-              };
-            })
-            .filter(Boolean)
-            .sort(function (a, b) {
-              return b.impact - a.impact;
-            });
-
-          const visible = actions.slice(0, 4);
-          const hiddenCount = Math.max(actions.length - visible.length, 3);
-          el.premiumGateLabel.textContent = `${hiddenCount} hidden premium insights`;
-
-          el.actionList.innerHTML = visible
-            .map(function (action) {
-              return `
-                <div class="action-item">
-                  <div><strong>${action.tenant}</strong></div>
-                  <div>${action.text}</div>
-                  <div class="tiny">Estimated monthly impact: ${utils.formatCurrency(action.impact)}</div>
-                  <div class="section-actions">
-                    <button class="btn btn-primary" type="button" data-open="${action.tenantId}">Take Action</button>
-                    <button class="btn btn-secondary" type="button" data-open-qbr="${action.tenantId}">Generate QBR</button>
-                  </div>
-                </div>`;
-            })
-            .join("");
-
-          el.actionList.querySelectorAll("[data-open]").forEach(function (button) {
-            button.addEventListener("click", function () {
-              state.selectedId = this.getAttribute("data-open");
-              renderDetail();
-              utils.toast("Action queued in pipeline");
-            });
-          });
-
-          el.actionList.querySelectorAll("[data-open-qbr]").forEach(function (button) {
-            button.addEventListener("click", function () {
-              openQbr(this.getAttribute("data-open-qbr"));
-            });
-          });
-        }
-
         function renderDetail() {
           const tenant = state.selectedId ? utils.getTenantById(state.selectedId) : null;
           if (!tenant) {
@@ -989,8 +866,6 @@
           renderRiskMap(tenants);
           renderUpsellTable(tenants);
           renderMargin(tenants);
-          renderBenchmark();
-          renderActions(tenants);
           renderDetail();
           utils.initInfoTips(document.body);
           updateResetButtonVisibility();

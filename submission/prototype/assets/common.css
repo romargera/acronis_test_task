@@ -957,10 +957,6 @@ a[href]:hover {
   margin-top: var(--acv-spacing-small);
 }
 
-#setGoalBtn {
-  margin-left: auto;
-}
-
 .client-hero {
   border: 1px solid var(--acv-color-divider-primary);
   border-radius: var(--acv-radius-large);

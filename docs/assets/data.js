@@ -297,12 +297,6 @@
     asOf: "2026-04-19",
     tenants: tenants,
     opsTrends: opsTrends,
-    revenueSeries: revenueSeries,
-    benchmark: {
-      ebitda: { you: 14.2, median: 11.1, topQuartile: 19.3 },
-      margin: { you: 31.6, median: 46.2, topQuartile: 61.4 },
-      arpu: { you: 182, median: 149, topQuartile: 286 },
-      ticketsPerTech: { you: 178, median: 121, topQuartile: 88 }
-    }
+    revenueSeries: revenueSeries
   };
 })();

@@ -19,12 +19,12 @@
 2. Commercial decision test (Business):
    - Ask owners to pick top 3 actions with and without dashboard support.
    - Measure action clarity and perceived revenue confidence.
-3. Trust calibration test (Risk + Benchmarks):
-   - Show risk explanations and benchmark snapshots to owners.
+3. Trust calibration test (Risk + Portfolio Trends):
+   - Show risk explanations and portfolio trend snapshots to owners.
    - Validate which signals they trust, which need transparency, and what confidence framing is required.
 
 ## If I had two more hours
 - Add an optional `Client 360` page for tenant-level deep dive connected from both dashboards.
 - Add explicit score explainability panel (feature contribution per risk score).
-- Add one benchmark segmentation control (cohort by size/region).
+- Add one goal-setting flow in MRR trend (target, owner, review cadence).
 - Add export stub for QBR draft into a simple markdown/PDF flow.

@@ -119,7 +119,7 @@ Why it matters:
 
 - business risk is often detected too late,
 - manual preparation for client communication is expensive,
-- no benchmark context leads to weak prioritization.
+- no clear comparative context leads to weak prioritization.
 
 ---
 
@@ -171,7 +171,7 @@ Goals for observability:
 Goals for product navigation and discoverability:
 
 - every key business KPI must be explorable via click-through,
-- benchmark and upsell insights must be discoverable without deep navigation,
+- churn and upsell insights must be discoverable without deep navigation,
 - user must understand where a recommendation came from.
 
 Non-goals:
@@ -254,8 +254,7 @@ Required data groups:
 - usage and revenue proxy (MRR-like) inputs,
 - service coverage status by client,
 - ticket/SLA/escalation behavior,
-- engagement signals and account behavior,
-- benchmark cohort aggregates.
+- engagement signals and account behavior.
 
 Likely data locations:
 
@@ -267,7 +266,6 @@ Likely data locations:
 Load-bearing assumptions:
 
 - stable, high-quality PSA connector data will be available for reopen/SLA/escalation metrics `(A)`.
-- anonymized benchmark sharing is legally and commercially feasible at enough cohort size `(A)`.
 - MRR proxy built from usage/billing mapping is accurate enough for decision support in v1 `(A)`.
 - churn model will need an initial warm-up period before trustworthy precision `(A)`.
 
@@ -315,16 +313,15 @@ Out-of-scope now:
 ## 7. What I would add with +2 more hours
 
 - add optional `Client 360` page linked from both dashboards as a tenant deep-dive hub (timeline, service coverage map, unified action and QBR context),
-- add benchmark display refinement with cohort controls and clearer comparison mode,
-- add benchmark transparency tooltip (cohort size, recency, metric definition),
+- replace the `Set goal` placeholder with a complete goal-setting flow (target, owner, cadence, progress tracking),
 - add richer click-through placeholders for KPI drill-down destinations,
 - add event instrumentation plan for validating interaction quality,
 - design migration logic for existing users to mitigate adoption risk if they prefer classic overview behavior (guided onboarding, fallback path, parity callouts, opt-out capture).
 
 Validation questions for that +2h extension:
 
-- which benchmark presentation is easier for owners: absolute values, percentiles, or quartile bands `(A)`,
-- what minimum cohort transparency is needed for trust in benchmarks `(A)`.
+- which goal format is easier for owners: monthly target, target band, or milestone plan `(A)`,
+- what minimum explanation is needed so owners trust goal progress status `(A)`.
 
 ---
 
@@ -334,7 +331,7 @@ Validation questions for that +2h extension:
 
 This is a representative comparison set, not an exhaustive market map.
 
-Representative platforms to benchmark against:
+Representative platforms reviewed:
 
 - ConnectWise BrightGauge,
 - Kaseya IT Complete,
@@ -345,7 +342,7 @@ Representative platforms to benchmark against:
 What to compare at minimum:
 
 - AI-assisted insight depth,
-- benchmark availability and transparency,
+- comparative performance visibility and transparency,
 - actionability from signal to next step,
 - setup friction and data dependency profile.
 
@@ -427,9 +424,7 @@ Prototype adaptation note:
 - A1 `(A)`: PSA-style SLA/ticket context can be integrated in a reliable way for operations triage enrichment.
 - A2 `(A)`: Tenant identity mapping is stable across all required data sources.
 - A3 `(A)`: PSA connector quality is sufficient for reopen/SLA/escalation based churn features.
-- A4 `(A)`: Anonymized benchmark sharing is feasible legally and commercially at usable cohort size.
-- A5 `(A)`: Usage-to-MRR proxy is accurate enough for decision support in v1.
-- A6 `(A)`: Churn modeling requires warm-up period before trustworthy precision.
-- A7 `(A)`: Best benchmark presentation mode for owners still needs validation.
-- A8 `(A)`: Minimum benchmark transparency threshold for trust still needs validation.
-- A9 `(A)`: Immediate full cross-tool intelligence platform is too risky for first delivery stage.
+- A4 `(A)`: Usage-to-MRR proxy is accurate enough for decision support in v1.
+- A5 `(A)`: Churn modeling requires warm-up period before trustworthy precision.
+- A6 `(A)`: The best goal-setting format for owners still needs validation.
+- A7 `(A)`: Immediate full cross-tool intelligence platform is too risky for first delivery stage.

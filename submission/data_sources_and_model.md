@@ -18,7 +18,7 @@
 | Service coverage per tenant | Product enablement + usage state | Daily | Upsell gap detection |
 | Ticket/SLA/escalation patterns | PSA connector events | Daily/near RT | Core churn features |
 | Client engagement signals | Product usage + QBR activity | Daily | Churn leading indicators |
-| Peer benchmark aggregate | Anonymized partner aggregate pipeline | Weekly/monthly | Requires privacy thresholds |
+| Portfolio trend aggregate | Internal analytics aggregate pipeline | Weekly/monthly | Used for directional planning context |
 
 ## Minimal Model Sketch
 
@@ -37,4 +37,4 @@
 ### Gaps to close in production
 - Reliable PSA integration quality and mapping.
 - Consistent cost model calibration across MSPs.
-- Governance rules for anonymized benchmark cohorts.
+- Governance rules for metric transparency and confidence labeling.
