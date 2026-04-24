@@ -184,6 +184,14 @@ a[href]:hover {
   align-items: start;
 }
 
+.grid-balanced {
+  align-items: stretch;
+}
+
+.grid-balanced > .card {
+  height: 100%;
+}
+
 .card {
   border: 1px solid var(--acv-color-divider-primary);
   border-radius: var(--acv-radius-large);
@@ -379,6 +387,26 @@ a[href]:hover {
   gap: 4px;
 }
 
+.alert-item.tenant-critical {
+  background: var(--acv-color-status-danger-primary);
+  border-color: var(--acv-color-status-danger-tertiary);
+}
+
+.alert-item.tenant-high {
+  background: var(--acv-color-status-critical-primary);
+  border-color: var(--acv-color-status-critical-tertiary);
+}
+
+.alert-item.tenant-medium {
+  background: var(--acv-color-status-warning-primary);
+  border-color: var(--acv-color-status-warning-tertiary);
+}
+
+.alert-item.tenant-low {
+  background: var(--acv-color-status-success-primary);
+  border-color: var(--acv-color-status-success-tertiary);
+}
+
 .alert-item-head {
   display: flex;
   align-items: flex-start;
@@ -522,6 +550,11 @@ a[href]:hover {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--acv-spacing-small);
+}
+
+.kpi-surface {
+  padding: var(--acv-spacing-small);
+  background: var(--acv-color-surface-primary);
 }
 
 .kpi-card {
@@ -870,6 +903,15 @@ a[href]:hover {
   color: var(--acv-color-link-primary);
   cursor: pointer;
   font: inherit;
+}
+
+.detail-tenant-name {
+  font-weight: var(--acv-font-weight-strong);
+  text-decoration: underline;
+}
+
+.detail-tenant-filter {
+  min-width: 220px;
 }
 
 .pill-tabs {

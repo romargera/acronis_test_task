@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./assets/acv-theme-acronis.css" />
     <link rel="stylesheet" href="./assets/common.css" />
   </head>
-  <body>
+  <body class="operations-dashboard">
     <main class="app-shell">
       <section class="toolbar" aria-label="Business controls">
         <div class="toolbar-left">
@@ -17,31 +17,42 @@
             <a class="pill-tab active" href="./business_dashboard.html" aria-current="page">Business Growth</a>
           </div>
           <div class="filters">
-            <select id="periodFilter" class="select" aria-label="Period filter">
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d" selected>Last 90 days</option>
-              <option value="180d">Last 180 days</option>
-              <option value="365d">Last 365 days</option>
+            <select id="windowFilter" class="select" aria-label="Data window filter">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="180">Last 180 days</option>
+              <option value="365">Last 365 days</option>
             </select>
-            <select id="riskFilter" class="select" aria-label="Risk filter">
-              <option value="all">All risk levels</option>
+            <select id="severityFilter" class="select" aria-label="Severity filter">
+              <option value="all">All severities</option>
               <option value="critical">Critical only</option>
               <option value="high">High and above</option>
               <option value="medium">Medium and above</option>
             </select>
-            <details class="filter-spoiler" id="segmentFilterWrap">
-              <summary id="segmentFilterSummary">All segments</summary>
-              <select id="segmentFilter" class="select spoiler-select" aria-label="Segment filter" multiple>
-                <option value="all" selected>All segments</option>
-                <option value="Regulated">Regulated</option>
-                <option value="Healthcare">Healthcare</option>
-                <option value="Professional Services">Professional Services</option>
-                <option value="Logistics">Logistics</option>
-                <option value="Retail">Retail</option>
-                <option value="Education">Education</option>
+
+            <details class="filter-spoiler" id="serviceFilterWrap">
+              <summary id="serviceFilterSummary">All services</summary>
+              <select id="serviceFilter" class="select spoiler-select" aria-label="Service filter" multiple>
+                <option value="all" selected>All services</option>
+                <option value="backup">Backup</option>
+                <option value="edr">EDR</option>
+                <option value="m365">M365 Backup</option>
+                <option value="patch">Patch</option>
+                <option value="dlp">DLP</option>
               </select>
             </details>
+
+            <details class="filter-spoiler" id="regionFilterWrap">
+              <summary id="regionFilterSummary">All regions</summary>
+              <select id="regionFilter" class="select spoiler-select" aria-label="Region filter" multiple>
+                <option value="all" selected>All regions</option>
+                <option value="NA">North America</option>
+                <option value="EU">Europe</option>
+                <option value="APAC">APAC</option>
+              </select>
+            </details>
+
             <details class="filter-spoiler" id="countryFilterWrap">
               <summary id="countryFilterSummary">All countries</summary>
               <select id="countryFilter" class="select spoiler-select" aria-label="Country filter" multiple>
@@ -55,6 +66,20 @@
                 <option value="Australia">Australia</option>
               </select>
             </details>
+            <details class="filter-spoiler" id="segmentFilterWrap">
+              <summary id="segmentFilterSummary">All segments</summary>
+              <select id="segmentFilter" class="select spoiler-select" aria-label="Segment filter" multiple>
+                <option value="all" selected>All segments</option>
+                <option value="Regulated">Regulated</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Professional Services">Professional Services</option>
+                <option value="Retail">Retail</option>
+                <option value="Logistics">Logistics</option>
+                <option value="Media">Media</option>
+                <option value="Industrial">Industrial</option>
+                <option value="Education">Education</option>
+              </select>
+            </details>
           </div>
         </div>
         <section class="quick-actions" aria-label="Quick actions">
@@ -62,11 +87,12 @@
           <button id="shareBtn" class="btn btn-secondary" type="button">Share</button>
         </section>
       </section>
-      <div class="tiny">Tip: open Segments/Countries and use Ctrl/Cmd + click for multi-select.</div>
+      <div class="tiny">Tip: open Services/Regions/Countries/Segments and use Ctrl/Cmd + click for multi-select.</div>
 
+      <div class="dashboard-view">
       <section class="kpi-grid" id="kpiGrid"></section>
 
-      <section class="grid grid-2">
+      <section class="grid grid-2 grid-balanced">
         <article class="card">
           <div class="section-actions">
             <h2 class="card-title">MRR Trend & Forecast <span class="info-tip" data-info="MRR time series with projected continuation. Forecast is based on recent slope and shown with a dashed line extension.">i</span></h2>
@@ -100,7 +126,7 @@
         </article>
       </section>
 
-      <section class="grid grid-2">
+      <section class="grid grid-2 grid-balanced">
         <article class="card">
           <div class="section-actions">
             <h2 class="card-title">Upsell Opportunity Pipeline</h2>
@@ -162,6 +188,7 @@
       <section class="page-actions-bottom" aria-label="Bottom actions">
         <button id="addWidgetBottomBtn" class="btn btn-secondary" type="button">Add widget</button>
       </section>
+      </div>
     </main>
 
     <div id="qbrModal" class="modal-backdrop" aria-hidden="true">
@@ -183,12 +210,23 @@
         const data = window.AcronisDemoData;
         const utils = window.DemoUtils;
 
-        const filters = {
-          period: "90d",
-          segment: ["all"],
-          risk: "all",
-          country: ["all"]
+        const sharedFilterDefaults = {
+          windowDays: "30",
+          severity: "all",
+          service: ["all"],
+          region: ["all"],
+          country: ["all"],
+          segment: ["all"]
         };
+        const sharedFilterAllowedValues = {
+          windowDays: ["7", "30", "90", "180", "365"],
+          severity: ["all", "critical", "high", "medium"],
+          service: ["all", "backup", "edr", "m365", "patch", "dlp"],
+          region: ["all", "NA", "EU", "APAC"],
+          country: ["all", "United States", "Germany", "Netherlands", "Canada", "France", "Singapore", "Australia"],
+          segment: ["all", "Regulated", "Healthcare", "Professional Services", "Retail", "Logistics", "Media", "Industrial", "Education"]
+        };
+        const filters = utils.loadSharedFilters(sharedFilterDefaults, sharedFilterAllowedValues);
 
         const state = {
           selectedId: null,
@@ -233,8 +271,10 @@
 
         function isDefaultFilters() {
           return (
-            filters.period === "90d" &&
-            filters.risk === "all" &&
+            filters.windowDays === sharedFilterDefaults.windowDays &&
+            filters.severity === sharedFilterDefaults.severity &&
+            filters.service.includes("all") &&
+            filters.region.includes("all") &&
             filters.segment.includes("all") &&
             filters.country.includes("all")
           );
@@ -253,13 +293,38 @@
           });
         }
 
+        function setMultiSelectValues(selectId, values) {
+          const select = document.getElementById(selectId);
+          if (!select) return;
+          const selected = Array.isArray(values) && values.length ? values : ["all"];
+          Array.from(select.options).forEach(function (option) {
+            option.selected = selected.includes(option.value);
+          });
+          if (!Array.from(select.options).some(function (option) { return option.selected; })) {
+            setMultiSelectAll(selectId);
+          }
+        }
+
+        function applyFiltersToControls() {
+          document.getElementById("windowFilter").value = filters.windowDays;
+          document.getElementById("severityFilter").value = filters.severity;
+          setMultiSelectValues("serviceFilter", filters.service);
+          setMultiSelectValues("regionFilter", filters.region);
+          setMultiSelectValues("countryFilter", filters.country);
+          setMultiSelectValues("segmentFilter", filters.segment);
+        }
+
+        function saveSharedFilters() {
+          utils.saveSharedFilters(filters);
+        }
+
         function buildRevenueSeries(totalDays) {
           const pointsByWindow = {
-            "7d": 7,
-            "30d": 10,
-            "90d": 12,
-            "180d": 15,
-            "365d": 18
+            "7": 7,
+            "30": 10,
+            "90": 12,
+            "180": 15,
+            "365": 18
           };
           const source = data.revenueSeries["365d"];
           const points = pointsByWindow[totalDays] || 12;
@@ -277,22 +342,38 @@
           return result;
         }
 
-        document.getElementById("periodFilter").addEventListener("change", function (event) {
-          filters.period = event.target.value;
+        document.getElementById("windowFilter").addEventListener("change", function (event) {
+          filters.windowDays = event.target.value;
+          saveSharedFilters();
+          render();
+        });
+        document.getElementById("severityFilter").addEventListener("change", function (event) {
+          filters.severity = event.target.value;
+          saveSharedFilters();
+          render();
+        });
+        document.getElementById("serviceFilter").addEventListener("change", function (event) {
+          filters.service = utils.parseMultiSelect(event.target, ["all"]);
+          updateSpoilerLabel("serviceFilter", "serviceFilterSummary", "All services", "services selected");
+          saveSharedFilters();
+          render();
+        });
+        document.getElementById("regionFilter").addEventListener("change", function (event) {
+          filters.region = utils.parseMultiSelect(event.target, ["all"]);
+          updateSpoilerLabel("regionFilter", "regionFilterSummary", "All regions", "regions selected");
+          saveSharedFilters();
           render();
         });
         document.getElementById("segmentFilter").addEventListener("change", function (event) {
           filters.segment = utils.parseMultiSelect(event.target, ["all"]);
           updateSpoilerLabel("segmentFilter", "segmentFilterSummary", "All segments", "segments selected");
+          saveSharedFilters();
           render();
         });
         document.getElementById("countryFilter").addEventListener("change", function (event) {
           filters.country = utils.parseMultiSelect(event.target, ["all"]);
           updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
-          render();
-        });
-        document.getElementById("riskFilter").addEventListener("change", function (event) {
-          filters.risk = event.target.value;
+          saveSharedFilters();
           render();
         });
         document.getElementById("riskSort").addEventListener("change", function (event) {
@@ -318,17 +399,19 @@
           utils.toast("Set goal placeholder: define target MRR and owner");
         });
         document.getElementById("resetFiltersBtn").addEventListener("click", function () {
-          filters.period = "90d";
-          filters.risk = "all";
-          filters.segment = ["all"];
-          filters.country = ["all"];
+          filters.windowDays = sharedFilterDefaults.windowDays;
+          filters.severity = sharedFilterDefaults.severity;
+          filters.service = sharedFilterDefaults.service.slice();
+          filters.region = sharedFilterDefaults.region.slice();
+          filters.segment = sharedFilterDefaults.segment.slice();
+          filters.country = sharedFilterDefaults.country.slice();
 
-          document.getElementById("periodFilter").value = "90d";
-          document.getElementById("riskFilter").value = "all";
-          setMultiSelectAll("segmentFilter");
-          setMultiSelectAll("countryFilter");
+          applyFiltersToControls();
+          updateSpoilerLabel("serviceFilter", "serviceFilterSummary", "All services", "services selected");
+          updateSpoilerLabel("regionFilter", "regionFilterSummary", "All regions", "regions selected");
           updateSpoilerLabel("segmentFilter", "segmentFilterSummary", "All segments", "segments selected");
           updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
+          saveSharedFilters();
           render();
         });
 
@@ -342,13 +425,49 @@
         });
 
         function inScope(tenant) {
+          if (!filters.region.includes("all") && !filters.region.includes(tenant.region)) return false;
+          if (!filters.service.includes("all") && !filters.service.some(function (service) {
+            return tenant.services[service];
+          })) {
+            return false;
+          }
           if (!filters.segment.includes("all") && !filters.segment.includes(tenant.segment)) return false;
           if (!filters.country.includes("all") && !filters.country.includes(tenant.country)) return false;
-          return (utils.levelWeights[tenant.riskLevel] || 0) >= severityThreshold[filters.risk];
+          return (utils.levelWeights[tenant.riskLevel] || 0) >= severityThreshold[filters.severity];
         }
 
         function scopedTenants() {
           return data.tenants.filter(inScope).sort(utils.byRiskDesc);
+        }
+
+        function tenantDeltaWeight(tenant) {
+          const idScore = tenant.id.split("").reduce(function (acc, char) {
+            return acc + char.charCodeAt(0);
+          }, 0);
+          const centeredSeed = ((idScore % 17) - 8) / 100;
+          const riskBias = ((utils.levelWeights[tenant.riskLevel] || 1) - 2.5) * 0.013;
+          const windowScale = Math.max(0.7, Number(filters.windowDays) / 80);
+          return centeredSeed * windowScale + riskBias;
+        }
+
+        function baselineTotal(tenants, extractor) {
+          return tenants.reduce(function (acc, tenant) {
+            const weight = Math.max(0.2, 1 - tenantDeltaWeight(tenant));
+            return acc + extractor(tenant) * weight;
+          }, 0);
+        }
+
+        function signedNumber(value, digits, suffix) {
+          const precision = typeof digits === "number" ? digits : 0;
+          const rounded = Number(value.toFixed(precision));
+          const sign = rounded > 0 ? "+" : "";
+          const base = precision ? rounded.toFixed(precision) : String(Math.round(rounded));
+          return `${sign}${base}${suffix || ""}`;
+        }
+
+        function deltaClass(delta, higherIsBetter) {
+          const improving = higherIsBetter ? delta >= 0 : delta <= 0;
+          return improving ? "kpi-trend-positive" : "kpi-trend-negative";
         }
 
         function renderKpis(tenants) {
@@ -379,42 +498,65 @@
               }, 0) / tenants.length
             : 0;
 
+          const baselineMRR = Math.max(1, baselineTotal(tenants, function (tenant) {
+            return tenant.mrr;
+          }));
+          const baselineRiskMRR = Math.max(1, baselineTotal(tenants, function (tenant) {
+            if (tenant.riskLevel !== "critical" && tenant.riskLevel !== "high") return 0;
+            return tenant.mrr;
+          }));
+          const baselineUpsell = Math.max(1, baselineTotal(tenants, function (tenant) {
+            return (tenant.opportunities || []).reduce(function (sum, item) {
+              return sum + item.impact;
+            }, 0);
+          }));
+          const baselineMargin = tenants.length
+            ? baselineTotal(tenants, function (tenant) {
+                return tenant.marginPct;
+              }) / tenants.length
+            : 0;
+
+          const mrrDeltaPct = ((totalMRR - baselineMRR) / baselineMRR) * 100;
+          const atRiskDeltaPct = ((atRiskMRR - baselineRiskMRR) / baselineRiskMRR) * 100;
+          const upsellDeltaPct = ((projectedUpsell - baselineUpsell) / baselineUpsell) * 100;
+          const marginDeltaPts = avgMargin - baselineMargin;
+
           const rows = [
             {
               id: "portfolio-mrr",
               label: "Portfolio MRR",
               formula: "Sum of monthly recurring revenue across clients in current filter.",
               value: utils.formatCurrency(totalMRR),
-              trend: "+6.4%",
-              trendClass: "kpi-trend-positive",
-              trendTitle: "Window delta for selected period."
+              trend: signedNumber(mrrDeltaPct, 1, "%"),
+              trendClass: deltaClass(mrrDeltaPct, true),
+              trendTitle: `Recomputed from filtered client scope and ${filters.windowDays}d window.`
             },
             {
               id: "risk-mrr",
               label: "At-Risk MRR",
               formula: "MRR from clients marked High or Critical risk.",
               value: utils.formatCurrency(atRiskMRR),
-              trend: "3 clients need intervention",
-              trendClass: "kpi-trend-negative",
-              trendTitle: "Current client risk distribution."
+              trend: signedNumber(atRiskDeltaPct, 1, "%"),
+              trendClass: deltaClass(atRiskDeltaPct, false),
+              trendTitle: `Recomputed from filtered client scope and ${filters.windowDays}d window.`
             },
             {
               id: "upsell",
               label: "Projected Upsell",
               formula: "Sum of estimated MRR uplift from identified opportunity gaps.",
               value: utils.formatCurrency(projectedUpsell),
-              trend: "coverage-gap derived",
-              trendClass: "kpi-trend-positive",
-              trendTitle: "Based on current service coverage gaps."
+              trend: signedNumber(upsellDeltaPct, 1, "%"),
+              trendClass: deltaClass(upsellDeltaPct, true),
+              trendTitle: `Recomputed from filtered client scope and ${filters.windowDays}d window.`
             },
             {
               id: "margin",
               label: "Avg Gross Margin",
               formula: "Average gross margin percent across scoped client portfolio.",
               value: avgMargin.toFixed(1) + "%",
-              trend: "below SLI top quartile",
-              trendClass: "kpi-trend-negative",
-              trendTitle: "Compared to benchmark top quartile."
+              trend: signedNumber(marginDeltaPts, 1, " pts"),
+              trendClass: deltaClass(marginDeltaPts, true),
+              trendTitle: `Recomputed from filtered client scope and ${filters.windowDays}d window.`
             }
           ];
 
@@ -443,15 +585,15 @@
         }
 
         function renderRevenue() {
-          const series = buildRevenueSeries(filters.period);
+          const series = buildRevenueSeries(filters.windowDays);
           const periodLabelMap = {
-            "7d": "7-day trend",
-            "30d": "30-day trend",
-            "90d": "90-day trend",
-            "180d": "180-day trend",
-            "365d": "365-day trend"
+            "7": "7-day trend",
+            "30": "30-day trend",
+            "90": "90-day trend",
+            "180": "180-day trend",
+            "365": "365-day trend"
           };
-          const periodLabel = periodLabelMap[filters.period] || "90-day trend";
+          const periodLabel = periodLabelMap[filters.windowDays] || "30-day trend";
           const xLabels = series.map(function (_, idx) {
             return `P${idx + 1}`;
           });
@@ -667,7 +809,7 @@
           }
 
           el.marginList.innerHTML = sorted
-            .slice(0, 6)
+            .slice(0, 8)
             .map(function (tenant) {
               return `
                 <div class="metric-row">
@@ -851,6 +993,9 @@
           updateResetButtonVisibility();
         }
 
+        applyFiltersToControls();
+        updateSpoilerLabel("serviceFilter", "serviceFilterSummary", "All services", "services selected");
+        updateSpoilerLabel("regionFilter", "regionFilterSummary", "All regions", "regions selected");
         updateSpoilerLabel("segmentFilter", "segmentFilterSummary", "All segments", "segments selected");
         updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
         render();

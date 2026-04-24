@@ -65,6 +65,72 @@
     return values;
   }
 
+  const sharedFilterStorageKey = "acronisDashboardSharedFiltersV1";
+
+  function cloneFilterState(source) {
+    const clone = {};
+    Object.keys(source || {}).forEach(function (key) {
+      const value = source[key];
+      clone[key] = Array.isArray(value) ? value.slice() : value;
+    });
+    return clone;
+  }
+
+  function normalizeSingleValue(value, allowedSet, fallbackValue) {
+    if (allowedSet.has(value)) return value;
+    return fallbackValue;
+  }
+
+  function normalizeMultiValue(value, allowedSet) {
+    const allValue = "all";
+    const list = Array.isArray(value) ? value : [];
+    if (!list.length || list.includes(allValue)) return [allValue];
+    const filtered = list.filter(function (item) {
+      return allowedSet.has(item) && item !== allValue;
+    });
+    return filtered.length ? filtered : [allValue];
+  }
+
+  function loadSharedFilters(defaults, allowedValues) {
+    const safeDefaults = cloneFilterState(defaults || {});
+    let parsed = null;
+    try {
+      parsed = JSON.parse(window.localStorage.getItem(sharedFilterStorageKey) || "null");
+    } catch (error) {
+      return safeDefaults;
+    }
+
+    if (!parsed || typeof parsed !== "object") return safeDefaults;
+
+    Object.keys(safeDefaults).forEach(function (key) {
+      const fallbackValue = safeDefaults[key];
+      const allowedSet = new Set(((allowedValues && allowedValues[key]) || []).slice());
+      if (Array.isArray(fallbackValue)) {
+        if (!allowedSet.size) {
+          safeDefaults[key] = Array.isArray(parsed[key]) ? parsed[key].slice() : fallbackValue.slice();
+          return;
+        }
+        safeDefaults[key] = normalizeMultiValue(parsed[key], allowedSet);
+        return;
+      }
+      if (!allowedSet.size) {
+        if (typeof parsed[key] === typeof fallbackValue) safeDefaults[key] = parsed[key];
+        return;
+      }
+      safeDefaults[key] = normalizeSingleValue(parsed[key], allowedSet, fallbackValue);
+    });
+
+    return safeDefaults;
+  }
+
+  function saveSharedFilters(filters) {
+    try {
+      window.localStorage.setItem(sharedFilterStorageKey, JSON.stringify(cloneFilterState(filters || {})));
+    } catch (error) {
+      // Ignore storage failures (private mode / quota) to avoid blocking UI interactions.
+    }
+  }
+
   function escapeAttr(value) {
     return String(value)
       .replace(/&/g, "&amp;")
@@ -423,6 +489,8 @@
     getTenantById: getTenantById,
     riskScore: riskScore,
     sortAlerts: sortAlerts,
+    loadSharedFilters: loadSharedFilters,
+    saveSharedFilters: saveSharedFilters,
     toast: toast,
     queryParam: queryParam
   };
