@@ -10,7 +10,7 @@
   </head>
   <body class="operations-dashboard">
     <main class="app-shell">
-      <section class="toolbar" aria-label="Business controls">
+      <section class="toolbar" aria-label="Dashboard controls">
         <div class="toolbar-left">
           <div class="pill-tabs" aria-label="Dashboard pages">
             <a class="pill-tab" href="./operations_dashboard.html">Operations</a>
@@ -87,7 +87,10 @@
           <button id="shareBtn" class="btn btn-secondary" type="button">Share</button>
         </section>
       </section>
-      <div class="tiny">Tip: open Services/Regions/Countries/Segments and use Ctrl/Cmd + click for multi-select.</div>
+      <div class="tiny filter-tip" id="multiSelectTip">
+        Tip: open Services/Regions/Countries/Segments and use Ctrl/Cmd + click for multi-select.
+        <button id="hideMultiSelectTip" class="link-btn tip-hide-btn" type="button">Hide</button>
+      </div>
 
       <div class="dashboard-view">
       <section class="kpi-grid" id="kpiGrid"></section>
@@ -103,30 +106,6 @@
           <div class="tiny">Unit: $k MRR. Diff baseline shown for the selected period.</div>
         </article>
 
-        <article class="card">
-          <div class="section-actions">
-            <h2 class="card-title">Churn Risk Radar</h2>
-            <span class="card-subtitle" id="radarSummary"></span>
-            <div class="control-inline">
-              <label for="riskSort">Sort clients</label>
-              <select id="riskSort" class="select select-sm" aria-label="Risk client sort">
-                <option value="risk">Risk (desc)</option>
-                <option value="mrr">MRR (desc)</option>
-                <option value="tenure">Tenure (low first)</option>
-              </select>
-            </div>
-          </div>
-          <svg id="riskMap" class="risk-map" viewBox="0 0 560 240" role="img" aria-label="Churn risk bubble map"></svg>
-          <div id="riskRankList" class="metric-bars"></div>
-          <div class="legend">
-            <span class="legend-item"><span class="dot dot-danger"></span> Critical</span>
-            <span class="legend-item"><span class="dot dot-warning"></span> High</span>
-            <span class="legend-item"><span class="dot dot-primary"></span> Medium/Low</span>
-          </div>
-        </article>
-      </section>
-
-      <section class="grid grid-2 grid-balanced">
         <article class="card">
           <div class="section-actions">
             <h2 class="card-title">Upsell Opportunity Pipeline</h2>
@@ -151,6 +130,30 @@
             </thead>
             <tbody id="upsellTable"></tbody>
           </table>
+        </article>
+      </section>
+
+      <section class="grid grid-2 grid-balanced">
+        <article class="card">
+          <div class="section-actions">
+            <h2 class="card-title">Churn Risk Radar</h2>
+            <span class="card-subtitle" id="radarSummary"></span>
+            <div class="control-inline">
+              <label for="riskSort">Sort clients</label>
+              <select id="riskSort" class="select select-sm" aria-label="Risk client sort">
+                <option value="risk">Risk (desc)</option>
+                <option value="mrr">MRR (desc)</option>
+                <option value="tenure">Tenure (low first)</option>
+              </select>
+            </div>
+          </div>
+          <svg id="riskMap" class="risk-map" viewBox="0 0 560 240" role="img" aria-label="Churn risk bubble map"></svg>
+          <div id="riskRankList" class="metric-bars"></div>
+          <div class="legend">
+            <span class="legend-item"><span class="dot dot-danger"></span> Critical</span>
+            <span class="legend-item"><span class="dot dot-warning"></span> High</span>
+            <span class="legend-item"><span class="dot dot-primary"></span> Medium/Low</span>
+          </div>
         </article>
 
         <article class="card">

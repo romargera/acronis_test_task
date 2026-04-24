@@ -554,7 +554,7 @@ a[href]:hover {
 
 .kpi-surface {
   padding: var(--acv-spacing-small);
-  background: var(--acv-color-surface-primary);
+  background: #ffffff;
 }
 
 .kpi-card {
@@ -836,7 +836,7 @@ a[href]:hover {
   background: var(--acv-color-surface-inversed-primary);
   color: var(--acv-color-text-primary);
   padding: 8px 10px;
-  font-size: var(--acv-font-size-note);
+  font-size: var(--acv-font-size-body);
   box-shadow: 0 6px 16px rgba(11, 18, 32, 0.16);
   opacity: 0;
   transform: translateY(3px);
@@ -852,7 +852,7 @@ a[href]:hover {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  font-size: var(--acv-font-size-note);
+  font-size: var(--acv-font-size-body);
 }
 
 .legend-item {
@@ -912,6 +912,17 @@ a[href]:hover {
 
 .detail-tenant-filter {
   min-width: 220px;
+}
+
+.filter-tip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tip-hide-btn {
+  text-decoration: underline;
 }
 
 .pill-tabs {

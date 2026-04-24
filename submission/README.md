@@ -25,17 +25,18 @@ No build step, no hosting required.
 ## Real vs Stubbed
 
 ### Real in prototype
-- Multi-page clickable workflow with cross-page context (`tenant` and `source` query params).
-- Interactive filters (severity/service/region/segment/period).
+- Two-page clickable workflow (Operations + Business Growth) with role-based interactions.
+- Interactive shared filters (time window, severity, service, region, country, segment) with cross-tab persistence.
 - Drill-down patterns from summary widgets to tenant detail.
 - Simulated live alert feed in Operations.
 - QBR draft modal generation flow.
 
 ### Stubbed/simulated
 - Data is fake but internally coherent (`prototype/assets/data.js`).
-- No live Acronis API calls, no PSA integration, no persistence.
+- No live Acronis API calls and no PSA integration.
+- No backend persistence (only local browser state for shared filters).
 - Churn score and margin model are heuristic placeholders.
-- Export/CRM ticket creation actions are simulated toasts.
+- Add widget / Share / dispatch actions are simulated toasts.
 
 ## If we had +2 more hours
 - Add `Client 360` as a third page (not required by the test task) for cross-dashboard tenant deep dive.

@@ -50,13 +50,13 @@ Give partners a decision cockpit that helps them:
 
 ### 2.3 Goals
 
-Unified goals:
+Goals:
 
 - improve operational decision speed and triage quality,
 - improve business decision quality on churn, upsell, and margin,
 - create a clear path for free-to-paid analytics value,
 - deliver a modernized reporting/dashboard baseline in the first release stage,
-- deliver data warehouse/lake foundation plus predictive AI capabilities in the next release stage.
+- (planned for next stage) deliver data warehouse/lake foundation plus predictive AI capabilities.
 
 Design principles:
 
@@ -137,7 +137,7 @@ Goals for product navigation and discoverability:
 
 - each high-level signal should allow click-through into details,
 - dashboard should guide user from summary to action without dead ends,
-- key platform entry points (`Add widget`, `Download`, `Send`) must stay visible and understandable.
+- key platform entry points (`Add widget`, `Share`) must stay visible and understandable.
 
 Non-goals:
 
@@ -200,6 +200,8 @@ Success metrics:
 Mandatory interaction and readability rules:
 
 - support multi-select filters where it affects comparison quality,
+- both dashboards must expose the same six filters (time window, severity, services, regions, countries, segments),
+- shared filter state must persist when switching between Operations and Business Growth dashboards,
 - make primary KPI cards clickable and route to detail placeholder if backend is not ready,
 - show "diff vs period" clearly and consistently (with hover detail for exact baseline),
 - add info icon for metrics that require formula explanation,
@@ -208,11 +210,17 @@ Mandatory interaction and readability rules:
 - diff indicators must use clear positive/negative color semantics,
 - `MRR Trend & Forecast` must include a visibly distinct forecast line,
 - lists and client collections must support sort criteria switching,
-- heatmap tile area must be aligned and visually balanced (avoid oversized tiles and top misalignment).
+- heatmap tile area must be aligned and visually balanced (avoid oversized tiles and top misalignment),
+- critical alert feed tile severity colors should match heatmap severity colors,
+- `Monthly Storage Usage` trend points should be non-flat from point to point,
+- `Posture Trends` text should not duplicate hardcoded window wording when the global window filter controls horizon,
+- `AI Morning Briefing` should have adjacent `Sort` and `View` filters (`Top 5` / `All`),
+- tenant drill-down should allow single-select business switching by clicking the tenant name in header,
+- KPI tiles should be grouped on a common surface for faster scanning.
 
 Must preserve production entry points:
 
-- keep clear access to `Add widget`, `Download`, `Send` flows.
+- keep clear access to `Add widget` and `Share` flows in the prototype.
 
 ---
 
@@ -286,8 +294,14 @@ In-scope now (3-4h task scope):
 - two dashboard pages only,
 - realistic fake data,
 - meaningful click-through flows,
-- filter interactions,
+- six shared filters across both dashboards with cross-tab state persistence,
 - drill-down panel behavior,
+- KPI diff recalculation based on active filter scope,
+- operations KPI row grouped on a common surface for readability,
+- Operations includes baseline parity widgets in the same page (summary counters, storage trend, status/protection donuts),
+- `AI Morning Briefing` includes `Sort` + `View` (`Top 5` / `All`) controls,
+- tenant drill-down supports single-select business switcher from clickable tenant name,
+- aligned severity color semantics between heatmap and critical-alert tiles,
 - QBR preview modal in Business dashboard.
 
 Out-of-scope now:
@@ -364,7 +378,7 @@ This rollout framing comes from interview context and is not mandatory output of
 - phase focused on modernized dashboard/report baseline,
 - phase focused on warehouse/lake and predictive intelligence expansion,
 - rollout starts with A/B test on new users only (classic vs new operations dashboard),
-- `Classic Overview` remains available as baseline view until Must Keep parity is validated,
+- prototype implementation merged baseline metrics into the Operations dashboard and removed separate `Classic Overview` tab,
 - staged access strategy via early-access cohort before broad rollout.
 
 ### 8.4 Current production baseline
@@ -401,6 +415,10 @@ Behavioral parity points:
 - widget-level clickability for investigation entry,
 - widget customization and reorder pattern,
 - regular refresh behavior for operational relevance.
+
+Prototype adaptation note:
+
+- current prototype uses `Add widget` and `Share` actions in the primary toolbar and keeps the same investigative click behavior.
 
 ---
 
