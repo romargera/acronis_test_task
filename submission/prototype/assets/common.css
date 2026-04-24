@@ -9,6 +9,14 @@ body {
   color: var(--acv-color-text-primary);
 }
 
+a[href] {
+  color: var(--acv-color-link-primary);
+}
+
+a[href]:hover {
+  color: var(--acv-color-link-hover);
+}
+
 .app-shell {
   max-width: var(--page-max-width);
   margin: 0 auto;
@@ -874,7 +882,7 @@ body {
 .pill-tab {
   border: none;
   background: var(--acv-color-surface-primary);
-  color: var(--acv-color-text-secondary);
+  color: var(--acv-color-link-primary);
   padding: 6px 10px;
   cursor: pointer;
   font-size: var(--acv-font-size-note);
@@ -887,6 +895,17 @@ body {
 .pill-tab.active {
   background: var(--acv-color-button-primary);
   color: var(--acv-color-button-label-inversed-primary);
+}
+
+.page-actions-bottom {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: var(--acv-spacing-small);
+}
+
+#setGoalBtn {
+  margin-left: auto;
 }
 
 .client-hero {

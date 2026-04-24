@@ -69,7 +69,7 @@
           </div>
         </div>
         <section class="quick-actions" aria-label="Quick actions">
-          <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
+          <button id="resetFiltersBtn" class="btn btn-secondary" type="button" hidden>Reset filters</button>
           <button id="shareBtn" class="btn btn-secondary" type="button">Share</button>
         </section>
       </section>
@@ -168,6 +168,9 @@
         </section>
 
         <section id="detailPanel" class="detail-panel" aria-live="polite"></section>
+        <section class="page-actions-bottom" aria-label="Bottom actions">
+          <button id="addWidgetBottomBtn" class="btn btn-secondary" type="button">Add widget</button>
+        </section>
       </div>
     </main>
 
@@ -228,6 +231,29 @@
             return;
           }
           summary.textContent = `${values.length} ${suffix}`;
+        }
+
+        function isDefaultFilters() {
+          return (
+            filters.windowDays === "30" &&
+            filters.severity === "all" &&
+            filters.service.includes("all") &&
+            filters.region.includes("all") &&
+            filters.country.includes("all")
+          );
+        }
+
+        function updateResetButtonVisibility() {
+          const resetButton = document.getElementById("resetFiltersBtn");
+          resetButton.hidden = isDefaultFilters();
+        }
+
+        function setMultiSelectAll(selectId) {
+          const select = document.getElementById(selectId);
+          if (!select) return;
+          Array.from(select.options).forEach(function (option) {
+            option.selected = option.value === "all";
+          });
         }
 
         function buildWindowedSeries(baseValues, totalDays, integerOnly) {
@@ -311,11 +337,28 @@
           renderBriefing(filteredTenants());
         });
 
-        document.getElementById("addWidgetBtn").addEventListener("click", function () {
+        document.getElementById("addWidgetBottomBtn").addEventListener("click", function () {
           utils.toast("Add widget flow placeholder: widget gallery opens here");
         });
         document.getElementById("shareBtn").addEventListener("click", function () {
           utils.toast("Share placeholder: report sharing dialog opens here");
+        });
+        document.getElementById("resetFiltersBtn").addEventListener("click", function () {
+          filters.windowDays = "30";
+          filters.severity = "all";
+          filters.service = ["all"];
+          filters.region = ["all"];
+          filters.country = ["all"];
+
+          document.getElementById("windowFilter").value = "30";
+          document.getElementById("severityFilter").value = "all";
+          setMultiSelectAll("serviceFilter");
+          setMultiSelectAll("regionFilter");
+          setMultiSelectAll("countryFilter");
+          updateSpoilerLabel("serviceFilter", "serviceFilterSummary", "All services", "services selected");
+          updateSpoilerLabel("regionFilter", "regionFilterSummary", "All regions", "regions selected");
+          updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
+          render();
         });
 
         function matchesFilters(tenant) {
@@ -880,6 +923,7 @@
           renderClassicOverview(tenants);
           renderDetail();
           utils.initInfoTips(document.body);
+          updateResetButtonVisibility();
         }
 
         updateSpoilerLabel("serviceFilter", "serviceFilterSummary", "All services", "services selected");

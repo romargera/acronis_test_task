@@ -58,7 +58,7 @@
           </div>
         </div>
         <section class="quick-actions" aria-label="Quick actions">
-          <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
+          <button id="resetFiltersBtn" class="btn btn-secondary" type="button" hidden>Reset filters</button>
           <button id="shareBtn" class="btn btn-secondary" type="button">Share</button>
         </section>
       </section>
@@ -71,6 +71,7 @@
           <div class="section-actions">
             <h2 class="card-title">MRR Trend & Forecast <span class="info-tip" data-info="MRR time series with projected continuation. Forecast is based on recent slope and shown with a dashed line extension.">i</span></h2>
             <span class="card-subtitle" id="periodLabel"></span>
+            <button id="setGoalBtn" class="btn btn-secondary" type="button">Set goal</button>
           </div>
           <div id="revenueTrend" class="chart-wrap"></div>
           <div class="tiny">Unit: $k MRR. Diff baseline shown for the selected period.</div>
@@ -99,7 +100,7 @@
         </article>
       </section>
 
-      <section class="split">
+      <section class="grid grid-2">
         <article class="card">
           <div class="section-actions">
             <h2 class="card-title">Upsell Opportunity Pipeline</h2>
@@ -158,6 +159,9 @@
       </section>
 
       <section id="detailPanel" class="detail-panel"></section>
+      <section class="page-actions-bottom" aria-label="Bottom actions">
+        <button id="addWidgetBottomBtn" class="btn btn-secondary" type="button">Add widget</button>
+      </section>
     </main>
 
     <div id="qbrModal" class="modal-backdrop" aria-hidden="true">
@@ -227,6 +231,28 @@
           summary.textContent = `${values.length} ${suffix}`;
         }
 
+        function isDefaultFilters() {
+          return (
+            filters.period === "90d" &&
+            filters.risk === "all" &&
+            filters.segment.includes("all") &&
+            filters.country.includes("all")
+          );
+        }
+
+        function updateResetButtonVisibility() {
+          const resetButton = document.getElementById("resetFiltersBtn");
+          resetButton.hidden = isDefaultFilters();
+        }
+
+        function setMultiSelectAll(selectId) {
+          const select = document.getElementById(selectId);
+          if (!select) return;
+          Array.from(select.options).forEach(function (option) {
+            option.selected = option.value === "all";
+          });
+        }
+
         function buildRevenueSeries(totalDays) {
           const pointsByWindow = {
             "7d": 7,
@@ -282,11 +308,28 @@
           renderMargin(scopedTenants());
         });
 
-        document.getElementById("addWidgetBtn").addEventListener("click", function () {
+        document.getElementById("addWidgetBottomBtn").addEventListener("click", function () {
           utils.toast("Add widget flow placeholder: business widget catalog opens here");
         });
         document.getElementById("shareBtn").addEventListener("click", function () {
           utils.toast("Share placeholder: sharing dialog opens here");
+        });
+        document.getElementById("setGoalBtn").addEventListener("click", function () {
+          utils.toast("Set goal placeholder: define target MRR and owner");
+        });
+        document.getElementById("resetFiltersBtn").addEventListener("click", function () {
+          filters.period = "90d";
+          filters.risk = "all";
+          filters.segment = ["all"];
+          filters.country = ["all"];
+
+          document.getElementById("periodFilter").value = "90d";
+          document.getElementById("riskFilter").value = "all";
+          setMultiSelectAll("segmentFilter");
+          setMultiSelectAll("countryFilter");
+          updateSpoilerLabel("segmentFilter", "segmentFilterSummary", "All segments", "segments selected");
+          updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
+          render();
         });
 
         document.getElementById("closeQbrModal").addEventListener("click", function () {
@@ -805,6 +848,7 @@
           renderActions(tenants);
           renderDetail();
           utils.initInfoTips(document.body);
+          updateResetButtonVisibility();
         }
 
         updateSpoilerLabel("segmentFilter", "segmentFilterSummary", "All segments", "segments selected");
