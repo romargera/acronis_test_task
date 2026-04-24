@@ -10,35 +10,54 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="filters" aria-label="Business filters">
-        <select id="periodFilter" class="select" aria-label="Period filter">
-          <option value="30d">Last 30 days</option>
-          <option value="90d" selected>Last 90 days</option>
-          <option value="365d">Last 12 months</option>
-        </select>
-        <select id="segmentFilter" class="select" aria-label="Segment filter" multiple>
-          <option value="all" selected>All segments</option>
-          <option value="Regulated">Regulated</option>
-          <option value="Healthcare">Healthcare</option>
-          <option value="Professional Services">Professional Services</option>
-          <option value="Logistics">Logistics</option>
-          <option value="Retail">Retail</option>
-          <option value="Education">Education</option>
-        </select>
-        <select id="riskFilter" class="select" aria-label="Risk filter">
-          <option value="all">All risk levels</option>
-          <option value="critical">Critical only</option>
-          <option value="high">High and above</option>
-          <option value="medium">Medium and above</option>
-        </select>
+      <section class="toolbar" aria-label="Business controls">
+        <div class="toolbar-left filters">
+          <select id="periodFilter" class="select" aria-label="Period filter">
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d" selected>Last 90 days</option>
+            <option value="180d">Last 180 days</option>
+            <option value="365d">Last 365 days</option>
+          </select>
+          <select id="riskFilter" class="select" aria-label="Risk filter">
+            <option value="all">All risk levels</option>
+            <option value="critical">Critical only</option>
+            <option value="high">High and above</option>
+            <option value="medium">Medium and above</option>
+          </select>
+          <details class="filter-spoiler" id="segmentFilterWrap">
+            <summary id="segmentFilterSummary">All segments</summary>
+            <select id="segmentFilter" class="select spoiler-select" aria-label="Segment filter" multiple>
+              <option value="all" selected>All segments</option>
+              <option value="Regulated">Regulated</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Professional Services">Professional Services</option>
+              <option value="Logistics">Logistics</option>
+              <option value="Retail">Retail</option>
+              <option value="Education">Education</option>
+            </select>
+          </details>
+          <details class="filter-spoiler" id="countryFilterWrap">
+            <summary id="countryFilterSummary">All countries</summary>
+            <select id="countryFilter" class="select spoiler-select" aria-label="Country filter" multiple>
+              <option value="all" selected>All countries</option>
+              <option value="United States">United States</option>
+              <option value="Germany">Germany</option>
+              <option value="Netherlands">Netherlands</option>
+              <option value="Canada">Canada</option>
+              <option value="France">France</option>
+              <option value="Singapore">Singapore</option>
+              <option value="Australia">Australia</option>
+            </select>
+          </details>
+        </div>
+        <section class="quick-actions" aria-label="Quick actions">
+          <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
+          <button id="downloadBtn" class="btn btn-secondary" type="button">Download</button>
+          <button id="sendBtn" class="btn btn-secondary" type="button">Send</button>
+        </section>
       </section>
-      <div class="tiny">Tip: use Ctrl/Cmd + click to select multiple segments.</div>
-
-      <section class="quick-actions" aria-label="Quick actions">
-        <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
-        <button id="downloadBtn" class="btn btn-secondary" type="button">Download</button>
-        <button id="sendBtn" class="btn btn-secondary" type="button">Send</button>
-      </section>
+      <div class="tiny">Tip: open Segments/Countries and use Ctrl/Cmd + click for multi-select.</div>
 
       <section class="kpi-grid" id="kpiGrid"></section>
 
@@ -83,6 +102,7 @@
               <label for="upsellSort">Sort</label>
               <select id="upsellSort" class="select select-sm" aria-label="Upsell sort">
                 <option value="impact">Impact (desc)</option>
+                <option value="mrr">Client MRR (desc)</option>
                 <option value="client">Client (A-Z)</option>
                 <option value="offer">Opportunity (A-Z)</option>
               </select>
@@ -157,7 +177,8 @@
         const filters = {
           period: "90d",
           segment: ["all"],
-          risk: "all"
+          risk: "all",
+          country: ["all"]
         };
 
         const state = {
@@ -191,12 +212,52 @@
           riskRankList: document.getElementById("riskRankList")
         };
 
+        function updateSpoilerLabel(selectId, summaryId, defaultLabel, suffix) {
+          const values = utils.parseMultiSelect(document.getElementById(selectId), ["all"]);
+          const summary = document.getElementById(summaryId);
+          if (values.includes("all")) {
+            summary.textContent = defaultLabel;
+            return;
+          }
+          summary.textContent = `${values.length} ${suffix}`;
+        }
+
+        function buildRevenueSeries(totalDays) {
+          const pointsByWindow = {
+            "7d": 7,
+            "30d": 10,
+            "90d": 12,
+            "180d": 15,
+            "365d": 18
+          };
+          const source = data.revenueSeries["365d"];
+          const points = pointsByWindow[totalDays] || 12;
+          const result = [];
+          for (let idx = 0; idx < points; idx += 1) {
+            const progress = points === 1 ? 0 : idx / (points - 1);
+            const sourcePos = progress * (source.length - 1);
+            const low = Math.floor(sourcePos);
+            const high = Math.min(source.length - 1, Math.ceil(sourcePos));
+            const ratio = sourcePos - low;
+            const base = source[low] + (source[high] - source[low]) * ratio;
+            const variation = Math.sin((idx + 2) * 0.85) * 0.35;
+            result.push(Number((base + variation).toFixed(1)));
+          }
+          return result;
+        }
+
         document.getElementById("periodFilter").addEventListener("change", function (event) {
           filters.period = event.target.value;
           render();
         });
         document.getElementById("segmentFilter").addEventListener("change", function (event) {
           filters.segment = utils.parseMultiSelect(event.target, ["all"]);
+          updateSpoilerLabel("segmentFilter", "segmentFilterSummary", "All segments", "segments selected");
+          render();
+        });
+        document.getElementById("countryFilter").addEventListener("change", function (event) {
+          filters.country = utils.parseMultiSelect(event.target, ["all"]);
+          updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
           render();
         });
         document.getElementById("riskFilter").addEventListener("change", function (event) {
@@ -237,6 +298,7 @@
 
         function inScope(tenant) {
           if (!filters.segment.includes("all") && !filters.segment.includes(tenant.segment)) return false;
+          if (!filters.country.includes("all") && !filters.country.includes(tenant.country)) return false;
           return (utils.levelWeights[tenant.riskLevel] || 0) >= severityThreshold[filters.risk];
         }
 
@@ -317,7 +379,7 @@
                 <button class="kpi-card-button" type="button" data-kpi="${item.id}">
                   <div class="kpi-label">${item.label}<span class="info-tip" title="${item.formula}">i</span></div>
                   <div class="kpi-value">${item.value}</div>
-                  <div class="tiny ${item.trendClass}" title="${item.trendTitle}">${item.trend}</div>
+                  <div class="kpi-diff ${item.trendClass}" title="${item.trendTitle}">${item.trend}</div>
                 </button>`;
             })
             .join("");
@@ -336,8 +398,15 @@
         }
 
         function renderRevenue() {
-          const series = data.revenueSeries[filters.period];
-          const periodLabel = filters.period === "30d" ? "30-day trend" : filters.period === "90d" ? "90-day trend" : "12-month trend";
+          const series = buildRevenueSeries(filters.period);
+          const periodLabelMap = {
+            "7d": "7-day trend",
+            "30d": "30-day trend",
+            "90d": "90-day trend",
+            "180d": "180-day trend",
+            "365d": "365-day trend"
+          };
+          const periodLabel = periodLabelMap[filters.period] || "90-day trend";
           const xLabels = series.map(function (_, idx) {
             return `P${idx + 1}`;
           });
@@ -346,15 +415,17 @@
             return Number((series[series.length - 1] + slope * 0.7 * step).toFixed(1));
           });
 
-          el.periodLabel.textContent = `${periodLabel} (diff vs previous ${periodLabel.split("-")[0]} period)`;
+          el.periodLabel.textContent = `${periodLabel} (diff vs previous ${periodLabel})`;
           el.revenueTrend.innerHTML = utils.createLineChart(series, {
-            width: 560,
-            height: 190,
+            width: 1080,
+            height: 220,
             unit: "k",
             yLabel: "MRR ($k)",
             xLabels: xLabels,
             forecastValues: forecast,
-            forecastLabels: ["F+1", "F+2", "F+3"]
+            forecastLabels: ["F+1", "F+2", "F+3"],
+            lineColor: "#2f86eb",
+            areaTint: "rgba(47, 134, 235, 0.12)"
           });
         }
 
@@ -469,12 +540,17 @@
                 tenantId: tenant.id,
                 tenant: tenant.name,
                 opportunity: opportunity.name,
-                impact: opportunity.impact
+                impact: opportunity.impact,
+                tenantMrr: tenant.mrr
               });
             });
           });
 
-          if (state.upsellSort === "client") {
+          if (state.upsellSort === "mrr") {
+            rows.sort(function (a, b) {
+              return b.tenantMrr - a.tenantMrr;
+            });
+          } else if (state.upsellSort === "client") {
             rows.sort(function (a, b) {
               return a.tenant.localeCompare(b.tenant);
             });
@@ -680,7 +756,7 @@
               <h2 class="card-title">Client Drill-Down: ${tenant.name}</h2>
               <span class="${utils.riskClass(tenant.riskLevel)}">${tenant.riskLevel.toUpperCase()}</span>
             </div>
-            <div class="card-subtitle">MRR ${utils.formatCurrency(tenant.mrr)} • Margin ${tenant.marginPct}% • Tenure ${tenant.tenureMonths} months</div>
+            <div class="card-subtitle">${tenant.country} • MRR ${utils.formatCurrency(tenant.mrr)} • Margin ${tenant.marginPct}% • Tenure ${tenant.tenureMonths} months</div>
             <div class="signal-grid">
               ${signals
                 .map(function (signal) {
@@ -725,6 +801,8 @@
           renderDetail();
         }
 
+        updateSpoilerLabel("segmentFilter", "segmentFilterSummary", "All segments", "segments selected");
+        updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
         render();
       })();
     </script>

@@ -63,6 +63,46 @@ body {
   align-items: flex-start;
 }
 
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--acv-spacing-small);
+  flex-wrap: wrap;
+}
+
+.toolbar-left {
+  display: flex;
+  gap: var(--acv-spacing-small);
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.filter-spoiler {
+  border: 1px solid var(--acv-color-form-secondary);
+  border-radius: var(--acv-radius-regular);
+  background: var(--acv-color-form-primary);
+  min-width: 170px;
+  padding: 4px 8px;
+}
+
+.filter-spoiler > summary {
+  list-style: none;
+  cursor: pointer;
+  color: var(--acv-color-text-primary);
+  font-size: var(--acv-font-size-caption);
+  user-select: none;
+}
+
+.filter-spoiler > summary::-webkit-details-marker {
+  display: none;
+}
+
+.spoiler-select {
+  margin-top: 6px;
+  width: 100%;
+}
+
 .select {
   border: 1px solid var(--acv-color-form-secondary);
   background: var(--acv-color-form-primary);
@@ -82,6 +122,7 @@ body {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  margin-left: auto;
 }
 
 .grid {
@@ -95,6 +136,7 @@ body {
 
 .grid-2 {
   grid-template-columns: 1fr 1fr;
+  align-items: start;
 }
 
 .card {
@@ -104,6 +146,7 @@ body {
   padding: var(--acv-spacing-regular);
   display: grid;
   gap: var(--acv-spacing-small);
+  align-content: start;
 }
 
 .card-title {
@@ -153,6 +196,7 @@ body {
   grid-template-columns: repeat(4, minmax(170px, 1fr));
   gap: var(--acv-spacing-small);
   align-items: start;
+  align-content: start;
 }
 
 .tenant-tile {
@@ -244,6 +288,11 @@ body {
   border: 1px solid var(--acv-color-divider-primary);
   border-radius: var(--acv-radius-regular);
   padding: 8px;
+  width: 100%;
+}
+
+.chart-wrap > div {
+  width: 100%;
 }
 
 .mini-chart {
@@ -443,11 +492,16 @@ body {
 }
 
 .kpi-trend-positive {
-  color: var(--acv-color-text-status-success);
+  color: var(--acv-color-text-status-success, #138a3a);
 }
 
 .kpi-trend-negative {
-  color: var(--acv-color-text-status-danger);
+  color: var(--acv-color-text-status-danger, #c1362f);
+}
+
+.kpi-diff {
+  font-size: var(--acv-font-size-caption);
+  font-weight: var(--acv-font-weight-strong);
 }
 
 .section-actions {
@@ -517,7 +571,8 @@ body {
 
 .line-chart {
   width: 100%;
-  height: 180px;
+  height: 220px;
+  display: block;
 }
 
 .chart-axis {
@@ -569,6 +624,10 @@ body {
   stroke-width: 2;
   fill: none;
   stroke-dasharray: 4 3;
+}
+
+.chart-area-hatch {
+  opacity: 0.95;
 }
 
 .legend {
@@ -771,5 +830,9 @@ body {
 
   .select[multiple] {
     min-height: 84px;
+  }
+
+  .quick-actions {
+    margin-left: 0;
   }
 }

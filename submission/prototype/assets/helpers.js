@@ -5,6 +5,7 @@
     medium: 2,
     low: 1
   };
+  let chartSeq = 0;
 
   function riskClass(level) {
     if (level === "critical") return "badge badge-critical";
@@ -73,6 +74,8 @@
     const lineClass = cfg.lineClass || "risk-spark";
     const forecastClass = cfg.forecastClass || "risk-forecast";
     const pointClass = cfg.pointClass || "line-point";
+    const lineColor = cfg.lineColor || "#2f86eb";
+    const areaTint = cfg.areaTint || "rgba(47, 134, 235, 0.12)";
     const xLabels = cfg.xLabels || values.map(function (_, idx) {
       return String(idx + 1);
     });
@@ -92,6 +95,8 @@
     const innerHeight = height - topPad - bottomPad;
     const totalPoints = values.length + forecast.length;
     const axisPoints = forecast.length ? totalPoints : values.length;
+    const chartId = `linechart-${chartSeq++}`;
+    const hatchId = `${chartId}-hatch`;
 
     function pointXByIndex(idx) {
       if (axisPoints === 1) return leftPad + innerWidth / 2;
@@ -102,18 +107,26 @@
       return topPad + (1 - (value - min) / range) * innerHeight;
     }
 
-    const actualPoints = values
+    const actualCoords = values
       .map(function (value, idx) {
-        return `${pointXByIndex(idx).toFixed(1)},${pointY(value).toFixed(1)}`;
+        return { x: pointXByIndex(idx), y: pointY(value), value: value };
+      });
+    const actualPoints = actualCoords
+      .map(function (coord) {
+        return `${coord.x.toFixed(1)},${coord.y.toFixed(1)}`;
       })
       .join(" ");
+    const baselineY = topPad + innerHeight;
+    const areaPoints = actualCoords.length
+      ? `${actualCoords[0].x.toFixed(1)},${baselineY.toFixed(1)} ${actualPoints} ${actualCoords[actualCoords.length - 1].x.toFixed(1)},${baselineY.toFixed(1)}`
+      : "";
 
-    const circles = values
-      .map(function (value, idx) {
-        const x = pointXByIndex(idx).toFixed(1);
-        const y = pointY(value).toFixed(1);
+    const circles = actualCoords
+      .map(function (coord, idx) {
+        const x = coord.x.toFixed(1);
+        const y = coord.y.toFixed(1);
         const label = xLabels[idx] || `P${idx + 1}`;
-        return `<circle class="${pointClass}" cx="${x}" cy="${y}" r="3"><title>${label}: ${value}${unit ? " " + unit : ""}</title></circle>`;
+        return `<circle class="${pointClass}" cx="${x}" cy="${y}" r="3"><title>${label}: ${coord.value}${unit ? " " + unit : ""}</title></circle>`;
       })
       .join("");
 
@@ -144,10 +157,17 @@
 
     return `
       <svg viewBox="0 0 ${width} ${height}" class="line-chart" aria-hidden="true">
+        <defs>
+          <pattern id="${hatchId}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="6" stroke="${lineColor}" stroke-opacity="0.28" stroke-width="1" />
+          </pattern>
+        </defs>
         <line class="chart-axis" x1="${leftPad}" y1="${topPad + innerHeight}" x2="${width - rightPad}" y2="${topPad + innerHeight}" />
         <line class="chart-axis" x1="${leftPad}" y1="${topPad}" x2="${leftPad}" y2="${topPad + innerHeight}" />
         <line class="chart-grid" x1="${leftPad}" y1="${topPad + innerHeight * 0.33}" x2="${width - rightPad}" y2="${topPad + innerHeight * 0.33}" />
         <line class="chart-grid" x1="${leftPad}" y1="${topPad + innerHeight * 0.66}" x2="${width - rightPad}" y2="${topPad + innerHeight * 0.66}" />
+        ${areaPoints ? `<polygon points="${areaPoints}" fill="${areaTint}"></polygon>` : ""}
+        ${areaPoints ? `<polygon class="chart-area-hatch" points="${areaPoints}" fill="url(#${hatchId})"></polygon>` : ""}
         <text class="chart-label" x="${leftPad - 28}" y="${topPad + 8}">${(max).toFixed(0)}${unit}</text>
         <text class="chart-label" x="${leftPad - 28}" y="${topPad + innerHeight + 4}">${(min).toFixed(0)}${unit}</text>
         <text class="chart-label" x="${leftPad}" y="${height - 6}">${xStart}</text>

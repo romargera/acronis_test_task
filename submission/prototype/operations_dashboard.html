@@ -10,35 +10,65 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="filters" aria-label="Dashboard filters">
-        <select id="severityFilter" class="select" aria-label="Severity filter">
-          <option value="all">All severities</option>
-          <option value="critical">Critical only</option>
-          <option value="high">High and above</option>
-          <option value="medium">Medium and above</option>
-        </select>
-        <select id="serviceFilter" class="select" aria-label="Service filter" multiple>
-          <option value="all" selected>All services</option>
-          <option value="backup">Backup</option>
-          <option value="edr">EDR</option>
-          <option value="m365">M365 Backup</option>
-          <option value="patch">Patch</option>
-          <option value="dlp">DLP</option>
-        </select>
-        <select id="regionFilter" class="select" aria-label="Region filter" multiple>
-          <option value="all" selected>All regions</option>
-          <option value="NA">North America</option>
-          <option value="EU">Europe</option>
-          <option value="APAC">APAC</option>
-        </select>
-      </section>
-      <div class="tiny">Tip: use Ctrl/Cmd + click to select multiple services or regions.</div>
+      <section class="toolbar" aria-label="Dashboard controls">
+        <div class="toolbar-left filters">
+          <select id="windowFilter" class="select" aria-label="Data window filter">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="180">Last 180 days</option>
+            <option value="365">Last 365 days</option>
+          </select>
+          <select id="severityFilter" class="select" aria-label="Severity filter">
+            <option value="all">All severities</option>
+            <option value="critical">Critical only</option>
+            <option value="high">High and above</option>
+            <option value="medium">Medium and above</option>
+          </select>
 
-      <section class="quick-actions" aria-label="Quick actions">
-        <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
-        <button id="downloadBtn" class="btn btn-secondary" type="button">Download</button>
-        <button id="sendBtn" class="btn btn-secondary" type="button">Send</button>
+          <details class="filter-spoiler" id="serviceFilterWrap">
+            <summary id="serviceFilterSummary">All services</summary>
+            <select id="serviceFilter" class="select spoiler-select" aria-label="Service filter" multiple>
+              <option value="all" selected>All services</option>
+              <option value="backup">Backup</option>
+              <option value="edr">EDR</option>
+              <option value="m365">M365 Backup</option>
+              <option value="patch">Patch</option>
+              <option value="dlp">DLP</option>
+            </select>
+          </details>
+
+          <details class="filter-spoiler" id="regionFilterWrap">
+            <summary id="regionFilterSummary">All regions</summary>
+            <select id="regionFilter" class="select spoiler-select" aria-label="Region filter" multiple>
+              <option value="all" selected>All regions</option>
+              <option value="NA">North America</option>
+              <option value="EU">Europe</option>
+              <option value="APAC">APAC</option>
+            </select>
+          </details>
+
+          <details class="filter-spoiler" id="countryFilterWrap">
+            <summary id="countryFilterSummary">All countries</summary>
+            <select id="countryFilter" class="select spoiler-select" aria-label="Country filter" multiple>
+              <option value="all" selected>All countries</option>
+              <option value="United States">United States</option>
+              <option value="Germany">Germany</option>
+              <option value="Netherlands">Netherlands</option>
+              <option value="Canada">Canada</option>
+              <option value="France">France</option>
+              <option value="Singapore">Singapore</option>
+              <option value="Australia">Australia</option>
+            </select>
+          </details>
+        </div>
+        <section class="quick-actions" aria-label="Quick actions">
+          <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
+          <button id="downloadBtn" class="btn btn-secondary" type="button">Download</button>
+          <button id="sendBtn" class="btn btn-secondary" type="button">Send</button>
+        </section>
       </section>
+      <div class="tiny">Tip: open Services/Regions/Countries and use Ctrl/Cmd + click for multi-select.</div>
 
       <section class="kpi-grid" id="kpiGrid" aria-label="Operations KPI cards"></section>
 
@@ -51,6 +81,7 @@
               <label for="heatmapSort">Sort</label>
               <select id="heatmapSort" class="select select-sm" aria-label="Heatmap sort">
                 <option value="risk">Risk (desc)</option>
+                <option value="mrr">MRR (desc)</option>
                 <option value="alerts">Open alerts (desc)</option>
                 <option value="posture">Posture (low first)</option>
                 <option value="name">Client name (A-Z)</option>
@@ -68,6 +99,7 @@
               <label for="briefingSort">Sort</label>
               <select id="briefingSort" class="select select-sm" aria-label="Briefing sort">
                 <option value="priority">Priority score</option>
+                <option value="mrr">MRR (desc)</option>
                 <option value="alerts">Critical alerts</option>
                 <option value="sla">SLA (low first)</option>
               </select>
@@ -112,9 +144,11 @@
         const data = window.AcronisDemoData;
         const utils = window.DemoUtils;
         const filters = {
+          windowDays: "30",
           severity: "all",
           service: ["all"],
-          region: ["all"]
+          region: ["all"],
+          country: ["all"]
         };
         const state = {
           selectedId: null,
@@ -143,6 +177,58 @@
           trendThreats: document.getElementById("trendThreats")
         };
 
+        function updateSpoilerLabel(selectId, summaryId, defaultLabel, suffix) {
+          const values = utils.parseMultiSelect(document.getElementById(selectId), ["all"]);
+          const summary = document.getElementById(summaryId);
+          if (values.includes("all")) {
+            summary.textContent = defaultLabel;
+            return;
+          }
+          summary.textContent = `${values.length} ${suffix}`;
+        }
+
+        function buildWindowedSeries(baseValues, totalDays, integerOnly) {
+          const pointsByWindow = {
+            7: 7,
+            30: 10,
+            90: 12,
+            180: 14,
+            365: 18
+          };
+          const points = pointsByWindow[totalDays] || 10;
+          const baseLength = baseValues.length - 1;
+          const values = [];
+          for (let idx = 0; idx < points; idx += 1) {
+            const progress = points === 1 ? 0 : idx / (points - 1);
+            const sourcePos = progress * baseLength;
+            const low = Math.floor(sourcePos);
+            const high = Math.min(baseLength, Math.ceil(sourcePos));
+            const ratio = sourcePos - low;
+            const baseValue = baseValues[low] + (baseValues[high] - baseValues[low]) * ratio;
+            const wave = Math.sin((idx + 1) * 0.9) * 0.6;
+            const adjusted = baseValue + wave;
+            const normalized = integerOnly ? Math.max(0, Math.round(adjusted)) : Math.max(0, Math.min(100, Number(adjusted.toFixed(1))));
+            values.push(normalized);
+          }
+          return values;
+        }
+
+        function buildWindowLabels(totalDays, count) {
+          if (count <= 1) return ["today"];
+          const step = Math.max(1, Math.round(totalDays / (count - 1)));
+          const labels = [];
+          for (let idx = 0; idx < count; idx += 1) {
+            const daysBack = totalDays - step * idx;
+            labels.push(daysBack > 0 ? `-${daysBack}d` : "today");
+          }
+          labels[labels.length - 1] = "today";
+          return labels;
+        }
+
+        document.getElementById("windowFilter").addEventListener("change", function (event) {
+          filters.windowDays = event.target.value;
+          render();
+        });
         document.getElementById("severityFilter").addEventListener("change", function (event) {
           filters.severity = event.target.value;
           render();
@@ -150,11 +236,19 @@
 
         document.getElementById("serviceFilter").addEventListener("change", function (event) {
           filters.service = utils.parseMultiSelect(event.target, ["all"]);
+          updateSpoilerLabel("serviceFilter", "serviceFilterSummary", "All services", "services selected");
           render();
         });
 
         document.getElementById("regionFilter").addEventListener("change", function (event) {
           filters.region = utils.parseMultiSelect(event.target, ["all"]);
+          updateSpoilerLabel("regionFilter", "regionFilterSummary", "All regions", "regions selected");
+          render();
+        });
+
+        document.getElementById("countryFilter").addEventListener("change", function (event) {
+          filters.country = utils.parseMultiSelect(event.target, ["all"]);
+          updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
           render();
         });
 
@@ -186,6 +280,7 @@
 
         function matchesFilters(tenant) {
           if (!filters.region.includes("all") && !filters.region.includes(tenant.region)) return false;
+          if (!filters.country.includes("all") && !filters.country.includes(tenant.country)) return false;
           if (!filters.service.includes("all") && !filters.service.some(function (service) {
             return tenant.services[service];
           })) {
@@ -222,27 +317,27 @@
               label: "Managed Tenants",
               formula: "Count of tenants in current filter scope.",
               value: tenants.length,
-              trend: "-2 vs previous 7d",
+              trend: "-2 vs previous " + filters.windowDays + "d",
               trendClass: "kpi-trend-positive",
-              trendTitle: "Compared to previous 7-day window."
+              trendTitle: "Compared to previous " + filters.windowDays + "-day window."
             },
             {
               id: "endpoints",
               label: "Endpoints In Scope",
               formula: "Sum of endpoint inventory across in-scope tenants.",
               value: totalEndpoints,
-              trend: "+4.2% vs previous 30d",
+              trend: "+4.2% vs previous " + filters.windowDays + "d",
               trendClass: "kpi-trend-positive",
-              trendTitle: "Compared to previous 30-day window."
+              trendTitle: "Compared to previous " + filters.windowDays + "-day window."
             },
             {
               id: "posture",
               label: "Avg Posture Score",
               formula: "Average of tenant posture score (0-100).",
               value: Math.round(avgPosture) + "/100",
-              trend: "-3 pts vs previous 7d",
+              trend: "-3 pts vs previous " + filters.windowDays + "d",
               trendClass: "kpi-trend-negative",
-              trendTitle: "Compared to previous 7-day window."
+              trendTitle: "Compared to previous " + filters.windowDays + "-day window."
             },
             {
               id: "critical-exposure",
@@ -261,7 +356,7 @@
                 <button class="kpi-card-button" type="button" data-kpi="${item.id}">
                   <div class="kpi-label">${item.label}<span class="info-tip" title="${item.formula}">i</span></div>
                   <div class="kpi-value">${item.value}</div>
-                  <div class="tiny ${item.trendClass}" title="${item.trendTitle}">${item.trend}</div>
+                  <div class="kpi-diff ${item.trendClass}" title="${item.trendTitle}">${item.trend}</div>
                 </button>`;
             })
             .join("");
@@ -288,7 +383,11 @@
 
         function renderHeatmap(tenants) {
           let sorted = tenants.slice();
-          if (state.heatmapSort === "alerts") {
+          if (state.heatmapSort === "mrr") {
+            sorted.sort(function (a, b) {
+              return b.mrr - a.mrr;
+            });
+          } else if (state.heatmapSort === "alerts") {
             sorted.sort(function (a, b) {
               return b.openCriticalAlerts - a.openCriticalAlerts;
             });
@@ -302,7 +401,7 @@
             });
           }
 
-          elements.tenantCountLabel.textContent = `${sorted.length} tenants in current filter`;
+          elements.tenantCountLabel.textContent = `${sorted.length} of ${data.tenants.length} tenants in current filter`;
 
           if (!sorted.length) {
             elements.heatmap.innerHTML = `<div class="empty-state">No tenants match current filters.</div>`;
@@ -314,7 +413,7 @@
               return `
                 <button class="${utils.tenantClass(tenant.riskLevel)}" data-id="${tenant.id}" role="listitem" type="button">
                   <strong>${tenant.name}</strong>
-                  <span class="tiny">${tenant.region} • ${tenant.endpoints} endpoints</span>
+                  <span class="tiny">${tenant.country} • ${tenant.region} • ${tenant.endpoints} endpoints</span>
                   <span class="${utils.riskClass(tenant.riskLevel)}">${tenant.riskLevel.toUpperCase()}</span>
                 </button>`;
             })
@@ -330,7 +429,11 @@
 
         function renderBriefing(tenants) {
           let ranked = tenants.slice();
-          if (state.briefingSort === "alerts") {
+          if (state.briefingSort === "mrr") {
+            ranked.sort(function (a, b) {
+              return b.mrr - a.mrr;
+            });
+          } else if (state.briefingSort === "alerts") {
             ranked.sort(function (a, b) {
               return b.openCriticalAlerts - a.openCriticalAlerts;
             });
@@ -374,38 +477,48 @@
         }
 
         function renderTrends() {
-          const labels = ["D-6", "D-5", "D-4", "D-3", "D-2", "D-1", "D-0"];
-          const backup = utils.createLineChart(data.opsTrends.backup, {
-            width: 440,
-            height: 180,
+          const totalDays = Number(filters.windowDays);
+          const backupSeries = buildWindowedSeries(data.opsTrends.backup, totalDays, false);
+          const patchSeries = buildWindowedSeries(data.opsTrends.patch, totalDays, false);
+          const threatSeries = buildWindowedSeries(data.opsTrends.threats, totalDays, true);
+          const labels = buildWindowLabels(totalDays, backupSeries.length);
+          const backup = utils.createLineChart(backupSeries, {
+            width: 1080,
+            height: 220,
             unit: "%",
             yLabel: "Backup %",
             xLabels: labels,
             lineClass: "risk-spark",
-            pointClass: "line-point"
+            pointClass: "line-point",
+            lineColor: "#2f86eb",
+            areaTint: "rgba(47, 134, 235, 0.12)"
           });
-          const patch = utils.createLineChart(data.opsTrends.patch, {
-            width: 440,
-            height: 180,
+          const patch = utils.createLineChart(patchSeries, {
+            width: 1080,
+            height: 220,
             unit: "%",
             yLabel: "Patch %",
             xLabels: labels,
             lineClass: "risk-spark-alt",
-            pointClass: "line-point-alt"
+            pointClass: "line-point-alt",
+            lineColor: "#f29f05",
+            areaTint: "rgba(242, 159, 5, 0.12)"
           });
-          const threats = utils.createLineChart(data.opsTrends.threats, {
-            width: 440,
-            height: 180,
+          const threats = utils.createLineChart(threatSeries, {
+            width: 1080,
+            height: 220,
             unit: " alerts",
             yLabel: "Critical alerts",
             xLabels: labels,
             lineClass: "risk-spark-danger",
-            pointClass: "line-point-danger"
+            pointClass: "line-point-danger",
+            lineColor: "#f15354",
+            areaTint: "rgba(241, 83, 84, 0.12)"
           });
 
-          elements.trendBackup.innerHTML = `<div class="tiny">Backup success trend (unit: %)</div>${backup}`;
-          elements.trendPatch.innerHTML = `<div class="tiny">Patch compliance trend (unit: %)</div>${patch}`;
-          elements.trendThreats.innerHTML = `<div class="tiny">Threat activity trend (unit: alerts)</div>${threats}`;
+          elements.trendBackup.innerHTML = `<div class="tiny">Backup success trend (unit: %, window: ${totalDays}d)</div>${backup}`;
+          elements.trendPatch.innerHTML = `<div class="tiny">Patch compliance trend (unit: %, window: ${totalDays}d)</div>${patch}`;
+          elements.trendThreats.innerHTML = `<div class="tiny">Threat activity trend (unit: alerts, window: ${totalDays}d)</div>${threats}`;
         }
 
         function renderAlerts(tenants) {
@@ -469,7 +582,7 @@
               <h2 class="card-title">Tenant Drill-Down: ${tenant.name}</h2>
               <span class="${utils.riskClass(tenant.riskLevel)}">${tenant.riskLevel.toUpperCase()}</span>
             </div>
-            <div class="card-subtitle">${tenant.region} • ${tenant.segment} • ${tenant.endpoints} endpoints</div>
+            <div class="card-subtitle">${tenant.country} • ${tenant.region} • ${tenant.segment} • ${tenant.endpoints} endpoints</div>
             <div class="section-actions">${serviceChips}</div>
             <div class="signal-grid">
               <div class="signal-tile"><div class="tiny">Posture score</div><strong>${tenant.postureScore}/100</strong></div>
@@ -538,6 +651,9 @@
           renderDetail();
         }
 
+        updateSpoilerLabel("serviceFilter", "serviceFilterSummary", "All services", "services selected");
+        updateSpoilerLabel("regionFilter", "regionFilterSummary", "All regions", "regions selected");
+        updateSpoilerLabel("countryFilter", "countryFilterSummary", "All countries", "countries selected");
         render();
         window.setInterval(injectLiveAlert, 21000);
       })();
