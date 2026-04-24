@@ -4,9 +4,9 @@ Author: Roman Babunts.
 
 > NOTE:
 >
-> - Marker `(A)` means an assumption that is not fully validated yet.
-> - Every `(A)` item is listed again in the final **Assumption Register**.
-> - Scope of this document is strictly two dashboards: Operations and Business Growth.
+> - The canonical submission lives in `submission/`. This document is an optional long-form version kept for readers who want the full narrative including the Assumption Register and alternatives considered.
+> - Marker `(A)` means an assumption that is not fully validated yet; every `(A)` item is also listed in the Assumption Register at the end.
+> - Scope is strictly two dashboards: Operations and Business Growth.
 
 ---
 
@@ -187,6 +187,7 @@ Primary user stories:
 - BIZ-3: as an owner, I need margin-oriented client ranking and sort controls.
 - BIZ-4: as an owner, I need visible forecast in MRR trend to support planning.
 - BIZ-5: as an owner, I need one-click QBR preview flow as communication accelerator.
+- BIZ-6: as an owner, I need a peer benchmark view so I can see how my portfolio compares to similar MSPs on retention, margin, Service Level Agreement compliance, and Monthly Recurring Revenue per endpoint, with an explicit cohort definition and anonymization floor.
 
 Success metrics:
 
@@ -327,26 +328,7 @@ Validation questions for that +2h extension:
 
 ## 8. Appendix
 
-### 8.1 Competitive context (reference, not core narrative)
-
-This is a representative comparison set, not an exhaustive market map.
-
-Representative platforms reviewed:
-
-- ConnectWise BrightGauge,
-- Kaseya IT Complete,
-- NinjaOne,
-- Datto/Autotask,
-- MSPbots.ai.
-
-What to compare at minimum:
-
-- AI-assisted insight depth,
-- comparative performance visibility and transparency,
-- actionability from signal to next step,
-- setup friction and data dependency profile.
-
-### 8.2 Alternatives considered (moved from core body)
+### 8.1 Alternatives considered
 
 Alternative 1:
 
@@ -368,17 +350,7 @@ Alternative 4:
 - immediate full cross-tool intelligence platform.
 - postponed due to dependency and delivery risk `(A)`.
 
-### 8.3 Phase-gated rollout notes (from interview context, optional)
-
-This rollout framing comes from interview context and is not mandatory output of the test task.
-
-- phase focused on modernized dashboard/report baseline,
-- phase focused on warehouse/lake and predictive intelligence expansion,
-- rollout starts with A/B test on new users only (classic vs new operations dashboard),
-- prototype implementation merged baseline metrics into the Operations dashboard and removed separate `Classic Overview` tab,
-- staged access strategy via early-access cohort before broad rollout.
-
-### 8.4 Current production baseline
+### 8.2 Current production baseline
 
 - Operations dashboard has basic overview with a top summary card.
 - Business-growth dashboard does not exist.
@@ -388,7 +360,7 @@ This rollout framing comes from interview context and is not mandatory output of
 - Documented refresh cadence is frequent (overview-level and operations-level updates).
 - Operations/overview model already supports drill-down-like investigation patterns.
 
-### 8.5 Baseline metric and visualization parity checklist
+### 8.3 Baseline metric and visualization parity checklist
 
 The current production view already communicates several metric patterns clearly, so v1 should keep parity:
 

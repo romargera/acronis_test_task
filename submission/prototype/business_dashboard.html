@@ -135,8 +135,9 @@
       <section class="grid grid-2 grid-balanced">
         <article class="card">
           <div class="section-actions">
-            <h2 class="card-title">Churn Risk Radar</h2>
+            <h2 class="card-title">Churn Risk Radar <span class="info-tip" data-info="Clients plotted by tenure and MRR with bubble color reflecting churn risk. Click a bubble to drill into a client.">i</span></h2>
             <span class="card-subtitle" id="radarSummary"></span>
+            <div class="control-inline" id="churnConfidenceSlot"></div>
             <div class="control-inline">
               <label for="riskSort">Sort clients</label>
               <select id="riskSort" class="select select-sm" aria-label="Risk client sort">
@@ -168,6 +169,29 @@
             </div>
           </div>
           <div id="marginList" class="metric-bars"></div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <div class="section-actions">
+            <h2 class="card-title">Peer Benchmark: How You Compare <span class="info-tip" data-info="Compares your portfolio to a cohort of similar MSPs on the metrics that drive growth and retention. Individual MSPs are never identified.">i</span></h2>
+            <span class="card-subtitle" id="peerCohortSummary"></span>
+            <div class="control-inline">
+              <label for="peerMetricFilter">Focus metric</label>
+              <select id="peerMetricFilter" class="select select-sm" aria-label="Peer metric filter">
+                <option value="all">All metrics</option>
+              </select>
+            </div>
+          </div>
+          <div class="peer-cohort" id="peerCohortLine"></div>
+          <div id="peerBenchmarkList" class="peer-benchmark-list"></div>
+          <div class="peer-legend">
+            <span class="legend-chip"><span class="legend-you"></span> You</span>
+            <span class="legend-chip"><span class="legend-range"></span> Peer 25th to 75th percentile</span>
+            <span class="legend-chip"><span class="legend-median"></span> Peer median</span>
+          </div>
+          <div class="tiny" id="peerAnonymizationNote"></div>
         </article>
       </section>
 
@@ -240,8 +264,16 @@
           detailPanel: document.getElementById("detailPanel"),
           qbrModal: document.getElementById("qbrModal"),
           qbrContent: document.getElementById("qbrContent"),
-          riskRankList: document.getElementById("riskRankList")
+          riskRankList: document.getElementById("riskRankList"),
+          churnConfidenceSlot: document.getElementById("churnConfidenceSlot"),
+          peerCohortLine: document.getElementById("peerCohortLine"),
+          peerCohortSummary: document.getElementById("peerCohortSummary"),
+          peerBenchmarkList: document.getElementById("peerBenchmarkList"),
+          peerAnonymizationNote: document.getElementById("peerAnonymizationNote"),
+          peerMetricFilter: document.getElementById("peerMetricFilter")
         };
+
+        const peerState = { focus: "all" };
 
         function updateSpoilerLabel(selectId, summaryId, defaultLabel, suffix) {
           const values = utils.parseMultiSelect(document.getElementById(selectId), ["all"]);
@@ -859,6 +891,115 @@
           el.qbrModal.classList.add("open");
         }
 
+        function renderChurnConfidence() {
+          if (!el.churnConfidenceSlot) return;
+          el.churnConfidenceSlot.innerHTML = utils.createConfidenceBadge(
+            "churnRisk",
+            "Heuristic v1 · how calculated"
+          );
+        }
+
+        function initPeerMetricFilter() {
+          const benchmarks = data.peerBenchmarks;
+          if (!el.peerMetricFilter || !benchmarks) return;
+          if (el.peerMetricFilter.dataset.built === "1") return;
+          const options = [{ value: "all", label: "All metrics" }].concat(
+            benchmarks.metrics.map(function (m) {
+              return { value: m.id, label: m.label };
+            })
+          );
+          el.peerMetricFilter.innerHTML = options
+            .map(function (opt) {
+              return `<option value="${opt.value}">${opt.label}</option>`;
+            })
+            .join("");
+          el.peerMetricFilter.value = peerState.focus;
+          el.peerMetricFilter.addEventListener("change", function (event) {
+            peerState.focus = event.target.value;
+            renderPeerBenchmark();
+          });
+          el.peerMetricFilter.dataset.built = "1";
+        }
+
+        function peerRangeBounds(metric) {
+          const anchor = metric.peerP25;
+          const span = Math.max(metric.peerP75 - metric.peerP25, 1);
+          const lo = Math.min(metric.peerP25, metric.yourValue) - span * 0.3;
+          const hi = Math.max(metric.peerP75, metric.yourValue) + span * 0.3;
+          return { lo: lo, hi: hi, anchor: anchor };
+        }
+
+        function pctPosition(value, bounds) {
+          const span = Math.max(bounds.hi - bounds.lo, 1);
+          const clamped = Math.min(Math.max(value, bounds.lo), bounds.hi);
+          return ((clamped - bounds.lo) / span) * 100;
+        }
+
+        function formatPeerValue(value, unit) {
+          if (unit === "$") return `$${Number(value).toFixed(0)}`;
+          if (unit === "%") return `${Number(value).toFixed(0)}%`;
+          return String(value);
+        }
+
+        function renderPeerBenchmark() {
+          const benchmarks = data.peerBenchmarks;
+          if (!benchmarks || !el.peerBenchmarkList) return;
+          initPeerMetricFilter();
+
+          el.peerCohortSummary.textContent = `Cohort: ${benchmarks.cohort.label}, sample ${benchmarks.cohort.sampleSize} MSPs`;
+          el.peerCohortLine.innerHTML = `<strong>Cohort definition:</strong> ${benchmarks.cohort.definition}`;
+          el.peerAnonymizationNote.textContent = benchmarks.cohort.anonymization;
+
+          const metrics = peerState.focus === "all"
+            ? benchmarks.metrics
+            : benchmarks.metrics.filter(function (m) {
+                return m.id === peerState.focus;
+              });
+
+          if (!metrics.length) {
+            el.peerBenchmarkList.innerHTML = '<div class="empty-state">No metric selected.</div>';
+            return;
+          }
+
+          el.peerBenchmarkList.innerHTML = metrics
+            .map(function (metric) {
+              const bounds = peerRangeBounds(metric);
+              const leftPct = pctPosition(metric.peerP25, bounds);
+              const rightPct = pctPosition(metric.peerP75, bounds);
+              const medianPct = pctPosition(metric.peerP50, bounds);
+              const youPct = pctPosition(metric.yourValue, bounds);
+              const delta = metric.yourValue - metric.peerP50;
+              const ahead = metric.higherIsBetter ? delta >= 0 : delta <= 0;
+              const deltaLabel = metric.higherIsBetter
+                ? (delta >= 0 ? "ahead of" : "behind")
+                : (delta <= 0 ? "ahead of" : "behind");
+              const deltaClassName = ahead ? "peer-delta-ahead" : "peer-delta-behind";
+              const youClassName = ahead ? "peer-you peer-you-ahead" : "peer-you peer-you-behind";
+              const displayDelta = metric.unit === "$"
+                ? `$${Math.abs(Math.round(delta))}`
+                : `${Math.abs(delta).toFixed(1)}${metric.unit === "%" ? "pp" : ""}`;
+
+              return `
+                <div class="peer-row">
+                  <div class="peer-row-head">
+                    <span class="peer-row-label">${metric.label}</span>
+                    <span class="peer-row-values">
+                      <span>You <strong>${formatPeerValue(metric.yourValue, metric.unit)}</strong></span>
+                      <span>Peer median <strong>${formatPeerValue(metric.peerP50, metric.unit)}</strong></span>
+                      <span class="${deltaClassName}">${displayDelta} ${deltaLabel} median</span>
+                    </span>
+                  </div>
+                  <div class="peer-bar" title="Peer 25th to 75th percentile: ${formatPeerValue(metric.peerP25, metric.unit)} to ${formatPeerValue(metric.peerP75, metric.unit)}">
+                    <div class="peer-range" style="left:${leftPct.toFixed(1)}%; width:${(rightPct - leftPct).toFixed(1)}%"></div>
+                    <div class="peer-median" style="left:${medianPct.toFixed(1)}%"></div>
+                    <div class="${youClassName}" style="left:${youPct.toFixed(1)}%" title="Your value: ${formatPeerValue(metric.yourValue, metric.unit)}"></div>
+                  </div>
+                  <div class="tiny">${metric.formula} Source: ${metric.source}.</div>
+                </div>`;
+            })
+            .join("");
+        }
+
         function render() {
           const tenants = scopedTenants();
           renderKpis(tenants);
@@ -866,8 +1007,11 @@
           renderRiskMap(tenants);
           renderUpsellTable(tenants);
           renderMargin(tenants);
+          renderChurnConfidence();
+          renderPeerBenchmark();
           renderDetail();
           utils.initInfoTips(document.body);
+          utils.bindConfidenceBadges(document.body);
           updateResetButtonVisibility();
         }
 

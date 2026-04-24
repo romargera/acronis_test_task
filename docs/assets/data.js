@@ -293,10 +293,99 @@
     "365d": [57, 58, 59, 61, 62, 63, 65, 67, 68, 69, 70, 72]
   };
 
+  const peerBenchmarks = {
+    cohort: {
+      label: "Mid-market MSPs",
+      definition: "MSPs with 150 to 500 managed tenants, regulated-heavy portfolio, primarily North America and Europe.",
+      sampleSize: 142,
+      anonymization: "Peer values are aggregated across at least 25 MSPs per metric. Individual MSPs are never identifiable; cells below that threshold are suppressed."
+    },
+    metrics: [
+      {
+        id: "nrr",
+        label: "Net Revenue Retention",
+        unit: "%",
+        yourValue: 103,
+        peerP25: 101,
+        peerP50: 109,
+        peerP75: 114,
+        higherIsBetter: true,
+        formula: "Current period MRR from the prior cohort divided by prior period MRR, net of churn and expansion.",
+        source: "Usage and billing telemetry, monthly rollup"
+      },
+      {
+        id: "gross-margin",
+        label: "Gross Margin",
+        unit: "%",
+        yourValue: 30,
+        peerP25: 28,
+        peerP50: 34,
+        peerP75: 40,
+        higherIsBetter: true,
+        formula: "Average gross margin across the scoped client portfolio using service revenue minus estimated delivery cost.",
+        source: "Usage plus PSA ticket pressure model"
+      },
+      {
+        id: "sla",
+        label: "SLA Compliance (MRR-weighted)",
+        unit: "%",
+        yourValue: 84,
+        peerP25: 83,
+        peerP50: 89,
+        peerP75: 93,
+        higherIsBetter: true,
+        formula: "Share of tickets meeting SLA, weighted by client MRR so that large accounts count more.",
+        source: "PSA connector events"
+      },
+      {
+        id: "mrr-per-endpoint",
+        label: "MRR per Endpoint",
+        unit: "$",
+        yourValue: 52,
+        peerP25: 45,
+        peerP50: 61,
+        peerP75: 74,
+        higherIsBetter: true,
+        formula: "Total portfolio MRR divided by total managed endpoints in the same scope.",
+        source: "Billing and endpoint inventory"
+      }
+    ]
+  };
+
+  const scoringConfig = {
+    operationsRisk: {
+      label: "Operational Risk Score",
+      version: "Heuristic v1",
+      confidence: "Medium confidence. Weights are initial product hypothesis, not trained ML. We collect technician up or down votes in the early access program to recalibrate.",
+      weights: [
+        { factor: "Backup failure rate", weight: 0.35, rationale: "Primary backup promise; most direct MSP liability." },
+        { factor: "Patch lag (days past published CVE)", weight: 0.25, rationale: "Strong leading indicator of exploitable surface." },
+        { factor: "Open critical alerts (severity-weighted)", weight: 0.20, rationale: "Captures current active incident pressure." },
+        { factor: "SLA miss rate (last 14 days)", weight: 0.20, rationale: "Contract exposure; ties ops signal to commercial risk." }
+      ],
+      fallback: "If a factor is missing data, its weight is redistributed proportionally across present factors. Missing factors are flagged in the hover explanation."
+    },
+    churnRisk: {
+      label: "Churn Risk Score",
+      version: "Heuristic v1",
+      confidence: "Low to medium confidence for the first 90 days after launch. A labeled churn dataset from production renewals is required before moving to a trained model.",
+      weights: [
+        { factor: "Ticket reopen rate", weight: 0.30, rationale: "Single strongest precursor seen in discovery interviews." },
+        { factor: "Escalation rate", weight: 0.25, rationale: "Reflects customer frustration and internal cost." },
+        { factor: "SLA compliance drop", weight: 0.20, rationale: "Directly visible to customer stakeholders." },
+        { factor: "QBR attendance drop", weight: 0.15, rationale: "Sponsor disengagement is a renewal risk." },
+        { factor: "Billing disputes", weight: 0.10, rationale: "Late signal but very high conviction when present." }
+      ],
+      fallback: "If PSA data quality is too low for a tenant, we display the score as Unavailable with an explicit data-gap label rather than guessing."
+    }
+  };
+
   window.AcronisDemoData = {
     asOf: "2026-04-19",
     tenants: tenants,
     opsTrends: opsTrends,
-    revenueSeries: revenueSeries
+    revenueSeries: revenueSeries,
+    peerBenchmarks: peerBenchmarks,
+    scoringConfig: scoringConfig
   };
 })();

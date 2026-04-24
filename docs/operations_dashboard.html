@@ -154,6 +154,7 @@
             <div class="section-actions section-actions-top">
               <h2 class="card-title">Cross-Tenant Risk Heatmap <span class="info-tip" data-info="Each tile summarizes tenant risk with scope metadata and current severity badge. Tiles are sortable and clickable for drill-down.">i</span></h2>
               <span class="card-subtitle" id="tenantCountLabel"></span>
+              <div class="control-inline" id="opsRiskConfidenceSlot"></div>
               <div class="control-inline">
                 <label for="heatmapSort">Sort</label>
                 <select id="heatmapSort" class="select select-sm" aria-label="Heatmap sort">
@@ -1118,6 +1119,15 @@
           utils.toast(`New ${tenant.name} alert pre-triaged by AI`);
         }
 
+        function renderOpsRiskConfidence() {
+          const slot = document.getElementById("opsRiskConfidenceSlot");
+          if (!slot) return;
+          slot.innerHTML = utils.createConfidenceBadge(
+            "operationsRisk",
+            "Heuristic v1 · how calculated"
+          );
+        }
+
         function render() {
           const tenants = filteredTenants();
           renderKpis(tenants);
@@ -1126,8 +1136,10 @@
           renderTrends();
           renderAlerts(tenants);
           renderClassicOverview(tenants);
+          renderOpsRiskConfidence();
           renderDetail();
           utils.initInfoTips(document.body);
+          utils.bindConfidenceBadges(document.body);
           updateResetButtonVisibility();
         }
 

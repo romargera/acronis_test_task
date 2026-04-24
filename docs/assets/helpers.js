@@ -473,6 +473,91 @@
     return params.get(name);
   }
 
+  function getScoringConfig(key) {
+    const config = window.AcronisDemoData && window.AcronisDemoData.scoringConfig;
+    return config ? config[key] : null;
+  }
+
+  function createConfidenceBadge(scoringKey, labelOverride) {
+    const config = getScoringConfig(scoringKey);
+    if (!config) return "";
+    const label = labelOverride || config.version;
+    return `<button type="button" class="confidence-badge" data-scoring-key="${escapeAttr(scoringKey)}" aria-label="Show scoring formula for ${escapeAttr(config.label)}">
+        <span class="confidence-dot" aria-hidden="true"></span>
+        <span class="confidence-label">${escapeHtml(label)}</span>
+      </button>`;
+  }
+
+  function buildScoreExplainerHtml(config) {
+    const rows = (config.weights || [])
+      .map(function (entry) {
+        const pct = Math.round(entry.weight * 100);
+        return `<li>
+            <div class="score-row">
+              <span class="score-factor">${escapeHtml(entry.factor)}</span>
+              <span class="score-weight">${pct}%</span>
+            </div>
+            <div class="tiny score-rationale">${escapeHtml(entry.rationale || "")}</div>
+          </li>`;
+      })
+      .join("");
+    return `
+      <div class="score-explainer">
+        <div class="score-explainer-head">
+          <strong>${escapeHtml(config.label)}</strong>
+          <span class="tiny">${escapeHtml(config.version)}</span>
+        </div>
+        <p class="tiny score-explainer-conf">${escapeHtml(config.confidence || "")}</p>
+        <ol class="score-weights">${rows}</ol>
+        <p class="tiny score-explainer-fallback">${escapeHtml(config.fallback || "")}</p>
+      </div>`;
+  }
+
+  function ensureScoreModal() {
+    let modal = document.getElementById("scoreExplainerModal");
+    if (modal) return modal;
+    modal = document.createElement("div");
+    modal.id = "scoreExplainerModal";
+    modal.className = "modal-backdrop";
+    modal.setAttribute("aria-hidden", "true");
+    modal.innerHTML = `
+      <div class="modal" role="dialog" aria-modal="true" aria-label="Score explanation">
+        <div class="section-actions">
+          <h2 class="card-title">How this score is calculated</h2>
+          <button class="btn btn-secondary" id="closeScoreExplainer" type="button">Close</button>
+        </div>
+        <div id="scoreExplainerBody"></div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal) modal.classList.remove("open");
+    });
+    modal.querySelector("#closeScoreExplainer").addEventListener("click", function () {
+      modal.classList.remove("open");
+    });
+    return modal;
+  }
+
+  function bindConfidenceBadges(scope) {
+    const root = scope || document;
+    const badges = root.querySelectorAll(".confidence-badge[data-scoring-key]");
+    if (!badges.length) return;
+    const modal = ensureScoreModal();
+    const body = modal.querySelector("#scoreExplainerBody");
+    badges.forEach(function (badge) {
+      if (badge.dataset.confBound === "1") return;
+      badge.dataset.confBound = "1";
+      badge.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const config = getScoringConfig(badge.getAttribute("data-scoring-key"));
+        if (!config) return;
+        body.innerHTML = buildScoreExplainerHtml(config);
+        modal.classList.add("open");
+      });
+    });
+  }
+
   window.DemoUtils = {
     levelWeights: levelWeights,
     riskClass: riskClass,
@@ -492,6 +577,9 @@
     loadSharedFilters: loadSharedFilters,
     saveSharedFilters: saveSharedFilters,
     toast: toast,
-    queryParam: queryParam
+    queryParam: queryParam,
+    createConfidenceBadge: createConfidenceBadge,
+    bindConfidenceBadges: bindConfidenceBadges,
+    getScoringConfig: getScoringConfig
   };
 })();

@@ -1146,3 +1146,222 @@ a[href]:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.peer-cohort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: center;
+  color: var(--acv-color-text-secondary);
+  font-size: var(--acv-font-size-caption);
+  margin-bottom: 6px;
+}
+
+.peer-cohort strong {
+  color: var(--acv-color-text-primary);
+}
+
+.peer-benchmark-list {
+  display: grid;
+  gap: 10px;
+}
+
+.peer-row {
+  border: 1px solid var(--acv-color-divider-primary);
+  border-radius: var(--acv-radius-regular);
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+  background: var(--acv-color-surface-inversed-primary);
+}
+
+.peer-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.peer-row-label {
+  font-weight: 600;
+  font-size: var(--acv-font-size-body);
+}
+
+.peer-row-values {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: var(--acv-font-size-caption);
+  color: var(--acv-color-text-secondary);
+}
+
+.peer-row-values strong {
+  color: var(--acv-color-text-primary);
+}
+
+.peer-bar {
+  position: relative;
+  height: 14px;
+  background: var(--acv-color-surface-secondary, #eef1f6);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.peer-range {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(47, 134, 235, 0.22);
+}
+
+.peer-median {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: #1f5fad;
+}
+
+.peer-you {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 10px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.18);
+}
+
+.peer-you-ahead {
+  background: #3ebc72;
+}
+
+.peer-you-behind {
+  background: #f29f05;
+}
+
+.peer-delta-ahead {
+  color: #1f7a42;
+  font-weight: 600;
+}
+
+.peer-delta-behind {
+  color: #8a4500;
+  font-weight: 600;
+}
+
+.peer-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: var(--acv-font-size-caption);
+  color: var(--acv-color-text-secondary);
+  margin-top: 4px;
+}
+
+.peer-legend .legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.peer-legend .legend-you {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #3ebc72;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.18);
+}
+
+.peer-legend .legend-range {
+  width: 18px;
+  height: 10px;
+  border-radius: 4px;
+  background: rgba(47, 134, 235, 0.22);
+}
+
+.peer-legend .legend-median {
+  width: 2px;
+  height: 12px;
+  background: #1f5fad;
+}
+
+.confidence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--acv-font-size-note);
+  border-radius: 999px;
+  padding: 3px 10px;
+  border: 1px solid var(--acv-color-divider-primary);
+  background: var(--acv-color-surface-inversed-primary);
+  color: var(--acv-color-text-secondary);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.confidence-badge:hover,
+.confidence-badge:focus-visible {
+  background: var(--acv-color-surface-primary-default);
+  border-color: var(--acv-color-border-primary);
+  outline: none;
+}
+
+.confidence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #2f86eb;
+  box-shadow: 0 0 0 2px rgba(47, 134, 235, 0.18);
+}
+
+.confidence-label {
+  font-weight: 500;
+}
+
+.score-explainer {
+  display: grid;
+  gap: 10px;
+}
+
+.score-explainer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.score-explainer-conf,
+.score-explainer-fallback {
+  color: var(--acv-color-text-secondary);
+}
+
+.score-weights {
+  list-style: decimal;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.score-factor {
+  font-weight: 600;
+}
+
+.score-weight {
+  font-variant-numeric: tabular-nums;
+  color: var(--acv-color-text-secondary);
+}
+
+.score-rationale {
+  color: var(--acv-color-text-secondary);
+}
+
