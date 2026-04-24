@@ -17,20 +17,27 @@
           <option value="high">High and above</option>
           <option value="medium">Medium and above</option>
         </select>
-        <select id="serviceFilter" class="select" aria-label="Service filter">
-          <option value="all">All services</option>
+        <select id="serviceFilter" class="select" aria-label="Service filter" multiple>
+          <option value="all" selected>All services</option>
           <option value="backup">Backup</option>
           <option value="edr">EDR</option>
           <option value="m365">M365 Backup</option>
           <option value="patch">Patch</option>
           <option value="dlp">DLP</option>
         </select>
-        <select id="regionFilter" class="select" aria-label="Region filter">
-          <option value="all">All regions</option>
+        <select id="regionFilter" class="select" aria-label="Region filter" multiple>
+          <option value="all" selected>All regions</option>
           <option value="NA">North America</option>
           <option value="EU">Europe</option>
           <option value="APAC">APAC</option>
         </select>
+      </section>
+      <div class="tiny">Tip: use Ctrl/Cmd + click to select multiple services or regions.</div>
+
+      <section class="quick-actions" aria-label="Quick actions">
+        <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
+        <button id="downloadBtn" class="btn btn-secondary" type="button">Download</button>
+        <button id="sendBtn" class="btn btn-secondary" type="button">Send</button>
       </section>
 
       <section class="kpi-grid" id="kpiGrid" aria-label="Operations KPI cards"></section>
@@ -38,8 +45,17 @@
       <section class="grid grid-2">
         <article class="card">
           <div class="section-actions">
-            <h2 class="card-title">Cross-Tenant Risk Heatmap</h2>
+            <h2 class="card-title">Cross-Tenant Risk Heatmap <span class="info-tip" title="Each tile combines risk level, open critical alerts, and posture score for quick cross-tenant triage.">i</span></h2>
             <span class="card-subtitle" id="tenantCountLabel"></span>
+            <div class="control-inline">
+              <label for="heatmapSort">Sort</label>
+              <select id="heatmapSort" class="select select-sm" aria-label="Heatmap sort">
+                <option value="risk">Risk (desc)</option>
+                <option value="alerts">Open alerts (desc)</option>
+                <option value="posture">Posture (low first)</option>
+                <option value="name">Client name (A-Z)</option>
+              </select>
+            </div>
           </div>
           <div class="heatmap" id="heatmap" role="list"></div>
         </article>
@@ -48,6 +64,14 @@
           <div class="section-actions">
             <h2 class="card-title">AI Morning Briefing</h2>
             <button id="briefToggle" class="btn btn-secondary" type="button">Show Top 5</button>
+            <div class="control-inline">
+              <label for="briefingSort">Sort</label>
+              <select id="briefingSort" class="select select-sm" aria-label="Briefing sort">
+                <option value="priority">Priority score</option>
+                <option value="alerts">Critical alerts</option>
+                <option value="sla">SLA (low first)</option>
+              </select>
+            </div>
           </div>
           <p class="card-subtitle">Priority-ranked actions generated from overnight telemetry.</p>
           <div id="briefingList" class="grid"></div>
@@ -56,7 +80,7 @@
 
       <section class="split">
         <article class="card">
-          <h2 class="card-title">Posture Trends (7/30/90 View)</h2>
+          <h2 class="card-title">Posture Trends (last 7 days) <span class="info-tip" title="Diff and trend are shown versus previous 7-day baseline window.">i</span></h2>
           <div class="legend">
             <span class="legend-item"><span class="dot dot-primary"></span> Backup success</span>
             <span class="legend-item"><span class="dot dot-warning"></span> Patch compliance</span>
@@ -89,12 +113,14 @@
         const utils = window.DemoUtils;
         const filters = {
           severity: "all",
-          service: "all",
-          region: "all"
+          service: ["all"],
+          region: ["all"]
         };
         const state = {
           selectedId: null,
           showTopOnly: true,
+          heatmapSort: "risk",
+          briefingSort: "priority",
           dynamicAlerts: utils.sortAlerts(data.tenants)
         };
 
@@ -123,13 +149,23 @@
         });
 
         document.getElementById("serviceFilter").addEventListener("change", function (event) {
-          filters.service = event.target.value;
+          filters.service = utils.parseMultiSelect(event.target, ["all"]);
           render();
         });
 
         document.getElementById("regionFilter").addEventListener("change", function (event) {
-          filters.region = event.target.value;
+          filters.region = utils.parseMultiSelect(event.target, ["all"]);
           render();
+        });
+
+        document.getElementById("heatmapSort").addEventListener("change", function (event) {
+          state.heatmapSort = event.target.value;
+          renderHeatmap(filteredTenants());
+        });
+
+        document.getElementById("briefingSort").addEventListener("change", function (event) {
+          state.briefingSort = event.target.value;
+          renderBriefing(filteredTenants());
         });
 
         document.getElementById("briefToggle").addEventListener("click", function () {
@@ -138,9 +174,23 @@
           renderBriefing(filteredTenants());
         });
 
+        document.getElementById("addWidgetBtn").addEventListener("click", function () {
+          utils.toast("Add widget flow placeholder: widget gallery opens here");
+        });
+        document.getElementById("downloadBtn").addEventListener("click", function () {
+          utils.toast("Download placeholder: PDF/CSV export selector opens here");
+        });
+        document.getElementById("sendBtn").addEventListener("click", function () {
+          utils.toast("Send placeholder: report delivery dialog opens here");
+        });
+
         function matchesFilters(tenant) {
-          if (filters.region !== "all" && tenant.region !== filters.region) return false;
-          if (filters.service !== "all" && !tenant.services[filters.service]) return false;
+          if (!filters.region.includes("all") && !filters.region.includes(tenant.region)) return false;
+          if (!filters.service.includes("all") && !filters.service.some(function (service) {
+            return tenant.services[service];
+          })) {
+            return false;
+          }
           const riskWeight = utils.levelWeights[tenant.riskLevel] || 0;
           if (riskWeight < severityThreshold[filters.severity]) return false;
           return true;
@@ -166,32 +216,100 @@
             return acc + tenant.openCriticalAlerts;
           }, 0);
 
-          elements.kpiGrid.innerHTML = [
-            { label: "Managed Tenants", value: tenants.length, trend: "-2 vs last week", trendClass: "kpi-trend-positive" },
-            { label: "Endpoints In Scope", value: totalEndpoints, trend: "+4.2% growth", trendClass: "kpi-trend-positive" },
-            { label: "Avg Posture Score", value: Math.round(avgPosture), trend: "-3 points WoW", trendClass: "kpi-trend-negative" },
-            { label: "Critical Exposure", value: criticalTenants + " tenants", trend: openAlerts + " open critical alerts", trendClass: "kpi-trend-negative" }
-          ]
+          const rows = [
+            {
+              id: "managed-tenants",
+              label: "Managed Tenants",
+              formula: "Count of tenants in current filter scope.",
+              value: tenants.length,
+              trend: "-2 vs previous 7d",
+              trendClass: "kpi-trend-positive",
+              trendTitle: "Compared to previous 7-day window."
+            },
+            {
+              id: "endpoints",
+              label: "Endpoints In Scope",
+              formula: "Sum of endpoint inventory across in-scope tenants.",
+              value: totalEndpoints,
+              trend: "+4.2% vs previous 30d",
+              trendClass: "kpi-trend-positive",
+              trendTitle: "Compared to previous 30-day window."
+            },
+            {
+              id: "posture",
+              label: "Avg Posture Score",
+              formula: "Average of tenant posture score (0-100).",
+              value: Math.round(avgPosture) + "/100",
+              trend: "-3 pts vs previous 7d",
+              trendClass: "kpi-trend-negative",
+              trendTitle: "Compared to previous 7-day window."
+            },
+            {
+              id: "critical-exposure",
+              label: "Critical Exposure",
+              formula: "Tenants currently at critical risk level and open critical alerts.",
+              value: criticalTenants + " tenants",
+              trend: openAlerts + " open critical alerts",
+              trendClass: "kpi-trend-negative",
+              trendTitle: "Live value refreshed every 20 seconds."
+            }
+          ];
+
+          elements.kpiGrid.innerHTML = rows
             .map(function (item) {
               return `
-                <div class="kpi-card">
-                  <div class="kpi-label">${item.label}</div>
+                <button class="kpi-card-button" type="button" data-kpi="${item.id}">
+                  <div class="kpi-label">${item.label}<span class="info-tip" title="${item.formula}">i</span></div>
                   <div class="kpi-value">${item.value}</div>
-                  <div class="tiny ${item.trendClass}">${item.trend}</div>
-                </div>`;
+                  <div class="tiny ${item.trendClass}" title="${item.trendTitle}">${item.trend}</div>
+                </button>`;
             })
             .join("");
+
+          elements.kpiGrid.querySelectorAll("[data-kpi]").forEach(function (button) {
+            button.addEventListener("click", function () {
+              const id = this.getAttribute("data-kpi");
+              if (!tenants.length) {
+                utils.toast("No tenants in current filter to drill down.");
+                return;
+              }
+              state.selectedId = tenants[0].id;
+              renderDetail();
+              const labels = {
+                "managed-tenants": "Opens tenant scope details",
+                endpoints: "Opens endpoint inventory details",
+                posture: "Opens posture score breakdown",
+                "critical-exposure": "Opens critical exposure queue"
+              };
+              utils.toast(labels[id] + " (prototype placeholder)");
+            });
+          });
         }
 
         function renderHeatmap(tenants) {
-          elements.tenantCountLabel.textContent = `${tenants.length} tenants in current filter`;
+          let sorted = tenants.slice();
+          if (state.heatmapSort === "alerts") {
+            sorted.sort(function (a, b) {
+              return b.openCriticalAlerts - a.openCriticalAlerts;
+            });
+          } else if (state.heatmapSort === "posture") {
+            sorted.sort(function (a, b) {
+              return a.postureScore - b.postureScore;
+            });
+          } else if (state.heatmapSort === "name") {
+            sorted.sort(function (a, b) {
+              return a.name.localeCompare(b.name);
+            });
+          }
 
-          if (!tenants.length) {
+          elements.tenantCountLabel.textContent = `${sorted.length} tenants in current filter`;
+
+          if (!sorted.length) {
             elements.heatmap.innerHTML = `<div class="empty-state">No tenants match current filters.</div>`;
             return;
           }
 
-          elements.heatmap.innerHTML = tenants
+          elements.heatmap.innerHTML = sorted
             .map(function (tenant) {
               return `
                 <button class="${utils.tenantClass(tenant.riskLevel)}" data-id="${tenant.id}" role="listitem" type="button">
@@ -211,12 +329,22 @@
         }
 
         function renderBriefing(tenants) {
-          const ranked = tenants
-            .slice()
-            .sort(function (a, b) {
+          let ranked = tenants.slice();
+          if (state.briefingSort === "alerts") {
+            ranked.sort(function (a, b) {
+              return b.openCriticalAlerts - a.openCriticalAlerts;
+            });
+          } else if (state.briefingSort === "sla") {
+            ranked.sort(function (a, b) {
+              return a.slaCompliance - b.slaCompliance;
+            });
+          } else {
+            ranked.sort(function (a, b) {
               return utils.riskScore(b) - utils.riskScore(a);
-            })
-            .slice(0, state.showTopOnly ? 5 : tenants.length);
+            });
+          }
+
+          ranked = ranked.slice(0, state.showTopOnly ? 5 : tenants.length);
 
           if (!ranked.length) {
             elements.briefingList.innerHTML = `<div class="empty-state">No actionable items for current filters.</div>`;
@@ -246,13 +374,38 @@
         }
 
         function renderTrends() {
-          const backup = utils.createSparkline(data.opsTrends.backup, { width: 380, height: 78 }).replace("risk-spark", "risk-spark");
-          const patch = utils.createSparkline(data.opsTrends.patch, { width: 380, height: 78 }).replace("risk-spark", "risk-spark risk-spark-alt");
-          const threats = utils.createSparkline(data.opsTrends.threats, { width: 380, height: 78 }).replace("risk-spark", "risk-spark risk-spark-danger");
+          const labels = ["D-6", "D-5", "D-4", "D-3", "D-2", "D-1", "D-0"];
+          const backup = utils.createLineChart(data.opsTrends.backup, {
+            width: 440,
+            height: 180,
+            unit: "%",
+            yLabel: "Backup %",
+            xLabels: labels,
+            lineClass: "risk-spark",
+            pointClass: "line-point"
+          });
+          const patch = utils.createLineChart(data.opsTrends.patch, {
+            width: 440,
+            height: 180,
+            unit: "%",
+            yLabel: "Patch %",
+            xLabels: labels,
+            lineClass: "risk-spark-alt",
+            pointClass: "line-point-alt"
+          });
+          const threats = utils.createLineChart(data.opsTrends.threats, {
+            width: 440,
+            height: 180,
+            unit: " alerts",
+            yLabel: "Critical alerts",
+            xLabels: labels,
+            lineClass: "risk-spark-danger",
+            pointClass: "line-point-danger"
+          });
 
-          elements.trendBackup.innerHTML = `<div class="tiny">Backup success trend</div>${backup}`;
-          elements.trendPatch.innerHTML = `<div class="tiny">Patch compliance trend</div>${patch}`;
-          elements.trendThreats.innerHTML = `<div class="tiny">Threat activity trend</div>${threats}`;
+          elements.trendBackup.innerHTML = `<div class="tiny">Backup success trend (unit: %)</div>${backup}`;
+          elements.trendPatch.innerHTML = `<div class="tiny">Patch compliance trend (unit: %)</div>${patch}`;
+          elements.trendThreats.innerHTML = `<div class="tiny">Threat activity trend (unit: alerts)</div>${threats}`;
         }
 
         function renderAlerts(tenants) {

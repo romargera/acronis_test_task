@@ -16,8 +16,8 @@
           <option value="90d" selected>Last 90 days</option>
           <option value="365d">Last 12 months</option>
         </select>
-        <select id="segmentFilter" class="select" aria-label="Segment filter">
-          <option value="all">All segments</option>
+        <select id="segmentFilter" class="select" aria-label="Segment filter" multiple>
+          <option value="all" selected>All segments</option>
           <option value="Regulated">Regulated</option>
           <option value="Healthcare">Healthcare</option>
           <option value="Professional Services">Professional Services</option>
@@ -32,25 +32,41 @@
           <option value="medium">Medium and above</option>
         </select>
       </section>
+      <div class="tiny">Tip: use Ctrl/Cmd + click to select multiple segments.</div>
+
+      <section class="quick-actions" aria-label="Quick actions">
+        <button id="addWidgetBtn" class="btn btn-secondary" type="button">Add widget</button>
+        <button id="downloadBtn" class="btn btn-secondary" type="button">Download</button>
+        <button id="sendBtn" class="btn btn-secondary" type="button">Send</button>
+      </section>
 
       <section class="kpi-grid" id="kpiGrid"></section>
 
       <section class="grid grid-2">
         <article class="card">
           <div class="section-actions">
-            <h2 class="card-title">MRR Trend & Forecast</h2>
+            <h2 class="card-title">MRR Trend & Forecast <span class="info-tip" title="Forecast is derived from recent trend slope and shown as a dashed continuation line.">i</span></h2>
             <span class="card-subtitle" id="periodLabel"></span>
           </div>
           <div id="revenueTrend" class="chart-wrap"></div>
-          <div class="tiny">Stubbed forecast shown with static assumptions; real version should pull from PSA + usage billing tables.</div>
+          <div class="tiny">Unit: $k MRR. Diff baseline shown vs previous period of same duration.</div>
         </article>
 
         <article class="card">
           <div class="section-actions">
             <h2 class="card-title">Churn Risk Radar</h2>
             <span class="card-subtitle" id="radarSummary"></span>
+            <div class="control-inline">
+              <label for="riskSort">Sort clients</label>
+              <select id="riskSort" class="select select-sm" aria-label="Risk client sort">
+                <option value="risk">Risk (desc)</option>
+                <option value="mrr">MRR (desc)</option>
+                <option value="tenure">Tenure (low first)</option>
+              </select>
+            </div>
           </div>
           <svg id="riskMap" class="risk-map" viewBox="0 0 560 240" role="img" aria-label="Churn risk bubble map"></svg>
+          <div id="riskRankList" class="metric-bars"></div>
           <div class="legend">
             <span class="legend-item"><span class="dot dot-danger"></span> Critical</span>
             <span class="legend-item"><span class="dot dot-warning"></span> High</span>
@@ -61,7 +77,17 @@
 
       <section class="split">
         <article class="card">
-          <h2 class="card-title">Upsell Opportunity Pipeline</h2>
+          <div class="section-actions">
+            <h2 class="card-title">Upsell Opportunity Pipeline</h2>
+            <div class="control-inline">
+              <label for="upsellSort">Sort</label>
+              <select id="upsellSort" class="select select-sm" aria-label="Upsell sort">
+                <option value="impact">Impact (desc)</option>
+                <option value="client">Client (A-Z)</option>
+                <option value="offer">Opportunity (A-Z)</option>
+              </select>
+            </div>
+          </div>
           <table class="table">
             <thead>
               <tr>
@@ -76,7 +102,17 @@
         </article>
 
         <article class="card">
-          <h2 class="card-title">Margin Leakage</h2>
+          <div class="section-actions">
+            <h2 class="card-title">Margin Leakage</h2>
+            <div class="control-inline">
+              <label for="marginSort">Sort</label>
+              <select id="marginSort" class="select select-sm" aria-label="Margin sort">
+                <option value="margin-low">Margin (low first)</option>
+                <option value="margin-high">Margin (high first)</option>
+                <option value="mrr-high">MRR (desc)</option>
+              </select>
+            </div>
+          </div>
           <div id="marginList" class="metric-bars"></div>
         </article>
       </section>
@@ -120,12 +156,15 @@
 
         const filters = {
           period: "90d",
-          segment: "all",
+          segment: ["all"],
           risk: "all"
         };
 
         const state = {
-          selectedId: null
+          selectedId: null,
+          riskSort: "risk",
+          upsellSort: "impact",
+          marginSort: "margin-low"
         };
 
         const severityThreshold = {
@@ -148,7 +187,8 @@
           detailPanel: document.getElementById("detailPanel"),
           premiumGateLabel: document.getElementById("premiumGateLabel"),
           qbrModal: document.getElementById("qbrModal"),
-          qbrContent: document.getElementById("qbrContent")
+          qbrContent: document.getElementById("qbrContent"),
+          riskRankList: document.getElementById("riskRankList")
         };
 
         document.getElementById("periodFilter").addEventListener("change", function (event) {
@@ -156,12 +196,34 @@
           render();
         });
         document.getElementById("segmentFilter").addEventListener("change", function (event) {
-          filters.segment = event.target.value;
+          filters.segment = utils.parseMultiSelect(event.target, ["all"]);
           render();
         });
         document.getElementById("riskFilter").addEventListener("change", function (event) {
           filters.risk = event.target.value;
           render();
+        });
+        document.getElementById("riskSort").addEventListener("change", function (event) {
+          state.riskSort = event.target.value;
+          renderRiskMap(scopedTenants());
+        });
+        document.getElementById("upsellSort").addEventListener("change", function (event) {
+          state.upsellSort = event.target.value;
+          renderUpsellTable(scopedTenants());
+        });
+        document.getElementById("marginSort").addEventListener("change", function (event) {
+          state.marginSort = event.target.value;
+          renderMargin(scopedTenants());
+        });
+
+        document.getElementById("addWidgetBtn").addEventListener("click", function () {
+          utils.toast("Add widget flow placeholder: business widget catalog opens here");
+        });
+        document.getElementById("downloadBtn").addEventListener("click", function () {
+          utils.toast("Download placeholder: export panel opens here");
+        });
+        document.getElementById("sendBtn").addEventListener("click", function () {
+          utils.toast("Send placeholder: sharing dialog opens here");
         });
 
         document.getElementById("closeQbrModal").addEventListener("click", function () {
@@ -174,7 +236,7 @@
         });
 
         function inScope(tenant) {
-          if (filters.segment !== "all" && tenant.segment !== filters.segment) return false;
+          if (!filters.segment.includes("all") && !filters.segment.includes(tenant.segment)) return false;
           return (utils.levelWeights[tenant.riskLevel] || 0) >= severityThreshold[filters.risk];
         }
 
@@ -210,27 +272,90 @@
               }, 0) / tenants.length
             : 0;
 
-          el.kpiGrid.innerHTML = [
-            { label: "Portfolio MRR", value: utils.formatCurrency(totalMRR), trend: "+6.4% QoQ", trendClass: "kpi-trend-positive" },
-            { label: "At-Risk MRR", value: utils.formatCurrency(atRiskMRR), trend: "3 clients need intervention", trendClass: "kpi-trend-negative" },
-            { label: "Projected Upsell", value: utils.formatCurrency(projectedUpsell), trend: "coverage-gap derived", trendClass: "kpi-trend-positive" },
-            { label: "Avg Gross Margin", value: avgMargin.toFixed(1) + "%", trend: "below SLI top quartile", trendClass: "kpi-trend-negative" }
-          ]
+          const rows = [
+            {
+              id: "portfolio-mrr",
+              label: "Portfolio MRR",
+              formula: "Sum of monthly recurring revenue across clients in current filter.",
+              value: utils.formatCurrency(totalMRR),
+              trend: "+6.4% vs previous quarter",
+              trendClass: "kpi-trend-positive",
+              trendTitle: "Compared to previous quarter."
+            },
+            {
+              id: "risk-mrr",
+              label: "At-Risk MRR",
+              formula: "MRR from clients marked High or Critical risk.",
+              value: utils.formatCurrency(atRiskMRR),
+              trend: "3 clients need intervention",
+              trendClass: "kpi-trend-negative",
+              trendTitle: "Current client risk distribution."
+            },
+            {
+              id: "upsell",
+              label: "Projected Upsell",
+              formula: "Sum of estimated MRR uplift from identified opportunity gaps.",
+              value: utils.formatCurrency(projectedUpsell),
+              trend: "coverage-gap derived",
+              trendClass: "kpi-trend-positive",
+              trendTitle: "Based on current service coverage gaps."
+            },
+            {
+              id: "margin",
+              label: "Avg Gross Margin",
+              formula: "Average gross margin percent across scoped client portfolio.",
+              value: avgMargin.toFixed(1) + "%",
+              trend: "below SLI top quartile",
+              trendClass: "kpi-trend-negative",
+              trendTitle: "Compared to benchmark top quartile."
+            }
+          ];
+
+          el.kpiGrid.innerHTML = rows
             .map(function (item) {
               return `
-                <div class="kpi-card">
-                  <div class="kpi-label">${item.label}</div>
+                <button class="kpi-card-button" type="button" data-kpi="${item.id}">
+                  <div class="kpi-label">${item.label}<span class="info-tip" title="${item.formula}">i</span></div>
                   <div class="kpi-value">${item.value}</div>
-                  <div class="tiny ${item.trendClass}">${item.trend}</div>
-                </div>`;
+                  <div class="tiny ${item.trendClass}" title="${item.trendTitle}">${item.trend}</div>
+                </button>`;
             })
             .join("");
+
+          el.kpiGrid.querySelectorAll("[data-kpi]").forEach(function (button) {
+            button.addEventListener("click", function () {
+              if (!tenants.length) {
+                utils.toast("No clients in current filter to drill down.");
+                return;
+              }
+              state.selectedId = tenants[0].id;
+              renderDetail();
+              utils.toast("KPI drill-down destination placeholder");
+            });
+          });
         }
 
         function renderRevenue() {
           const series = data.revenueSeries[filters.period];
-          el.periodLabel.textContent = filters.period === "30d" ? "30-day trend" : filters.period === "90d" ? "90-day trend" : "12-month trend";
-          el.revenueTrend.innerHTML = utils.createSparkline(series, { width: 520, height: 140 }).replace("mini-chart", "big-chart");
+          const periodLabel = filters.period === "30d" ? "30-day trend" : filters.period === "90d" ? "90-day trend" : "12-month trend";
+          const xLabels = series.map(function (_, idx) {
+            return `P${idx + 1}`;
+          });
+          const slope = series.length > 1 ? series[series.length - 1] - series[series.length - 2] : 1;
+          const forecast = [1, 2, 3].map(function (step) {
+            return Number((series[series.length - 1] + slope * 0.7 * step).toFixed(1));
+          });
+
+          el.periodLabel.textContent = `${periodLabel} (diff vs previous ${periodLabel.split("-")[0]} period)`;
+          el.revenueTrend.innerHTML = utils.createLineChart(series, {
+            width: 560,
+            height: 190,
+            unit: "k",
+            yLabel: "MRR ($k)",
+            xLabels: xLabels,
+            forecastValues: forecast,
+            forecastLabels: ["F+1", "F+2", "F+3"]
+          });
         }
 
         function bubbleColor(level) {
@@ -244,7 +369,21 @@
           if (!tenants.length) {
             el.riskMap.innerHTML = "";
             el.radarSummary.textContent = "No clients in scope";
+            el.riskRankList.innerHTML = '<div class="empty-state">No ranked clients in scope.</div>';
             return;
+          }
+
+          const ranked = tenants.slice();
+          if (state.riskSort === "mrr") {
+            ranked.sort(function (a, b) {
+              return b.mrr - a.mrr;
+            });
+          } else if (state.riskSort === "tenure") {
+            ranked.sort(function (a, b) {
+              return a.tenureMonths - b.tenureMonths;
+            });
+          } else {
+            ranked.sort(utils.byRiskDesc);
           }
 
           const maxTenure = Math.max.apply(
@@ -289,11 +428,32 @@
             <line x1="36" y1="212" x2="536" y2="212" stroke="#aab4ca" />
             <line x1="42" y1="16" x2="42" y2="218" stroke="#aab4ca" />
             <text x="44" y="228" font-size="10" fill="#5d6f8c">Tenure (months)</text>
-            <text x="5" y="20" font-size="10" fill="#5d6f8c">MRR</text>
+            <text x="5" y="20" font-size="10" fill="#5d6f8c">MRR (USD)</text>
             ${circles}
           `;
 
           el.riskMap.querySelectorAll(".risk-dot").forEach(function (node) {
+            node.addEventListener("click", function () {
+              state.selectedId = this.getAttribute("data-id");
+              renderDetail();
+            });
+          });
+
+          el.riskRankList.innerHTML = ranked
+            .slice(0, 5)
+            .map(function (tenant, idx) {
+              return `
+                <button class="brief-item" data-id="${tenant.id}" type="button">
+                  <div class="section-actions">
+                    <span class="${utils.riskClass(tenant.riskLevel)}">R${idx + 1}</span>
+                    <strong>${tenant.name}</strong>
+                  </div>
+                  <div class="tiny">MRR ${utils.formatCurrency(tenant.mrr)} • Tenure ${tenant.tenureMonths}m • Risk ${tenant.riskLevel}</div>
+                </button>`;
+            })
+            .join("");
+
+          el.riskRankList.querySelectorAll("[data-id]").forEach(function (node) {
             node.addEventListener("click", function () {
               state.selectedId = this.getAttribute("data-id");
               renderDetail();
@@ -314,9 +474,19 @@
             });
           });
 
-          rows.sort(function (a, b) {
-            return b.impact - a.impact;
-          });
+          if (state.upsellSort === "client") {
+            rows.sort(function (a, b) {
+              return a.tenant.localeCompare(b.tenant);
+            });
+          } else if (state.upsellSort === "offer") {
+            rows.sort(function (a, b) {
+              return a.opportunity.localeCompare(b.opportunity);
+            });
+          } else {
+            rows.sort(function (a, b) {
+              return b.impact - a.impact;
+            });
+          }
 
           if (!rows.length) {
             el.upsellTable.innerHTML = '<tr><td colspan="4" class="tiny">No upsell opportunities in scope.</td></tr>';
@@ -357,18 +527,29 @@
             })
           );
 
-          el.marginList.innerHTML = tenants
-            .slice()
-            .sort(function (a, b) {
+          const sorted = tenants.slice();
+          if (state.marginSort === "margin-high") {
+            sorted.sort(function (a, b) {
+              return b.marginPct - a.marginPct;
+            });
+          } else if (state.marginSort === "mrr-high") {
+            sorted.sort(function (a, b) {
+              return b.mrr - a.mrr;
+            });
+          } else {
+            sorted.sort(function (a, b) {
               return a.marginPct - b.marginPct;
-            })
+            });
+          }
+
+          el.marginList.innerHTML = sorted
             .slice(0, 6)
             .map(function (tenant) {
               return `
                 <div class="metric-row">
                   <div class="section-actions">
                     <strong>${tenant.name}</strong>
-                    <span class="tiny">Margin ${tenant.marginPct}%</span>
+                    <span class="tiny">Margin ${tenant.marginPct}% • MRR ${utils.formatCurrency(tenant.mrr)}</span>
                   </div>
                   ${utils.createBar(tenant.mrr, maxMRR)}
                 </div>`;
