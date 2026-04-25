@@ -4,6 +4,8 @@
 
 This is not a production schema. It is a lightweight sketch to show the proposal is believable with data Acronis already has, or could reasonably ingest, and to make the scoring choices explicit enough to defend in review.
 
+In this document, *near real time* means the event is available for dashboard use within five minutes of source emission. This matches the technical success metrics in the PRD.
+
 ## Operations dashboard
 
 | Data needed | Plausible source | Refresh cadence | Notes |
@@ -22,6 +24,7 @@ This is not a production schema. It is a lightweight sketch to show the proposal
 | Service coverage per tenant | Product enablement plus usage state | Daily | Upsell gap detection. |
 | Ticket, SLA, and escalation patterns | PSA connector events | Daily, near real time for critical | Core churn features. |
 | Client engagement signals | Product usage plus QBR activity | Daily | Churn leading indicators. |
+| Acronis-native tenant engagement signals | Protected endpoint trend, admin activity, and policy-change activity | Daily | Fallback churn signals when PSA, CRM, or billing are missing. |
 | Portfolio trend aggregate | Internal analytics aggregate pipeline | Weekly and monthly | Directional planning context. |
 | Peer cohort aggregates | Anonymized cross-tenant aggregation warehouse view | Weekly | See peer benchmark section below for governance. |
 
@@ -36,6 +39,8 @@ This is not a production schema. It is a lightweight sketch to show the proposal
 - `risk_signal_event` (tenant_id, type, severity, timestamp, description).
 - `peer_cohort_metric` (cohort_id, metric_id, p25, p50, p75, sample_size, as_of_date).
 
+- In v1, `est_cost` is an explicit proxy rather than accounting truth: ticket count times median handling time times an MSP-configured blended hourly rate. `margin_pct` is therefore directional and should be labeled estimated in the product.
+
 ## Scoring: Operational Risk Score
 
 Version: Heuristic v1. The score is a weighted sum of four factors, normalized to a zero to one hundred scale. We ship this as a rules-based score in v1 rather than a trained model; see the rationale in the trade-offs section of the problem framing document.
@@ -47,7 +52,7 @@ Version: Heuristic v1. The score is a weighted sum of four factors, normalized t
 | Open critical alerts, severity-weighted | 0.20 | Security and EDR events | Captures current incident pressure. |
 | SLA miss rate over the last fourteen days | 0.20 | PSA connector | Contract exposure; ties ops signal to commercial risk. |
 
-Missing-data handling: if a factor lacks fresh data for a tenant, its weight is redistributed proportionally across the remaining factors, and the hover explanation on the confidence badge lists which factors were missing so the technician can judge whether to trust the score.
+Missing-data handling: if a factor lacks fresh data for a tenant, its weight is redistributed proportionally across the remaining factors, and the hover explanation on the confidence badge lists which factors were missing so the technician can judge whether to trust the score. If SLA data is unavailable for more than roughly 30 percent of tenants in the current filter (A), the dashboard also shows a filter-level banner that the score is less reliable because PSA-backed SLA data is missing broadly.
 
 ## Scoring: Churn Risk Score
 
@@ -61,11 +66,12 @@ Version: Heuristic v1. The score is a weighted sum of five signals, normalized t
 | QBR attendance drop | 0.15 | CRM or internal QBR tracker | Sponsor disengagement is a renewal risk signal. |
 | Billing disputes | 0.10 | Billing system | Late signal but very high conviction when present. |
 
-Missing-data handling: if PSA connector quality is too low for a tenant (covered by the validation plan as an assumption), the score is shown as *Unavailable* with an explicit data-gap label. We do not guess a score.
+Missing-data handling: if PSA, CRM, or billing data is unavailable, v1 falls back to a reduced-confidence native signal set using protected-endpoint shrinkage and admin or policy-activity decline. If neither connector data nor native fallback signals are sufficient, the score is shown as *Unavailable* with an explicit data-gap label. We do not guess a score.
 
 ## Peer Benchmark Aggregates
 
-- Cohort definition is explicit and shown on the widget: in v1 we start with a single cohort labeled *Mid-market MSPs* (A), defined broadly enough to make peer comparison useful for similarly scaled MSPs without pretending to be universal.
+- Cohort definition is explicit and shown on the widget: in v1 we start with a *Mid-market MSPs* label (A), but the actual comparison group is built operationally from the MSP's region when available, tenant-count band, endpoint-count band, and at least six months of history. This keeps the cohort concrete enough for review without pretending the benchmark is universal.
+- The four benchmarked metrics in v1 are Net Revenue Retention, Gross Margin, SLA Compliance, and MRR per Endpoint.
 - Each metric displays the twenty-fifth, fiftieth, and seventy-fifth percentile of the cohort plus the current MSP's own value.
 - Privacy floor: any metric in any cohort is suppressed if it does not clear a minimum privacy threshold (A), and cells suppressed this way render as *Not enough data yet* rather than a numeric value.
 - Refresh: peer aggregates are recomputed weekly through an offline batch job on a separate analytics warehouse view, not through per-request reads on live tenant data.
@@ -76,12 +82,13 @@ This is the kind of thing that looks free in a proposal and hurts eighteen month
 
 - **Operations near real time snapshots.** Higher cost. Requires a streaming ingestion path and a write-through cache so the KPI row and the Critical Alerts Feed stay honest. Much of this likely builds on the existing telemetry stack (A); incremental cost should stay manageable as long as we do not add per-dashboard-load queries against hot storage.
 - **Business daily snapshots.** Low cost. A nightly batch job reads billing and usage aggregates and writes a per-tenant row. One row per tenant per day is cheap even at tens of thousands of tenants.
+- **Composite score recomputation.** Moderate cost. Operational Risk and Churn Risk scores should be recomputed on a five-minute micro-batch cadence rather than on every incoming event. At typical MSP scales this is lightweight compared with the ingestion layer.
 - **Peer cohort aggregation.** Moderate one-time cost, low recurring cost. Runs weekly offline; the main cost is getting the cohort definition and privacy floor right once, not the compute.
-- **Product analytics events for success metrics.** We expect roughly twelve to fifteen new events across both dashboards, including `ops.morning_briefing_viewed`, `ops.drilldown_initiated`, `ops.escalation_dispatched`, `biz.kpi_drilled`, `biz.peer_benchmark_expanded`, `biz.qbr_preview_opened`. This rides on the existing analytics pipeline and is effectively incremental on top of current event volume; we are not introducing a new analytics system to support it.
+- **Product analytics events for success metrics.** We expect roughly twelve to fifteen new events across both dashboards, including `ops.morning_briefing_viewed`, `ops.drilldown_initiated`, `ops.escalation_dispatched`, `ops.filter_applied`, `ops.kpi_card_clicked`, `biz.kpi_drilled`, `biz.peer_benchmark_expanded`, `biz.upsell_inspected`, `biz.qbr_preview_opened`, `biz.qbr_exported`, and `shared.tab_switched`. This rides on the existing analytics pipeline and is effectively incremental on top of current event volume; we are not introducing a new analytics system to support it.
 - **Trained models.** Deliberately not in v1. The warm-up period required to collect labeled churn data is a cost we are postponing until the rules-based scoring has produced enough feedback to calibrate weights and to judge whether a trained model is worth the ongoing storage and retraining cost.
 
 ## Gaps to close in production
 
-- Reliable PSA integration quality and tenant-identity mapping.
-- Consistent cost model calibration across MSPs, because margin estimation depends on a defensible delivery-cost proxy.
-- Governance rules for peer benchmark participation, including an explicit opt-in flow and the publishing policy for cohort definitions.
+- Reliable PSA integration quality and tenant-identity mapping. Blocks pilot coverage for SLA-backed scoring and most churn factors. Owner: platform integrations team. Timing: before pilot.
+- Consistent cost model calibration across MSPs, because margin estimation depends on a defensible delivery-cost proxy. Does not block v1 if margin is labeled estimated or beta. Owner: product plus finance. Timing: before broad rollout.
+- Governance rules for peer benchmark participation, including an explicit opt-in flow and the publishing policy for cohort definitions. Blocks peer comparison launch. Owner: legal plus product. Timing: before benchmark data is exposed.

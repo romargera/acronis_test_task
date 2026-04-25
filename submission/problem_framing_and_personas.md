@@ -64,7 +64,7 @@ It is nine o'clock on Monday morning and Mike has just logged in.
 1. The KPI row shows Portfolio MRR is up one point three percent period over period, but At-Risk MRR is up eight percent. He clicks the At-Risk card.
 2. The Churn Risk Radar highlights two bubbles in critical: Northwind Financial and Alpine Medical. He clicks Northwind.
 3. The client drill-down shows SLA compliance at seventy-four percent, ticket reopen rate at thirty-one percent, and two billing disputes. Churn Risk is *Heuristic v1*; Mike clicks the badge and sees that reopen rate and escalation rate dominate the score, which matches his intuition.
-4. He presses *Preview QBR Draft*, generates a two-paragraph executive summary with a forward plan, and forwards it to the account manager to use as a starting point.
+4. He presses *Preview QBR Draft*, generates a two-paragraph executive summary with a forward plan based on incident summary, SLA trend, coverage gaps, and the top actionable risks, and forwards it to the account manager to use as a starting point.
 5. Before closing, he scrolls to the Peer Benchmark card. He sees he is six percentage points behind the peer median on Net Revenue Retention and four points behind on Gross Margin, but ahead of the twenty-fifth percentile on SLA compliance. He screenshots it for the leadership Friday meeting.
 
 ## Trade-offs we accepted, with the reasoning
@@ -95,8 +95,16 @@ We show the user their value against the twenty-fifth, fiftieth, and seventy-fif
 - Downside: users cannot see who is at the top or learn from specific peers.
 - Alternative considered: an opt-in named benchmarking club. Deferred because the first version is about producing any defensible comparison at all; a club adds acquisition friction we should not take on before the base widget is validated.
 
+### Two separate dashboards, not one adaptive surface
+
+We chose two focused dashboards rather than a single adaptive surface with role-based widgets.
+
+- Upside: each persona gets a cleaner information hierarchy tuned to their decision cadence, daily triage versus weekly portfolio review.
+- Downside: shared entities such as tenants, alerts, and risks appear in both contexts, which creates consistency and maintenance overhead.
+- Alternative considered: one dashboard with role-based widget sets. Rejected for v1 because the primary JTBDs and scan patterns differ enough that the adaptive surface adds complexity without clearly reducing cognitive load.
+
 ## Optional extension with two more hours: Client 360
 
 - Who it is for: both personas when they need customer-specific context.
 - Top decisions enabled: which action to take now (operations hardening, retention outreach, or a commercial proposal), and what to include in the next QBR with a forward-looking plan.
-- Why it matters: both operational and commercial workflows converge at tenant level, so one shared detail surface can reduce context loss across the two dashboards.
+- Why it matters: both operational and commercial workflows converge at tenant level, so one shared detail surface can reduce context loss across the two dashboards. The drill-down panels in both v1 dashboards are intentionally scoped-down previews of what Client 360 would become.

@@ -124,5 +124,6 @@ Sub-JTBDs: prepare customer communication faster and compare portfolio performan
 - Shared six-filter state (time window, severity, services, regions, countries, segments) that persists when switching dashboards.
 - Role-based access: Operations is available to technician and admin roles; Business Growth is available to owner and practice-lead roles; owner roles may retain read access to Operations where needed.
 - Explainability: every scored metric on either dashboard exposes its formula and factor weights via a confidence badge.
+- Peer benchmark visuals always show cohort definition and as-of timestamp in the widget itself so screenshots remain interpretable outside the product.
 - Every Key Performance Indicator card is drill-capable; when the destination page is not ready in v1 it routes to an explicit placeholder rather than a dead click.
 - Units, baseline comparison period, and positive or negative diff colors are shown consistently across both dashboards.
