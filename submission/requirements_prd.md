@@ -24,7 +24,7 @@
 
 ### Operations success metrics
 
-All quantitative metrics below are grouped into product, business, and technical metrics. Qualitative signals are listed separately. `(A)` marks a directional assumption rather than a validated baseline or target.
+All quantitative metrics below are grouped into product, MSP business, Acronis business, and technical metrics. Qualitative signals are listed separately. `(A)` marks a directional assumption rather than a validated baseline or target.
 
 Primary JTBD: help the technician identify where to act first and take the first meaningful action quickly.  
 Sub-JTBDs: detect drift early and route into the right next step with enough context.
@@ -41,10 +41,15 @@ Initial v1 valuable actions can include escalation or dispatch with context, lau
 - **Widget utility funnel by widget.** Track: viewport impression -> engaged click -> valuable next step for AI Morning Briefing, Risk Heatmap, Critical Alerts Feed, Backup Success Rate, Patch Compliance, and Open Critical Alerts tiles.
 - **Session efficiency.** Track: any-click rate plus median and average session duration. Read together so that higher time on page is not misread when no-click consumption increases.
 
-#### Business metrics
+#### MSP business metrics
 
 - **Preventable Tier 2 escalations per 100 managed tenants.** Baseline (A): to be measured in pilot. Target: downward trend for active users.
 - **SLA breach rate on scoped tenants.** Baseline (A): to be established during early access. Target: decline versus a matched pre-dashboard baseline.
+
+#### Acronis business metrics
+
+- **Partner activation of the Operations dashboard.** Target (A): upward trend in the share of eligible partner accounts where at least one technician completes a valuable dashboard-led action within the first 30 days after enablement.
+- **Acronis service attach influenced by operational gap discovery.** Baseline (A): to be established in pilot. Target: upward trend in backup, patch, or security-module adoption among exposed partner accounts.
 
 #### Technical metrics
 
@@ -85,7 +90,7 @@ Initial v1 valuable actions can include escalation or dispatch with context, lau
 
 ### Business success metrics
 
-All quantitative metrics below are grouped into product, business, and technical metrics. Qualitative signals are listed separately. `(A)` marks a directional assumption rather than a validated baseline or target.
+All quantitative metrics below are grouped into product, MSP business, Acronis business, and technical metrics. Qualitative signals are listed separately. `(A)` marks a directional assumption rather than a validated baseline or target.
 
 Primary JTBD: help the owner or practice lead identify where revenue is at risk or where growth is available, then commit to the next action.  
 Sub-JTBDs: prepare customer communication faster and compare portfolio performance to peers with enough confidence to act.
@@ -99,11 +104,17 @@ Sub-JTBDs: prepare customer communication faster and compare portfolio performan
 - **Session efficiency.** Track: any-click rate plus median and average session duration, interpreted together with no-click consumption.
 - **Widget utility funnel by widget.** Track: viewport impression -> engaged click -> valuable next step for churn radar, upsell pipeline, margin leakage, QBR preview, and peer benchmark.
 
-#### Business metrics
+#### MSP business metrics
 
 - **At-risk MRR covered by an intervention plan.** Baseline (A): roughly twenty to thirty percent today. Target (A): at least seventy-five percent.
 - **Expansion MRR influenced by surfaced upsell opportunities.** Baseline (A): to be established in pilot. Target: upward trend.
 - **Retention trend for high-risk accounts.** Baseline (A): needs at least two quarters of observation. Target (A): improvement versus a matched pre-dashboard comparison group.
+
+#### Acronis business metrics
+
+- **Partner activation of the Business Growth dashboard.** Target (A): upward trend in the share of eligible partner accounts where an owner or practice lead returns weekly within the first 30 days after enablement.
+- **Partner renewal conversion uplift among activated accounts.** Baseline (A): requires post-launch cohort observation. Target: improvement versus a matched exposed-but-not-activated partner cohort.
+- **Average Acronis revenue per activated partner.** Baseline (A): requires launch-cohort benchmarking. Target: upward trend versus the pre-dashboard baseline or a matched comparison cohort.
 
 #### Technical metrics
 
