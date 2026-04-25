@@ -10,15 +10,15 @@
 
 ### Operations non-goals
 
-- Replacing Security Information and Event Management-level deep investigation.
-- Replacing PSA ticketing workflow.
-- Full third-party Remote Monitoring and Management unification in the first release.
+- Replacing Security Information and Event Management-level deep investigation, because technicians should route from the dashboard into dedicated security tools for forensics rather than perform full investigation here.
+- Replacing PSA ticketing workflow, because MSPs already have PSA investments and context push into the existing workflow is more valuable than replacement in v1.
+- Full third-party Remote Monitoring and Management unification in the first release, because cross-vendor normalization is a multi-quarter dependency that should not block the core triage value.
 
 ### Operations user stories
 
 - As a Tier 1 technician, I can filter tenants by severity, service, and region and instantly see where to start.
 - As a technician, I can click a risk tile and open a tenant drill-down with key posture metrics and a recommended action.
-- As an MSP technician or IT admin, I can use a ranked AI Morning Briefing instead of scanning each tenant manually.
+- As an MSP technician or IT admin, I can read a prioritized AI Morning Briefing that tells me the top issues across my portfolio in ranked order, so I can skip the manual scan and start acting within the first few minutes of my shift.
 - As a lead technician, I can monitor the Critical Alerts Feed and dispatch escalations with attached context.
 - As a technician, I can see how the Operational Risk Score is computed, including factor weights, before I trust it. In v1 this is a heuristic score based on backup failure rate, patch lag, active critical alerts, and SLA miss rate; detailed weights live in `data_sources_and_model.md`.
 
@@ -48,6 +48,8 @@ Initial v1 valuable actions can include escalation or dispatch with context, lau
 
 #### Acronis business metrics
 
+Attribution for Acronis-facing metrics uses exposed-versus-matched-unexposed partner cohorts and should be interpreted as influenced rather than causally driven.
+
 - **Partner activation of the Operations dashboard.** Target (A): upward trend in the share of eligible partner accounts where at least one technician completes a valuable dashboard-led action within the first 30 days after enablement.
 - **Acronis service attach influenced by operational gap discovery.** Baseline (A): to be established in pilot. Target: upward trend in backup, patch, or security-module adoption among exposed partner accounts.
 
@@ -76,15 +78,15 @@ Initial v1 valuable actions can include escalation or dispatch with context, lau
 
 ### Business non-goals
 
-- Accounting-grade financial reporting.
-- Contract management and invoicing.
-- Full CRM and PSA automation in the first release.
+- Accounting-grade financial reporting, because directional MRR and margin support is enough for decision-making in v1 while audit-grade accuracy would require broader billing integration for limited extra product value.
+- Contract management and invoicing, because those workflows already live in PSA and billing systems and duplicating them here would create data conflict.
+- Full CRM and PSA automation in the first release, because reliable bidirectional sync is a platform investment beyond dashboard scope and v1 should read from those systems before it writes back to them.
 
 ### Business user stories
 
 - As an MSP owner, I can identify high-risk clients ranked by revenue impact.
 - As a practice lead, I can inspect service coverage gaps and estimate MRR uplift from closing them.
-- As a manager, I can generate a QBR draft from one click to accelerate preparation. The draft includes an executive summary, SLA and service-performance highlights, coverage gaps, MRR trend, and recommended next actions.
+- As a manager, I can generate a QBR draft from one click to accelerate preparation. The draft includes an executive summary, SLA and service-performance highlights, period-over-period comparison for key metrics, coverage gaps, MRR trend, and recommended next actions.
 - As an owner, I can see how my portfolio compares to similar MSPs on four key metrics, with an explicit cohort definition and privacy floor.
 - As an owner, I can see how the Churn Risk Score is computed, including factor weights, before I act on it. In v1 this is a heuristic score based on ticket reopen rate, escalation rate, SLA compliance drop, QBR engagement drop, and billing disputes; detailed weights live in `data_sources_and_model.md`.
 
@@ -100,7 +102,7 @@ Sub-JTBDs: prepare customer communication faster and compare portfolio performan
 - **Time to identify the top three accounts requiring action and open the first client drill-down** (primary JTBD). Baseline (A): currently a manual multi-tool review. Target (A): under ten minutes for a weekly portfolio review.
 - **Decision-to-next-step rate** (sub-JTBD). Target (A): at least half of owner sessions that inspect churn or upsell signals end with an explicit next step such as intervention-plan creation or QBR draft opening.
 - **QBR preparation time** (sub-JTBD). Baseline (A): ninety to one hundred twenty minutes today. Target (A): under thirty minutes.
-- **Weekly active usage by owners and practice leads.** Target (A): at least forty percent in a given calendar week.
+- **Weekly active usage by owners and practice leads.** Target (A): at least forty percent of partner accounts where an owner or practice-lead role has been provisioned and the Business Growth dashboard has been enabled for at least fourteen days.
 - **Session efficiency.** Track: any-click rate plus median and average session duration, interpreted together with no-click consumption.
 - **Widget utility funnel by widget.** Track: viewport impression -> engaged click -> valuable next step for churn radar, upsell pipeline, margin leakage, QBR preview, and peer benchmark.
 
@@ -112,6 +114,8 @@ Sub-JTBDs: prepare customer communication faster and compare portfolio performan
 
 #### Acronis business metrics
 
+Attribution for Acronis-facing metrics uses exposed-versus-matched-unexposed partner cohorts and should be interpreted as influenced rather than causally driven.
+
 - **Partner activation of the Business Growth dashboard.** Target (A): upward trend in the share of eligible partner accounts where an owner or practice lead returns weekly within the first 30 days after enablement.
 - **Partner renewal conversion uplift among activated accounts.** Baseline (A): requires post-launch cohort observation. Target: improvement versus a matched exposed-but-not-activated partner cohort.
 - **Average Acronis revenue per activated partner.** Baseline (A): requires launch-cohort benchmarking. Target: upward trend versus the pre-dashboard baseline or a matched comparison cohort.
@@ -121,7 +125,7 @@ Sub-JTBDs: prepare customer communication faster and compare portfolio performan
 - **Dashboard time to usable data.** Target (A): p95 under three seconds for a warm load and under five seconds for a cold load.
 - **Churn Risk Score coverage.** Target (A): score available for at least eighty percent of eligible tenants when required sources are connected.
 - **QBR draft generation success rate.** Target (A): at least ninety-five percent of draft-preview requests complete without timeout or error.
-- **Graceful degradation under partial source failure.** Target (A): at least ninety-nine percent of sessions still render the dashboard shell and unaffected widgets when one upstream source is stale or unavailable.
+- **Graceful degradation under partial source failure.** Target (A): at least ninety-nine percent of sessions still render the dashboard shell and unaffected widgets when one upstream source is stale or unavailable. This matches Operations intentionally because the shell-and-fallback behavior is shared, while freshness expectations differ by dashboard.
 
 #### Qualitative signals
 
@@ -136,5 +140,5 @@ Sub-JTBDs: prepare customer communication faster and compare portfolio performan
 - Role-based access: Operations is available to technician and admin roles; Business Growth is available to owner and practice-lead roles; owner roles may retain read access to Operations where needed.
 - Explainability: every scored metric on either dashboard exposes its formula and factor weights via a confidence badge.
 - Peer benchmark visuals always show cohort definition and as-of timestamp in the widget itself so screenshots remain interpretable outside the product.
-- Every Key Performance Indicator card is drill-capable; when the destination page is not ready in v1 it routes to an explicit placeholder rather than a dead click.
+- Every Key Performance Indicator card is drill-capable; when the destination page is not ready in v1 it routes to an explicit placeholder rather than a dead click. The placeholder shows the clicked metric and current value, a short description of the intended full drill-down, and a lightweight feedback prompt on whether that destination would be useful.
 - Units, baseline comparison period, and positive or negative diff colors are shown consistently across both dashboards.
