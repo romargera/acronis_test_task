@@ -36,10 +36,10 @@ Final decision: two role-focused dashboards with a shared filter bar and shared 
 
 ## What I deliberately did not delegate
 
-- Choosing the MSP segment (mid-market, one hundred fifty to five hundred tenants, regulated-heavy). This is a product-strategy call that changes the rest of the submission and had to be mine.
+- Choosing the v1 MSP segment and how tightly to scope it. This is a product-strategy call that changes the rest of the submission and had to be mine.
 - The weight vectors for the Operational Risk Score and the Churn Risk Score. AI was asked for weight *candidates* but the final selection, including which factor dominates each score, was a manual judgment call informed by my call notes.
 - The decision to ship rules-based scoring in v1 rather than trained ML scoring. AI defaulted to "just train a model"; I held the line on explainability first, training later.
-- The decision to present peer benchmarks as percentile bands rather than a named league table, and the twenty-five-MSP privacy floor.
+- The decision to present peer benchmarks as percentile bands rather than a named league table, and to use a minimum privacy threshold rather than expose thin cohorts.
 
 ## What I would improve with more time
 

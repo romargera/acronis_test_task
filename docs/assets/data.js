@@ -296,9 +296,9 @@
   const peerBenchmarks = {
     cohort: {
       label: "Mid-market MSPs",
-      definition: "MSPs with 150 to 500 managed tenants, regulated-heavy portfolio, primarily North America and Europe.",
+      definition: "MSPs with similar portfolio scale and service complexity, used here as a directional v1 comparison cohort.",
       sampleSize: 142,
-      anonymization: "Peer values are aggregated across at least 25 MSPs per metric. Individual MSPs are never identifiable; cells below that threshold are suppressed."
+      anonymization: "Peer values are shown only when the contributing cohort clears a minimum privacy threshold. Individual MSPs are never identifiable; thin cohorts are suppressed."
     },
     metrics: [
       {
@@ -370,7 +370,7 @@
       version: "Heuristic v1",
       confidence: "Low to medium confidence for the first 90 days after launch. A labeled churn dataset from production renewals is required before moving to a trained model.",
       weights: [
-        { factor: "Ticket reopen rate", weight: 0.30, rationale: "Single strongest precursor seen in discovery interviews." },
+        { factor: "Ticket reopen rate", weight: 0.30, rationale: "Strong early signal to validate in discovery." },
         { factor: "Escalation rate", weight: 0.25, rationale: "Reflects customer frustration and internal cost." },
         { factor: "SLA compliance drop", weight: 0.20, rationale: "Directly visible to customer stakeholders." },
         { factor: "QBR attendance drop", weight: 0.15, rationale: "Sponsor disengagement is a renewal risk." },

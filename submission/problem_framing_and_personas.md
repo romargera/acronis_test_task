@@ -1,18 +1,20 @@
 # Problem Framing & Personas
 
+`(A)` marks a working assumption that is also listed in the Assumptions register.
+
 ## Who we are designing for
 
-We are explicitly designing for **mid-market MSPs**: technician staff between roughly twenty and eighty people, portfolios of about one hundred fifty to five hundred managed tenants, with a regulated-heavy client mix (healthcare, legal, financial services) and a primary footprint in North America and Europe.
+We are explicitly designing first for **mid-market MSPs** (A): partners with enough tenant volume and operational complexity for portfolio-level prioritization and peer benchmarking to be useful. The prototype examples lean toward regulated industries, but that is illustrative rather than a hard scope boundary.
 
 This segment was chosen because:
 
 - They already pay for operational tooling but still run morning triage by jumping between consoles and spreadsheets, so the time-to-decision problem is very real.
-- They have enough portfolio volume for peer benchmarking to feel fair, unlike five-person boutique MSPs where cohort comparison produces noisy small-sample results.
-- Acronis is already monetised in this segment, so operations and business signals can be joined today without a new data acquisition project.
+- They have enough portfolio volume for peer benchmarking to feel fair, unlike very small MSPs where cohort comparison produces noisy small-sample results. (A)
+- Operations and business signals can plausibly be joined without a net-new data acquisition project. (A)
 
 We are explicitly **not** optimising for:
 
-- Very small MSPs (fewer than roughly ten clients), whose workflow is still single-operator and where one dashboard replaces memory rather than a console.
+- Very small MSPs, whose workflow is still single-operator and where one dashboard replaces memory rather than a console.
 - Enterprise in-house Security Operations Centers, which already run a SIEM and expect different incident-investigation depth than we intend to provide.
 
 ## Dashboard 1: Operations dashboard
@@ -26,9 +28,9 @@ We are explicitly **not** optimising for:
 
 ### Primary persona: Sarah, Tier 1 MSP technician
 
-- Works an eight-hour shift covering around one hundred eighty tenants.
+- Works an eight-hour shift covering a large book of tenants.
 - Starts every shift by asking herself two questions: *"what broke overnight that I need to act on first"* and *"is anything quietly drifting that will become an escalation later this week".*
-- Today she opens four different consoles to answer those questions. The proposed dashboard is designed to answer both in under three minutes.
+- Today she opens several consoles to answer those questions. The proposed dashboard is designed to answer both much faster.
 
 ### Sarah's Monday morning walkthrough
 
@@ -37,7 +39,7 @@ It is eight o'clock on Monday morning and Sarah has just logged in.
 1. The Key Performance Indicator row shows that unresolved critical issues rose from nine to fourteen over the weekend and patch compliance dropped three percentage points. The diff indicator is red.
 2. The Cross-Tenant Risk Heatmap now has three tiles in critical, led by Northwind Financial. Sarah clicks the Northwind tile.
 3. The drill-down panel shows twelve endpoints missing a critical CVE patch, a backup success rate at seventy-two percent, and SLA compliance at seventy-four percent. The Operational Risk Score badge is marked *Heuristic v1*; Sarah clicks it once, confirms the weights match her mental model, and moves on.
-4. She dispatches the Northwind critical to Tier 2 with the attached context. Elapsed time from login to dispatched escalation is about ninety seconds, compared with an estimated eight minutes in the current multi-console workflow.
+4. She dispatches the Northwind critical to Tier 2 with the attached context. This is materially faster than the current multi-console workflow.
 5. She then scans the AI Morning Briefing for the next four ranked items and works through them before opening anything else.
 
 ## Dashboard 2: Business-growth dashboard
@@ -51,9 +53,9 @@ It is eight o'clock on Monday morning and Sarah has just logged in.
 
 ### Primary persona: Mike, MSP owner and practice lead
 
-- Owns a mid-market MSP with roughly two hundred tenants and twenty-five technicians.
+- Owns a mid-market MSP with a few hundred tenants and a few dozen technicians.
 - Reviews portfolio health once a week and prepares monthly QBRs.
-- Today he builds QBR decks in a spreadsheet, chasing data from PSA, CRM, and the backup console separately. The proposed dashboard is designed to replace the first ninety minutes of that preparation with ninety seconds of review.
+- Today he builds QBR decks in a spreadsheet, chasing data from PSA, CRM, and the backup console separately. The proposed dashboard is designed to turn that long prep step into a much shorter review flow.
 
 ### Mike's Monday morning walkthrough
 
@@ -74,8 +76,8 @@ These are explicit choices we would defend in review rather than omissions we ho
 We chose a heatmap of tiles instead of a ranked list for cross-tenant risk.
 
 - Upside: visually groupable, supports sorting on multiple axes, tolerates scanning by color without reading every row.
-- Downside: scales poorly beyond roughly fifty tenants on one screen; for five-hundred-tenant portfolios we accept that users filter or use the AI Morning Briefing as the entry point.
-- Alternative considered: a dense ranked table. Rejected for v1 because technician feedback during discovery consistently pointed at color-scan behavior.
+- Downside: scales poorly once too many tenants are shown on one screen; for larger portfolios we accept that users filter or use the AI Morning Briefing as the entry point.
+- Alternative considered: a dense ranked table. Rejected for v1 because the working product hypothesis (A) is that technicians first scan by color and severity before reading a dense table.
 
 ### Rules-based scoring in v1, not a trained model
 

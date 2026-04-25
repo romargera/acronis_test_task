@@ -1,5 +1,7 @@
 # Data Sources & Model
 
+`(A)` marks a working assumption that is also listed in the Assumptions register.
+
 This is not a production schema. It is a lightweight sketch to show the proposal is believable with data Acronis already has, or could reasonably ingest, and to make the scoring choices explicit enough to defend in review.
 
 ## Operations dashboard
@@ -53,7 +55,7 @@ Version: Heuristic v1. The score is a weighted sum of five signals, normalized t
 
 | Factor | Weight | Source | Rationale |
 | --- | --- | --- | --- |
-| Ticket reopen rate | 0.30 | PSA connector | Single strongest precursor seen in discovery interviews. |
+| Ticket reopen rate | 0.30 | PSA connector | Strong early signal to validate in discovery. (A) |
 | Escalation rate | 0.25 | PSA connector | Reflects customer frustration and internal cost pressure. |
 | SLA compliance drop | 0.20 | PSA connector | Directly visible to customer stakeholders. |
 | QBR attendance drop | 0.15 | CRM or internal QBR tracker | Sponsor disengagement is a renewal risk signal. |
@@ -63,16 +65,16 @@ Missing-data handling: if PSA connector quality is too low for a tenant (covered
 
 ## Peer Benchmark Aggregates
 
-- Cohort definition is explicit and shown on the widget: in v1 we start with a single cohort labeled *Mid-market MSPs* defined by one hundred fifty to five hundred managed tenants, regulated-heavy portfolio, and a North America or Europe footprint.
+- Cohort definition is explicit and shown on the widget: in v1 we start with a single cohort labeled *Mid-market MSPs* (A), defined broadly enough to make peer comparison useful for similarly scaled MSPs without pretending to be universal.
 - Each metric displays the twenty-fifth, fiftieth, and seventy-fifth percentile of the cohort plus the current MSP's own value.
-- Privacy floor: any metric in any cohort is suppressed if fewer than twenty-five MSPs contribute to it, and cells suppressed this way render as *Not enough data yet* rather than a numeric value.
+- Privacy floor: any metric in any cohort is suppressed if it does not clear a minimum privacy threshold (A), and cells suppressed this way render as *Not enough data yet* rather than a numeric value.
 - Refresh: peer aggregates are recomputed weekly through an offline batch job on a separate analytics warehouse view, not through per-request reads on live tenant data.
 
 ## Instrumentation Cost Awareness
 
 This is the kind of thing that looks free in a proposal and hurts eighteen months later. Rough sizing:
 
-- **Operations near real time snapshots.** Higher cost. Requires a streaming ingestion path and a write-through cache so the KPI row and the Critical Alerts Feed stay honest. We already pay for most of this in the current platform telemetry stack; incremental cost stays small as long as we do not add per-dashboard-load queries against hot storage.
+- **Operations near real time snapshots.** Higher cost. Requires a streaming ingestion path and a write-through cache so the KPI row and the Critical Alerts Feed stay honest. Much of this likely builds on the existing telemetry stack (A); incremental cost should stay manageable as long as we do not add per-dashboard-load queries against hot storage.
 - **Business daily snapshots.** Low cost. A nightly batch job reads billing and usage aggregates and writes a per-tenant row. One row per tenant per day is cheap even at tens of thousands of tenants.
 - **Peer cohort aggregation.** Moderate one-time cost, low recurring cost. Runs weekly offline; the main cost is getting the cohort definition and privacy floor right once, not the compute.
 - **Product analytics events for success metrics.** We expect roughly twelve to fifteen new events across both dashboards, including `ops.morning_briefing_viewed`, `ops.drilldown_initiated`, `ops.escalation_dispatched`, `biz.kpi_drilled`, `biz.peer_benchmark_expanded`, `biz.qbr_preview_opened`. This rides on the existing analytics pipeline and is effectively incremental on top of current event volume; we are not introducing a new analytics system to support it.
