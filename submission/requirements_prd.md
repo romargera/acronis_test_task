@@ -24,35 +24,39 @@
 
 ### Operations success metrics
 
-All quantitative metrics below are grouped into product, business, and technical metrics. These are the data-backed signals we would review regularly. Qualitative signals are listed separately because they require interviews, usability sessions, or survey feedback rather than telemetry alone. `(A)` marks a directional assumption rather than a validated baseline or target.
+All quantitative metrics below are grouped into product, business, and technical metrics. Qualitative signals are listed separately. `(A)` marks a directional assumption rather than a validated baseline or target.
 
 Primary JTBD: help the technician identify where to act first and take the first meaningful action quickly.  
-Sub-JTBDs: detect drift early and escalate with the right context.
+Sub-JTBDs: detect drift early and route into the right next step with enough context.
+
+Note: until Acronis has a validated taxonomy of valuable downstream actions, v1 can use a proxy based on engaged click-outs, downstream follow-through events, and long versus short click-outs from the dashboard.
 
 #### Product metrics
 
-- **Primary JTBD: median time from login to first dispatched escalation.** Baseline hypothesis (A): about eight minutes in the current multi-console workflow, to be confirmed by timing three to five technicians during discovery. Target direction (A): under three minutes for the median technician within roughly three months after general availability. Instrumentation: measure the time between `auth.session_started` and the first `ops.escalation_dispatched` event per session, reported as the daily median per user.
-- **Sub-JTBD: dashboard-led valuable action rate.** Baseline hypothesis: not instrumented today. Target direction (A): at least half of active technician sessions reach a valuable next step directly from the AI Morning Briefing, Risk Heatmap, or drill-down without requiring a separate starting tool. Instrumentation: chain `ops.briefing_item_opened`, `ops.heatmap_tile_opened`, or `ops.drilldown_initiated` to a subsequent valuable-action event in the same session. Note: if Acronis does not yet tag which downstream actions are genuinely valuable, an initial proxy can segment long click-outs versus short click-outs from the dashboard and then refine the taxonomy with observed user behavior.
-- **Share of technicians who reach the AI Morning Briefing in the first five minutes of shift.** Baseline hypothesis: not applicable because the feature does not exist today. Target direction (A): at least seventy percent of active technicians on any given weekday within the first quarter of general availability. Instrumentation: `ops.morning_briefing_viewed` event, divided by daily active technicians.
-- **Drill-down to valuable next-step conversion.** Baseline hypothesis: drill-down rate is visible today but meaningful next steps are not. Target direction (A): at least forty percent of drill-down sessions result in a dispatched escalation, documented follow-up, or resolution action. Instrumentation: ratio of `ops.drilldown_initiated` to a subsequent valuable-action event within the same session.
+- **Time to first valuable next step** (primary JTBD). Baseline (A): about eight minutes today. Target (A): under three minutes. Measure: `auth.session_started` to first valuable-action event.
+- **Dashboard-led valuable next-step rate** (sub-JTBD). Target (A): at least half of active technician sessions. Measure: briefing, heatmap, or drill-down interaction followed by a valuable-action event in the same session.
+- **Cross-surface discoverability per active technician.** Target (A): more unique downstream domains or products opened from the dashboard per active user than today. Measure: unique downstream tools opened from dashboard entry points.
+- **Widget utility funnel by widget.** Track: viewport impression -> engaged click -> valuable next step for AI Morning Briefing, Risk Heatmap, Critical Alerts Feed, and key tiles.
+- **Session efficiency.** Track: any-click rate plus median and average session duration. Read together so that higher time on page is not misread when no-click consumption increases.
 
 #### Business metrics
 
-- **SLA breach rate for scoped tenants.** Baseline hypothesis (A): to be established during early access. Target direction: decline versus a matched pre-dashboard baseline for active users. Instrumentation: weekly SLA breach snapshot joined to dashboard usage cohort.
-- **Avoidable Tier 2 escalations per 100 managed tenants.** Baseline hypothesis (A): to be measured in pilot. Target direction: downward trend for teams actively using the dashboard. Instrumentation: escalation reason codes plus Tier 2 reopen tags, normalized by tenant count.
+- **Preventable Tier 2 escalations per 100 managed tenants.** Baseline (A): to be measured in pilot. Target: downward trend for active users.
+- **SLA breach rate on scoped tenants.** Baseline (A): to be established during early access. Target: decline versus a matched pre-dashboard baseline.
 
 #### Technical metrics
 
-- **Dashboard time to usable data.** Baseline hypothesis: not instrumented today. Target direction (A): p95 under two seconds for a warm load and under four seconds for a cold load. Instrumentation: browser-based real user monitoring event `ops.dashboard_usable`.
-- **Critical alert freshness.** Baseline hypothesis: current freshness is inconsistent across widgets. Target direction (A): at least ninety-five percent of critical alerts appear in the feed within five minutes of source-event ingestion. Instrumentation: freshness monitor comparing source event timestamp to surfaced widget timestamp.
-- **Operational Risk Score coverage.** Baseline hypothesis: not applicable because the score does not exist today. Target direction (A): score available for at least ninety percent of tenants in the current filter when required data sources are connected. Instrumentation: daily score-coverage monitor by tenant and factor completeness.
-- **Graceful degradation under partial source failure.** Baseline hypothesis: not instrumented today. Target direction (A): at least ninety-nine percent of sessions still render the dashboard shell and unaffected widgets when one upstream source is stale or unavailable. Instrumentation: widget-level render status, error-boundary telemetry, and synthetic outage monitoring.
+- **Dashboard time to usable data.** Target (A): p95 under two seconds for a warm load and under four seconds for a cold load.
+- **Critical alert freshness.** Target (A): at least ninety-five percent of critical alerts visible within five minutes of source-event ingestion.
+- **Operational Risk Score coverage.** Target (A): score available for at least ninety percent of tenants in the current filter when required sources are connected.
+- **Graceful degradation under partial source failure.** Target (A): at least ninety-nine percent of sessions still render the dashboard shell and unaffected widgets when one upstream source is stale or unavailable.
 
 #### Qualitative signals
 
 - Technicians say the ranking and color coding broadly match their mental model of what should be worked first.
-- Technicians say escalations created from the dashboard include enough context for Tier 2 to act without extra back-and-forth.
+- Technicians say downstream click-outs usually lead to the intended tool or action with little confusion.
 - Technicians say score explanations, units, and diffs are understandable without separate documentation.
+- There is little negative unsolicited feedback about the dashboard in partner community channels, support feedback, and social networks.
 
 ## Business-growth dashboard
 
@@ -79,36 +83,39 @@ Sub-JTBDs: detect drift early and escalate with the right context.
 
 ### Business success metrics
 
-All quantitative metrics below are grouped into product, business, and technical metrics. These are the data-backed signals we would review regularly. Qualitative signals are listed separately because they require interviews, usability sessions, or survey feedback rather than telemetry alone. `(A)` marks a directional assumption rather than a validated baseline or target.
+All quantitative metrics below are grouped into product, business, and technical metrics. Qualitative signals are listed separately. `(A)` marks a directional assumption rather than a validated baseline or target.
 
 Primary JTBD: help the owner or practice lead identify where revenue is at risk or where growth is available, then commit to the next action.  
 Sub-JTBDs: prepare customer communication faster and compare portfolio performance to peers with enough confidence to act.
 
 #### Product metrics
 
-- **Primary JTBD: time to identify the top three accounts requiring action and open the first client drill-down.** Baseline hypothesis (A): currently requires a manual review across multiple tools and spreadsheets. Target direction (A): under ten minutes for a weekly portfolio review. Instrumentation: elapsed time from `biz.dashboard_viewed` to the third `biz.client_drilldown_opened` or equivalent ranked-insight interaction.
-- **Sub-JTBD: QBR preparation time.** Baseline hypothesis (A): ninety to one hundred twenty minutes today, to be confirmed by shadowing three owners through a real QBR cycle. Target direction (A): under thirty minutes of preparation time using the QBR Draft Preview as a starting point within the first quarter after general availability. Instrumentation: self-reported through a post-QBR survey in v1 rather than automated timing, which we would add in v2.
-- **Sub-JTBD: decision-to-next-step rate.** Baseline hypothesis: not instrumented today. Target direction (A): at least half of owner sessions that inspect churn or upsell signals end with an explicit next step such as intervention-plan creation or QBR draft opening. Instrumentation: chain `biz.client_drilldown_opened`, `biz.upsell_inspected`, or `biz.churn_client_opened` to `biz.intervention_plan_created` or `biz.qbr_preview_opened`.
-- **Weekly active usage by owners and practice leads.** Baseline hypothesis: not applicable because the dashboard does not exist today. Target direction (A): at least forty percent of owner and practice-lead accounts active in any given calendar week within the first quarter of general availability. Instrumentation: `biz.dashboard_viewed` event per session.
+- **Time to identify the top three accounts requiring action and open the first client drill-down** (primary JTBD). Baseline (A): currently a manual multi-tool review. Target (A): under ten minutes for a weekly portfolio review.
+- **Decision-to-next-step rate** (sub-JTBD). Target (A): at least half of owner sessions that inspect churn or upsell signals end with an explicit next step such as intervention-plan creation or QBR draft opening.
+- **QBR preparation time** (sub-JTBD). Baseline (A): ninety to one hundred twenty minutes today. Target (A): under thirty minutes.
+- **Weekly active usage by owners and practice leads.** Target (A): at least forty percent in a given calendar week.
+- **Session efficiency.** Track: any-click rate plus median and average session duration, interpreted together with no-click consumption.
+- **Widget utility funnel by widget.** Track: viewport impression -> engaged click -> valuable next step for churn radar, upsell pipeline, margin leakage, QBR preview, and peer benchmark.
 
 #### Business metrics
 
-- **At-risk MRR covered by an intervention plan.** Baseline hypothesis (A): roughly twenty to thirty percent of at-risk MRR has a formal intervention plan today. Target direction (A): at least seventy-five percent of at-risk MRR has a tagged intervention plan within one quarter after general availability. Instrumentation: `biz.intervention_plan_created` event tagged with client identifier, joined to the at-risk MRR roll-up.
-- **Expansion MRR influenced by surfaced upsell opportunities.** Baseline hypothesis (A): to be established in pilot. Target direction: upward trend in closed-won or committed upsell MRR for accounts first inspected through the dashboard. Instrumentation: opportunity records tagged to `biz.upsell_inspected` sessions and matched to later expansion events.
-- **Retention trend for high-risk accounts.** Baseline hypothesis (A): needs a comparison window of at least two quarters before the number is trustworthy. Target direction (A): improvement in renewal rate for accounts flagged as high or critical churn risk at least sixty days before renewal, versus a matched pre-dashboard comparison group. Instrumentation: existing renewal data cross-referenced with the weekly churn score snapshot.
+- **At-risk MRR covered by an intervention plan.** Baseline (A): roughly twenty to thirty percent today. Target (A): at least seventy-five percent.
+- **Expansion MRR influenced by surfaced upsell opportunities.** Baseline (A): to be established in pilot. Target: upward trend.
+- **Retention trend for high-risk accounts.** Baseline (A): needs at least two quarters of observation. Target (A): improvement versus a matched pre-dashboard comparison group.
 
 #### Technical metrics
 
-- **Dashboard time to usable data.** Baseline hypothesis: not instrumented today. Target direction (A): p95 under three seconds for a warm load and under five seconds for a cold load. Instrumentation: browser-based real user monitoring event `biz.dashboard_usable`.
-- **Churn Risk Score coverage.** Baseline hypothesis: not applicable because the score does not exist today. Target direction (A): score available for at least eighty percent of tenants when billing, PSA, and product telemetry connections are present. Instrumentation: daily coverage monitor for churn-score eligibility and missing-factor counts.
-- **QBR draft generation success rate.** Baseline hypothesis: not applicable because the feature does not exist today. Target direction (A): at least ninety-five percent of draft-preview requests complete successfully without timeout or error. Instrumentation: `biz.qbr_preview_requested` to `biz.qbr_preview_rendered` success ratio, plus latency distribution.
-- **Graceful degradation under partial source failure.** Baseline hypothesis: not instrumented today. Target direction (A): at least ninety-nine percent of sessions still render the dashboard shell and unaffected widgets when one upstream source such as billing, PSA, or peer-benchmark data is stale or unavailable. Instrumentation: widget-level render status, error-boundary telemetry, and synthetic outage monitoring.
+- **Dashboard time to usable data.** Target (A): p95 under three seconds for a warm load and under five seconds for a cold load.
+- **Churn Risk Score coverage.** Target (A): score available for at least eighty percent of eligible tenants when required sources are connected.
+- **QBR draft generation success rate.** Target (A): at least ninety-five percent of draft-preview requests complete without timeout or error.
+- **Graceful degradation under partial source failure.** Target (A): at least ninety-nine percent of sessions still render the dashboard shell and unaffected widgets when one upstream source is stale or unavailable.
 
 #### Qualitative signals
 
 - Owners say the dashboard makes it clearer where revenue is at risk and where growth is available.
 - Owners say the peer benchmark is believable enough to use in planning or leadership discussion.
 - Owners say the QBR draft is useful enough as a starting point rather than just a demo artifact.
+- There is little negative unsolicited feedback about the dashboard in partner community channels, support feedback, and social networks.
 
 ### Cross-dashboard requirements
 
