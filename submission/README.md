@@ -15,7 +15,7 @@
 - `prototype/operations_dashboard.html`
 - `prototype/business_dashboard.html`
 
-## How to run
+## How to open
 
 1. Open `prototype/index.html` in a browser. No build step, no hosting required.
 2. Navigate between dashboards with the top navigation.
@@ -25,7 +25,7 @@
    - Business: scroll to the *Peer Benchmark* card to compare the portfolio to the peer cohort on four metrics.
    - On either dashboard: click the *"Heuristic v1 · how calculated"* confidence badge next to a score to see the factor weights and rationale.
 
-## Real versus stubbed
+## What's real vs stubbed
 
 ### Real in prototype
 
@@ -40,7 +40,7 @@
 ### Stubbed or simulated
 
 - Data is fake but internally coherent (`prototype/assets/data.js`).
-- No live Acronis Application Programming Interface calls and no Professional Services Automation integration.
+- No live Acronis API calls and no live PSA integration.
 - No backend persistence; shared filter state is stored only in the browser.
 - Scoring weights are the initial product hypothesis (visible in the explainer modal), not a trained model.
 - Peer cohort values are synthetic placeholders in realistic directional ranges.

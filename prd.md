@@ -187,7 +187,7 @@ Primary user stories:
 - BIZ-3: as an owner, I need margin-oriented client ranking and sort controls.
 - BIZ-4: as an owner, I need visible forecast in MRR trend to support planning.
 - BIZ-5: as an owner, I need one-click QBR preview flow as communication accelerator.
-- BIZ-6: as an owner, I need a peer benchmark view so I can see how my portfolio compares to similar MSPs on retention, margin, Service Level Agreement compliance, and Monthly Recurring Revenue per endpoint, with an explicit cohort definition and anonymization floor.
+- BIZ-6: as an owner, I need a peer benchmark view so I can see how my portfolio compares to similar MSPs on retention, margin, SLA compliance, and MRR per endpoint, with an explicit cohort definition and anonymization floor.
 
 Success metrics:
 
