@@ -1,13 +1,11 @@
 # Acronis Dashboard Test Task
 
-This repository is organized so the reviewer can go straight to the canonical submission.
-
-## Start here (canonical deliverable)
+## Submission
 
 - Submission package: [`submission/`](./submission/)
 - Interactive prototype (hosted): [romargera.github.io/acronis_test_task](https://romargera.github.io/acronis_test_task/)
 
-## Reviewer path (fast, about 15 minutes)
+## Contents
 
 1. Review the submission package in [`submission/`](./submission/). It includes the required task README plus the five written sections:
    - problem framing and personas,

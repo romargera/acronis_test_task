@@ -4,7 +4,6 @@ Author: Roman Babunts.
 
 > NOTE:
 >
-> - The canonical submission lives in `submission/`. This document is an optional long-form version kept for readers who want the full narrative including the Assumption Register and alternatives considered.
 > - Marker `(A)` means an assumption that is not fully validated yet; every `(A)` item is also listed in the Assumption Register at the end.
 > - Scope is strictly two dashboards: Operations and Business Growth.
 
