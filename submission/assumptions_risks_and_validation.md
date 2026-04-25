@@ -9,6 +9,7 @@ Any inline `(A)` marker elsewhere in the submission points back to this register
 - Operational and business signals can be joined without a net-new data acquisition project.
 - A consistent tenant identifier exists across operational, billing, and PSA sources.
 - PSA-derived signals (SLA, reopen, escalations) are available and clean enough for a heuristic v1 score.
+- A usable taxonomy of valuable downstream actions can be defined, or approximated initially through click-out depth and follow-through patterns.
 - Technicians will prefer rapid color-and-severity scanning over a dense ranked table for first-pass triage.
 - Ticket reopen rate is a strong enough early churn signal to use in a heuristic v1 score.
 - Benchmarking can be provided through anonymized cohorts with a privacy threshold users accept.
