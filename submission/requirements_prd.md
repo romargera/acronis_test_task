@@ -20,7 +20,7 @@
 - As a technician, I can click a risk tile and open a tenant drill-down with key posture metrics and a recommended action.
 - As an MSP technician or IT admin, I can use a ranked AI Morning Briefing instead of scanning each tenant manually.
 - As a lead technician, I can monitor the Critical Alerts Feed and dispatch escalations with attached context.
-- As a technician, I can see how the Operational Risk Score is computed, including factor weights, before I trust it.
+- As a technician, I can see how the Operational Risk Score is computed, including factor weights, before I trust it. In v1 this is a heuristic score based on backup failure rate, patch lag, active critical alerts, and SLA miss rate; detailed weights live in `data_sources_and_model.md`.
 
 ### Operations success metrics
 
@@ -31,12 +31,14 @@ Sub-JTBDs: detect drift early and route into the right next step with enough con
 
 Note: until Acronis has a validated taxonomy of valuable downstream actions, v1 can use a proxy based on engaged click-outs, downstream follow-through events, and long versus short click-outs from the dashboard.
 
+Initial v1 valuable actions can include escalation or dispatch with context, launching a remediation job, opening the tenant console with sustained engagement, or creating a documented follow-up.
+
 #### Product metrics
 
 - **Time to first valuable next step** (primary JTBD). Baseline (A): about eight minutes today. Target (A): under three minutes. Measure: `auth.session_started` to first valuable-action event.
 - **Dashboard-led valuable next-step rate** (sub-JTBD). Target (A): at least half of active technician sessions. Measure: briefing, heatmap, or drill-down interaction followed by a valuable-action event in the same session.
 - **Cross-surface discoverability per active technician.** Target (A): more unique downstream domains or products opened from the dashboard per active user than today. Measure: unique downstream tools opened from dashboard entry points.
-- **Widget utility funnel by widget.** Track: viewport impression -> engaged click -> valuable next step for AI Morning Briefing, Risk Heatmap, Critical Alerts Feed, and key tiles.
+- **Widget utility funnel by widget.** Track: viewport impression -> engaged click -> valuable next step for AI Morning Briefing, Risk Heatmap, Critical Alerts Feed, Backup Success Rate, Patch Compliance, and Open Critical Alerts tiles.
 - **Session efficiency.** Track: any-click rate plus median and average session duration. Read together so that higher time on page is not misread when no-click consumption increases.
 
 #### Business metrics
@@ -56,7 +58,7 @@ Note: until Acronis has a validated taxonomy of valuable downstream actions, v1 
 - Technicians say the ranking and color coding broadly match their mental model of what should be worked first.
 - Technicians say downstream click-outs usually lead to the intended tool or action with little confusion.
 - Technicians say score explanations, units, and diffs are understandable without separate documentation.
-- There is little negative unsolicited feedback about the dashboard in partner community channels, support feedback, and social networks.
+- Technicians proactively reference or share dashboard views in partner community channels, support interactions, or team workflows as a useful triage artifact.
 
 ## Business-growth dashboard
 
@@ -77,9 +79,9 @@ Note: until Acronis has a validated taxonomy of valuable downstream actions, v1 
 
 - As an MSP owner, I can identify high-risk clients ranked by revenue impact.
 - As a practice lead, I can inspect service coverage gaps and estimate MRR uplift from closing them.
-- As a manager, I can generate a QBR draft from one click to accelerate preparation.
+- As a manager, I can generate a QBR draft from one click to accelerate preparation. The draft includes an executive summary, SLA and service-performance highlights, coverage gaps, MRR trend, and recommended next actions.
 - As an owner, I can see how my portfolio compares to similar MSPs on four key metrics, with an explicit cohort definition and privacy floor.
-- As an owner, I can see how the Churn Risk Score is computed, including factor weights, before I act on it.
+- As an owner, I can see how the Churn Risk Score is computed, including factor weights, before I act on it. In v1 this is a heuristic score based on ticket reopen rate, escalation rate, SLA compliance drop, QBR engagement drop, and billing disputes; detailed weights live in `data_sources_and_model.md`.
 
 ### Business success metrics
 
@@ -115,11 +117,12 @@ Sub-JTBDs: prepare customer communication faster and compare portfolio performan
 - Owners say the dashboard makes it clearer where revenue is at risk and where growth is available.
 - Owners say the peer benchmark is believable enough to use in planning or leadership discussion.
 - Owners say the QBR draft is useful enough as a starting point rather than just a demo artifact.
-- There is little negative unsolicited feedback about the dashboard in partner community channels, support feedback, and social networks.
+- Owners reference dashboard outputs in QBR prep, planning reviews, or leadership discussion without falling back to spreadsheets as the default source.
 
 ### Cross-dashboard requirements
 
 - Shared six-filter state (time window, severity, services, regions, countries, segments) that persists when switching dashboards.
+- Role-based access: Operations is available to technician and admin roles; Business Growth is available to owner and practice-lead roles; owner roles may retain read access to Operations where needed.
 - Explainability: every scored metric on either dashboard exposes its formula and factor weights via a confidence badge.
 - Every Key Performance Indicator card is drill-capable; when the destination page is not ready in v1 it routes to an explicit placeholder rather than a dead click.
 - Units, baseline comparison period, and positive or negative diff colors are shown consistently across both dashboards.
