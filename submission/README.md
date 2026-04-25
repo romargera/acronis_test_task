@@ -17,7 +17,7 @@
 
 ## How to open
 
-1. Open `prototype/index.html` in a browser. No build step, no hosting required.
+1. Open the hosted prototype: [romargera.github.io/acronis_test_task](https://romargera.github.io/acronis_test_task/)
 2. Navigate between dashboards with the top navigation.
 3. Use filters and click interactions:
    - Operations: click a heatmap tile, a briefing item, or an alert row to open the tenant drill-down, then *Dispatch to Tier 2*.
@@ -54,6 +54,7 @@
 - Replace the `Set goal` placeholder with a complete goal-setting flow (target definition, owner, cadence, and follow-up actions).
 - Rank all widgets by decision importance and validate those priorities as explicit assumptions.
 - Add responsive-layout rules for different screen proportions and define accessibility and mobile behaviour (focus order, keyboard navigation, contrast, and compact interaction patterns).
+- Prepare a simple mitigation plan for the biggest product risks: adoption risk, data-quality risk, and benchmark-trust risk.
 
 ## Design system usage
 

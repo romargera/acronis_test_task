@@ -28,3 +28,4 @@
 - Add explicit score explainability panel (feature contribution per risk score).
 - Add one goal-setting flow in MRR trend (target, owner, review cadence).
 - Add export stub for QBR draft into a simple markdown/PDF flow.
+- Prepare a simple mitigation plan for the biggest risks, especially score trust, data quality, and benchmark adoption.

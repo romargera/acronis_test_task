@@ -6,11 +6,11 @@ I used AI as a speed multiplier for synthesis, drafting, and boilerplate, and ke
 
 - **Claude Code** as the primary agentic coding and drafting tool for the PRD sections, the prototype scaffold, and the data-model tables.
 - **Perplexity** to collect MSP context and competitive references during research, especially for peer-benchmarking patterns.
-- **Whisper-based transcription** on the recording of the hiring-manager call, used as input context for the segment and scope decisions.
+- **Dictation** to turn my own notes from the hiring-manager call into editable text faster and reduce typing overhead during the timeboxed exercise.
 
 ## Where AI accelerated the work
 
-- Consolidating long context sources (the prototype seed notes, the Perplexity research dump, and the interview transcript) into a tight PRD aligned with a three-to-four-hour delivery budget.
+- Consolidating long context sources (the prototype seed notes, the Perplexity research dump, and my dictated call notes) into a tight PRD aligned with a three-to-four-hour delivery budget.
 - First-pass structures for the problem framing, requirements, and data-model tables, which I then rewrote into sharper prose.
 - Boilerplate interaction logic for the prototype pages, including filter state, drill-down wiring, and modal behaviour. I simplified the generated code by hand to remove dead branches and over-defensive checks.
 - Drafting the initial QBR template text that the prototype modal produces, before I rewrote the tone to match how a delivery lead actually writes.
@@ -37,7 +37,7 @@ Final decision: two role-focused dashboards with a shared filter bar and shared 
 ## What I deliberately did not delegate
 
 - Choosing the MSP segment (mid-market, one hundred fifty to five hundred tenants, regulated-heavy). This is a product-strategy call that changes the rest of the submission and had to be mine.
-- The weight vectors for the Operational Risk Score and the Churn Risk Score. AI was asked for weight *candidates* but the final selection, including which factor dominates each score, was a manual judgment call informed by the interview transcript.
+- The weight vectors for the Operational Risk Score and the Churn Risk Score. AI was asked for weight *candidates* but the final selection, including which factor dominates each score, was a manual judgment call informed by my call notes.
 - The decision to ship rules-based scoring in v1 rather than trained ML scoring. AI defaulted to "just train a model"; I held the line on explainability first, training later.
 - The decision to present peer benchmarks as percentile bands rather than a named league table, and the twenty-five-MSP privacy floor.
 
@@ -47,3 +47,4 @@ Final decision: two role-focused dashboards with a shared filter bar and shared 
 - Add explicit instrumentation event names and payloads for all success metrics as a real appendix, not just as prose in the data model document.
 - Integrate one realistic CSV import flow for PSA-like data so the Churn Risk Score assumption is testable with real tenant data rather than synthetic data.
 - Add a third `Client 360` page as an optional phase-two extension connected from both dashboards.
+- Prepare a simple risk-mitigation plan for the biggest product and rollout risks before moving from prototype to implementation.
