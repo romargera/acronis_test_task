@@ -314,7 +314,7 @@ Out-of-scope now:
 ## 7. What I would add with +2 more hours
 
 - add optional `Client 360` page linked from both dashboards as a tenant deep-dive hub (timeline, service coverage map, unified action and QBR context),
-- replace the `Set goal` placeholder with a complete goal-setting flow (target, owner, cadence, progress tracking),
+- think through whether goal-setting belongs in v1, which goals matter most, and how that workflow should connect to planning without adding noise,
 - add richer click-through placeholders for KPI drill-down destinations,
 - add event instrumentation plan for validating interaction quality,
 - design migration logic for existing users to mitigate adoption risk if they prefer classic overview behavior (guided onboarding, fallback path, parity callouts, opt-out capture).

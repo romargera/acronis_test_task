@@ -39,7 +39,7 @@
 
 ### Stubbed or simulated
 
-- Data is fake but internally coherent (`prototype/assets/data.js`).
+- Data is mock data (`prototype/assets/data.js`).
 - No live Acronis API calls and no live PSA integration.
 - No backend persistence; shared filter state is stored only in the browser.
 - Scoring weights are the initial product hypothesis (visible in the explainer modal), not a trained model.
@@ -51,7 +51,7 @@
 - Add `Client 360` as a third page (not required by the test task) for cross-dashboard tenant deep dive.
 - Connect Operations and Business drill-down actions to that page with query parameters (`tenant`, `source`).
 - Expand the QBR flow there: timeline plus service map plus one-click export stub.
-- Replace the `Set goal` placeholder with a complete goal-setting flow (target definition, owner, cadence, and follow-up actions).
+- Think through whether goal-setting belongs in v1, which goals matter most, and how that workflow should connect to planning without adding noise.
 - Rank all widgets by decision importance and validate those priorities as explicit assumptions.
 - Add responsive-layout rules for different screen proportions and define accessibility and mobile behaviour (focus order, keyboard navigation, contrast, and compact interaction patterns).
 - Prepare a simple mitigation plan for the biggest product risks: adoption risk, data-quality risk, and benchmark-trust risk.
