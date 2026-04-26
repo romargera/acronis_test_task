@@ -48,13 +48,16 @@
 
 ## If we had two more hours
 
+- Work through onboarding for technicians and owners, especially first-run education, confidence-badge explanation, and paths back to familiar workflows.
+- Define low-data and no-data widget states for accounts without clean PSA, CRM, billing, or fallback native signals.
+- Detail the rollout plan: internal dogfood, design-partner pilot, opt-in beta, cohort expansion, success gates, and rollback triggers.
 - Add `Client 360` as a third page (not required by the test task) for cross-dashboard tenant deep dive.
 - Connect Operations and Business drill-down actions to that page with query parameters (`tenant`, `source`).
 - Expand the QBR flow there: timeline plus service map plus one-click export stub.
 - Think through whether goal-setting belongs in v1, which goals matter most, and how that workflow should connect to planning without adding noise.
 - Rank all widgets by decision importance and validate those priorities as explicit assumptions.
 - Add responsive-layout rules for different screen proportions and define accessibility and mobile behaviour (focus order, keyboard navigation, contrast, and compact interaction patterns).
-- Prepare a simple mitigation plan for the biggest product risks: adoption risk, data-quality risk, and benchmark-trust risk.
+- Prepare a simple mitigation plan for the biggest product risks: adoption and habit-disruption risk, data-quality risk, and benchmark-trust risk.
 
 ## Design system usage
 

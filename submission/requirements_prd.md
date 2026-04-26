@@ -10,8 +10,8 @@
 
 ### Operations non-goals
 
-- Replacing Security Information and Event Management-level deep investigation, because technicians should route from the dashboard into dedicated security tools for forensics rather than perform full investigation here.
-- Replacing PSA ticketing workflow, because MSPs already have PSA investments and context push into the existing workflow is more valuable than replacement in v1.
+- Replacing Security Information and Event Management-level deep investigation, because technicians should route from the dashboard into dedicated security tools for forensics outside this product surface.
+- Replacing PSA ticketing workflow, because MSPs already have PSA investments and context push into the existing workflow carries more v1 value; full replacement is out of scope.
 - Full third-party Remote Monitoring and Management unification in the first release, because cross-vendor normalization is a multi-quarter dependency that should not block the core triage value.
 
 ### Operations user stories
@@ -24,7 +24,7 @@
 
 ### Operations success metrics
 
-All quantitative metrics below are grouped into product, MSP business, Acronis business, and technical metrics. Qualitative signals are listed separately. `(A)` marks a directional assumption rather than a validated baseline or target.
+All quantitative metrics below are grouped into product, MSP business, Acronis business, and technical metrics. Qualitative signals are listed separately. `(A)` marks a directional assumption that still needs baseline validation; see the [Assumptions register](./assumptions_risks_and_validation.md).
 
 Primary JTBD: help the technician identify where to act first and take the first meaningful action quickly.  
 Sub-JTBDs: detect drift early and route into the right next step with enough context.
@@ -37,7 +37,7 @@ Initial v1 valuable actions can include escalation or dispatch with context, lau
 
 - **Time to first valuable next step** (primary JTBD). Baseline (A): about eight minutes today. Target (A): under three minutes. Measure: `auth.session_started` to first valuable-action event.
 - **Dashboard-led valuable next-step rate** (sub-JTBD). Target (A): at least half of active technician sessions. Measure: briefing, heatmap, or drill-down interaction followed by a valuable-action event in the same session.
-- **Cross-surface discoverability per active technician.** Target (A): more unique downstream domains or products opened from the dashboard per active user than today. Measure: unique downstream tools opened from dashboard entry points.
+- **Cross-surface discoverability per active technician.** Target (A): an increase in unique downstream domains or products opened from the dashboard per active user. Measure: unique downstream tools opened from dashboard entry points.
 - **Widget utility funnel by widget.** Track: viewport impression -> engaged click -> valuable next step for AI Morning Briefing, Risk Heatmap, Critical Alerts Feed, Backup Success Rate, Patch Compliance, and Open Critical Alerts tiles.
 - **Session efficiency.** Track: any-click rate plus median and average session duration. Read together so that higher time on page is not misread when no-click consumption increases.
 
@@ -48,7 +48,7 @@ Initial v1 valuable actions can include escalation or dispatch with context, lau
 
 #### Acronis business metrics
 
-Attribution for Acronis-facing metrics uses exposed-versus-matched-unexposed partner cohorts and should be interpreted as influenced rather than causally driven.
+Attribution for Acronis-facing metrics uses exposed-versus-matched-unexposed partner cohorts and should be interpreted as influenced, not causally driven.
 
 - **Partner activation of the Operations dashboard.** Target (A): upward trend in the share of eligible partner accounts where at least one technician completes a valuable dashboard-led action within the first 30 days after enablement.
 - **Acronis service attach influenced by operational gap discovery.** Baseline (A): to be established in pilot. Target: upward trend in backup, patch, or security-module adoption among exposed partner accounts.
@@ -92,7 +92,7 @@ Attribution for Acronis-facing metrics uses exposed-versus-matched-unexposed par
 
 ### Business success metrics
 
-All quantitative metrics below are grouped into product, MSP business, Acronis business, and technical metrics. Qualitative signals are listed separately. `(A)` marks a directional assumption rather than a validated baseline or target.
+All quantitative metrics below are grouped into product, MSP business, Acronis business, and technical metrics. Qualitative signals are listed separately. `(A)` marks a directional assumption that still needs baseline validation; see the [Assumptions register](./assumptions_risks_and_validation.md).
 
 Primary JTBD: help the owner or practice lead identify where revenue is at risk or where growth is available, then commit to the next action.  
 Sub-JTBDs: prepare customer communication faster and compare portfolio performance to peers with enough confidence to act.
@@ -114,7 +114,7 @@ Sub-JTBDs: prepare customer communication faster and compare portfolio performan
 
 #### Acronis business metrics
 
-Attribution for Acronis-facing metrics uses exposed-versus-matched-unexposed partner cohorts and should be interpreted as influenced rather than causally driven.
+Attribution for Acronis-facing metrics uses exposed-versus-matched-unexposed partner cohorts and should be interpreted as influenced, not causally driven.
 
 - **Partner activation of the Business Growth dashboard.** Target (A): upward trend in the share of eligible partner accounts where an owner or practice lead returns weekly within the first 30 days after enablement.
 - **Partner renewal conversion uplift among activated accounts.** Baseline (A): requires post-launch cohort observation. Target: improvement versus a matched exposed-but-not-activated partner cohort.
@@ -131,7 +131,7 @@ Attribution for Acronis-facing metrics uses exposed-versus-matched-unexposed par
 
 - Owners say the dashboard makes it clearer where revenue is at risk and where growth is available.
 - Owners say the peer benchmark is believable enough to use in planning or leadership discussion.
-- Owners say the QBR draft is useful enough as a starting point rather than just a demo artifact.
+- Owners say the QBR draft is useful enough as a real starting point, not just a demo artifact.
 - Owners reference dashboard outputs in QBR prep, planning reviews, or leadership discussion without falling back to spreadsheets as the default source.
 
 ### Cross-dashboard requirements
@@ -140,5 +140,5 @@ Attribution for Acronis-facing metrics uses exposed-versus-matched-unexposed par
 - Role-based access: Operations is available to technician and admin roles; Business Growth is available to owner and practice-lead roles; owner roles may retain read access to Operations where needed.
 - Explainability: every scored metric on either dashboard exposes its formula and factor weights via a confidence badge.
 - Peer benchmark visuals always show cohort definition and as-of timestamp in the widget itself so screenshots remain interpretable outside the product.
-- Every Key Performance Indicator card is drill-capable; when the destination page is not ready in v1 it routes to an explicit placeholder rather than a dead click. The placeholder shows the clicked metric and current value, a short description of the intended full drill-down, and a lightweight feedback prompt on whether that destination would be useful.
+- Every Key Performance Indicator card is drill-capable; when the destination page is not ready in v1 it routes to an explicit placeholder instead of a dead click. The placeholder shows the clicked metric and current value, a short description of the intended full drill-down, and a lightweight feedback prompt on whether that destination would be useful.
 - Units, baseline comparison period, and positive or negative diff colors are shown consistently across both dashboards.

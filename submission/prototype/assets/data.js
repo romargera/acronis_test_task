@@ -376,7 +376,7 @@
         { factor: "QBR attendance drop", weight: 0.15, rationale: "Sponsor disengagement is a renewal risk." },
         { factor: "Billing disputes", weight: 0.10, rationale: "Late signal but very high conviction when present." }
       ],
-      fallback: "If PSA data quality is too low for a tenant, we display the score as Unavailable with an explicit data-gap label rather than guessing."
+      fallback: "If PSA data quality is too low for a tenant, we display the score as Unavailable with an explicit data-gap label instead of guessing."
     }
   };
 

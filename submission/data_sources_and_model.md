@@ -1,6 +1,6 @@
 # Data Sources & Model
 
-`(A)` marks a working assumption that is also listed in the Assumptions register.
+`(A)` marks a working assumption that is also listed in the [Assumptions register](./assumptions_risks_and_validation.md).
 
 This is not a production schema. It is a lightweight sketch to show the proposal is believable with data Acronis already has, or could reasonably ingest, and to make the scoring choices explicit enough to defend in review.
 
@@ -39,11 +39,11 @@ In this document, *near real time* means the event is available for dashboard us
 - `risk_signal_event` (tenant_id, type, severity, timestamp, description).
 - `peer_cohort_metric` (cohort_id, metric_id, p25, p50, p75, sample_size, as_of_date).
 
-- In v1, `est_cost` is an explicit proxy rather than accounting truth: ticket count times median handling time times an MSP-configured blended hourly rate. `margin_pct` is therefore directional and should be labeled estimated in the product.
+- In v1, `est_cost` is an explicit proxy, not accounting truth: ticket count times median handling time times an MSP-configured blended hourly rate. `margin_pct` is therefore directional and should be labeled estimated in the product.
 
 ## Scoring: Operational Risk Score
 
-Version: Heuristic v1. The score is a weighted sum of four factors, normalized to a zero to one hundred scale. We ship this as a rules-based score in v1 rather than a trained model; see the rationale in the trade-offs section of the problem framing document.
+Version: Heuristic v1. The score is a weighted sum of four factors, normalized to a zero to one hundred scale. We ship this as a rules-based score in v1, not a trained model; see the rationale in the trade-offs section of the problem framing document.
 
 | Factor | Weight | Source | Rationale |
 | --- | --- | --- | --- |
@@ -52,7 +52,7 @@ Version: Heuristic v1. The score is a weighted sum of four factors, normalized t
 | Open critical alerts, severity-weighted | 0.20 | Security and EDR events | Captures current incident pressure. |
 | SLA miss rate over the last fourteen days | 0.20 | PSA connector | Contract exposure; ties ops signal to commercial risk. |
 
-Missing-data handling: if a factor lacks fresh data for a tenant, its weight is redistributed proportionally across the remaining factors, and the hover explanation on the confidence badge lists which factors were missing so the technician can judge whether to trust the score. If SLA data is unavailable for more than roughly 30 percent of tenants in the current filter (A), the dashboard also shows a filter-level banner that the score is less reliable because PSA-backed SLA data is missing broadly.
+Missing-data handling: if a factor lacks fresh data for a tenant, its weight is redistributed proportionally across the remaining factors, and the hover explanation on the confidence badge lists which factors were missing so the technician can judge whether to trust the score. If SLA data is unavailable for roughly 30 percent or more of tenants in the current filter (A), the dashboard also shows a filter-level banner that the score is less reliable because PSA-backed SLA data is missing broadly.
 
 ## Scoring: Churn Risk Score
 
@@ -73,7 +73,7 @@ Missing-data handling: if PSA, CRM, or billing data is unavailable, v1 falls bac
 - Cohort definition is explicit and shown on the widget: in v1 we start with a *Mid-market MSPs* label (A), but the actual comparison group is built operationally from the MSP's region when available, tenant-count band, endpoint-count band, and at least six months of history. This keeps the cohort concrete enough for review without pretending the benchmark is universal.
 - The four benchmarked metrics in v1 are Net Revenue Retention, Gross Margin, SLA Compliance, and MRR per Endpoint.
 - Each metric displays the twenty-fifth, fiftieth, and seventy-fifth percentile of the cohort plus the current MSP's own value.
-- Privacy floor: any metric in any cohort is suppressed if it does not clear a minimum privacy threshold (A), and cells suppressed this way render as *Not enough data yet* rather than a numeric value.
+- Privacy floor: any metric in any cohort is suppressed if it does not clear a minimum privacy threshold (A), and cells suppressed this way display *Not enough data yet* in place of a numeric value.
 - Refresh: peer aggregates are recomputed weekly through an offline batch job on a separate analytics warehouse view, not through per-request reads on live tenant data.
 
 ## Instrumentation Cost Awareness
@@ -82,7 +82,7 @@ This is the kind of thing that looks free in a proposal and hurts eighteen month
 
 - **Operations near real time snapshots.** Higher cost. Requires a streaming ingestion path and a write-through cache so the KPI row and the Critical Alerts Feed stay honest. Much of this likely builds on the existing telemetry stack (A); incremental cost should stay manageable as long as we do not add per-dashboard-load queries against hot storage.
 - **Business daily snapshots.** Low cost. A nightly batch job reads billing and usage aggregates and writes a per-tenant row. One row per tenant per day is cheap even at tens of thousands of tenants.
-- **Composite score recomputation.** Moderate cost. Operational Risk and Churn Risk scores should be recomputed on a five-minute micro-batch cadence rather than on every incoming event. At typical MSP scales this is lightweight compared with the ingestion layer.
+- **Composite score recomputation.** Moderate cost. Operational Risk and Churn Risk scores should be recomputed on a five-minute micro-batch cadence, not on every incoming event. At typical MSP scales this is lightweight compared with the ingestion layer.
 - **Peer cohort aggregation.** Moderate one-time cost, low recurring cost. Runs weekly offline; the main cost is getting the cohort definition and privacy floor right once, not the compute.
 - **Product analytics events for success metrics.** We expect roughly twelve to fifteen new events across both dashboards, including `ops.morning_briefing_viewed`, `ops.drilldown_initiated`, `ops.escalation_dispatched`, `ops.filter_applied`, `ops.kpi_card_clicked`, `biz.kpi_drilled`, `biz.peer_benchmark_expanded`, `biz.upsell_inspected`, `biz.qbr_preview_opened`, `biz.qbr_exported`, and `shared.tab_switched`. This rides on the existing analytics pipeline and is effectively incremental on top of current event volume; we are not introducing a new analytics system to support it.
 - **Trained models.** Deliberately not in v1. The warm-up period required to collect labeled churn data is a cost we are postponing until the rules-based scoring has produced enough feedback to calibrate weights and to judge whether a trained model is worth the ongoing storage and retraining cost.

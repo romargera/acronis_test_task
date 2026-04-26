@@ -1,21 +1,21 @@
 # Problem Framing & Personas
 
-`(A)` marks a working assumption that is also listed in the Assumptions register.
+`(A)` marks a working assumption that is also listed in the [Assumptions register](./assumptions_risks_and_validation.md).
 
 ## Who we are designing for
 
-We are explicitly designing first for **mid-market MSPs** (A): partners with enough tenant volume and operational complexity for portfolio-level prioritization and peer benchmarking to be useful. The prototype examples lean toward regulated industries, but that is illustrative rather than a hard scope boundary.
+We are explicitly designing first for **mid-market and upper-mid-market MSPs** (A): partners with enough tenant volume and operational complexity for portfolio-level prioritization and peer benchmarking to be useful. Very large MSPs are not excluded, but v1 validation does not optimize for enterprise-scale customization, governance, or procurement needs. The prototype examples lean toward regulated industries, but that is illustrative and not a hard scope boundary.
 
 This segment was chosen because:
 
 - They already pay for operational tooling but still run morning triage by jumping between consoles and spreadsheets, so the time-to-decision problem is very real.
-- They have enough portfolio volume for peer benchmarking to feel fair, unlike very small MSPs where cohort comparison produces noisy small-sample results. (A)
+- They have enough portfolio volume for peer benchmarking to feel fair. Very small MSPs often produce noisy small-sample cohorts. (A)
 - Operations and business signals can plausibly be joined without a net-new data acquisition project. (A)
 
 We are explicitly **not** optimising for:
 
-- Very small MSPs, whose workflow is still single-operator and where one dashboard replaces memory rather than a console.
-- Enterprise in-house Security Operations Centers, which already run a SIEM and expect different incident-investigation depth than we intend to provide.
+- Very small MSPs, whose workflow is still single-operator and where one dashboard would mainly replace memory, not a console.
+- Enterprise in-house Security Operations Centers, which already run a SIEM and expect incident-investigation depth outside this proposal.
 
 ## Dashboard 1: Operations dashboard
 
@@ -39,7 +39,7 @@ It is eight o'clock on Monday morning and Sarah has just logged in.
 1. The Key Performance Indicator row shows that unresolved critical issues rose from nine to fourteen over the weekend and patch compliance dropped three percentage points. The diff indicator is red.
 2. The Cross-Tenant Risk Heatmap now has three tiles in critical, led by Northwind Financial. Sarah clicks the Northwind tile.
 3. The drill-down panel shows twelve endpoints missing a critical CVE patch, a backup success rate at seventy-two percent, and SLA compliance at seventy-four percent. The Operational Risk Score badge is marked *Heuristic v1*; Sarah clicks it once, confirms the weights match her mental model, and moves on.
-4. She dispatches the Northwind critical to Tier 2 with the attached context. This is materially faster than the current multi-console workflow.
+4. She dispatches the Northwind critical to Tier 2 with the attached context. This materially speeds up the current multi-console workflow.
 5. She then scans the AI Morning Briefing for the next four ranked items and works through them before opening anything else.
 
 ## Dashboard 2: Business-growth dashboard
@@ -69,7 +69,7 @@ It is nine o'clock on Monday morning and Mike has just logged in.
 
 ## Trade-offs we accepted, with the reasoning
 
-These are explicit choices we would defend in review rather than omissions we hope nobody notices.
+These are explicit choices we would defend in review, not hidden omissions.
 
 ### Heatmap tiles over a single ranked list on Operations
 
@@ -81,7 +81,7 @@ We chose a heatmap of tiles instead of a ranked list for cross-tenant risk.
 
 ### Rules-based scoring in v1, not a trained model
 
-Both the Operational Risk Score and the Churn Risk Score are deterministic weighted heuristics rather than trained machine-learning models.
+Both the Operational Risk Score and the Churn Risk Score are deterministic weighted heuristics, not trained machine-learning models.
 
 - Upside: we can ship explainable scoring immediately, users can see and argue with the weights, and we avoid a long warm-up period with no product to validate.
 - Downside: weights will be wrong in absolute terms and must be recalibrated with real thumbs up and thumbs down feedback in the early access program.
@@ -97,7 +97,7 @@ We show the user their value against the twenty-fifth, fiftieth, and seventy-fif
 
 ### Two separate dashboards, not one adaptive surface
 
-We chose two focused dashboards rather than a single adaptive surface with role-based widgets.
+We chose two focused dashboards, not a single adaptive surface with role-based widgets.
 
 - Upside: each persona gets a cleaner information hierarchy tuned to their decision cadence, daily triage versus weekly portfolio review.
 - Downside: shared entities such as tenants, alerts, and risks appear in both contexts, which creates consistency and maintenance overhead.

@@ -6,14 +6,13 @@ I used AI as a speed multiplier for synthesis, drafting, and boilerplate, and ke
 
 - **Claude Code** as the primary agentic coding and drafting tool for the PRD sections, the prototype scaffold, and the data-model tables.
 - **Perplexity** to collect MSP context and competitive references during research, especially for peer-benchmarking patterns.
-- **Dictation** to turn my own notes from the hiring-manager call into editable text faster and reduce typing overhead during the timeboxed exercise.
+- **MacWhisper** to dictate my own notes from the hiring-manager call instead of typing them manually, turning them into editable text faster and reducing typing overhead during the timeboxed exercise.
 
 ## Where AI accelerated the work
 
-- Consolidating long context sources (the prototype seed notes, the Perplexity research dump, and my dictated call notes) into a tight PRD aligned with a three-to-four-hour delivery budget.
+- Consolidating long context sources (the prototype seed notes, the Perplexity research dump, and my MacWhisper-dictated call notes) into a tight PRD aligned with a three-to-four-hour delivery budget.
 - First-pass structures for the problem framing, requirements, and data-model tables, which I then rewrote into sharper prose.
 - Boilerplate interaction logic for the prototype pages, including filter state, drill-down wiring, and modal behaviour. I simplified the generated code by hand to remove dead branches and over-defensive checks.
-- Drafting the initial QBR template text that the prototype modal produces, before I rewrote the tone to match how a delivery lead actually writes.
 
 ## Where I overrode AI output
 
@@ -38,13 +37,14 @@ Final decision: two role-focused dashboards with a shared filter bar and shared 
 
 - Choosing the v1 MSP segment and how tightly to scope it. This is a product-strategy call that changes the rest of the submission and had to be mine.
 - The weight vectors for the Operational Risk Score and the Churn Risk Score. AI was asked for weight *candidates* but the final selection, including which factor dominates each score, was a manual judgment call informed by my call notes.
-- The decision to ship rules-based scoring in v1 rather than trained ML scoring. AI defaulted to "just train a model"; I held the line on explainability first, training later.
-- The decision to present peer benchmarks as percentile bands rather than a named league table, and to use a minimum privacy threshold rather than expose thin cohorts.
+- The decision to ship rules-based scoring in v1 instead of trained ML scoring. AI defaulted to "just train a model"; I held the line on explainability first, training later.
+- The decision to present peer benchmarks as percentile bands, not a named league table, and to use a minimum privacy threshold instead of exposing thin cohorts.
 
 ## What I would improve with more time
 
 - Replace the synthetic risk heuristics in the prototype with a transparent weighted model that reads directly from the `scoringConfig` used to populate the explainer, so the score on the card and the formula in the explainer are guaranteed to match.
 - Add explicit instrumentation event names and payloads for all success metrics as a real appendix, not just as prose in the data model document.
-- Integrate one realistic CSV import flow for PSA-like data so the Churn Risk Score assumption is testable with real tenant data rather than synthetic data.
+- Spend two more hours on onboarding and edge cases: first-run education for technicians and owners, low-data and no-data states, and a rollout plan with pilot cohorts, opt-in beta, expansion criteria, and rollback triggers.
+- Integrate one realistic CSV import flow for PSA-like data so the Churn Risk Score assumption is testable with real tenant data instead of only synthetic data.
 - Add a third `Client 360` page as an optional phase-two extension connected from both dashboards.
 - Prepare a simple risk-mitigation plan for the biggest product and rollout risks before moving from prototype to implementation.
