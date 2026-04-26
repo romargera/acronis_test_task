@@ -175,8 +175,7 @@
       <section class="grid">
         <article class="card">
           <div class="section-actions">
-            <h2 class="card-title">Peer Benchmark: How You Compare <span class="info-tip" data-info="Compares your portfolio to a cohort of similar MSPs on the metrics that drive growth and retention. Individual MSPs are never identified.">i</span></h2>
-            <span class="card-subtitle" id="peerCohortSummary"></span>
+            <h2 class="card-title">Peer Benchmark: How You Compare <span id="peerBenchmarkInfoTip" class="info-tip" data-info="Compares your portfolio to a cohort of similar MSPs on the metrics that drive growth and retention. Individual MSPs are never identified.">i</span></h2>
             <div class="control-inline">
               <label for="peerMetricFilter">Focus metric</label>
               <select id="peerMetricFilter" class="select select-sm" aria-label="Peer metric filter">
@@ -184,14 +183,12 @@
               </select>
             </div>
           </div>
-          <div class="peer-cohort" id="peerCohortLine"></div>
           <div id="peerBenchmarkList" class="peer-benchmark-list"></div>
           <div class="peer-legend">
             <span class="legend-chip"><span class="legend-you"></span> You</span>
             <span class="legend-chip"><span class="legend-range"></span> Peer 25th to 75th percentile</span>
             <span class="legend-chip"><span class="legend-median"></span> Peer median</span>
           </div>
-          <div class="tiny" id="peerAnonymizationNote"></div>
         </article>
       </section>
 
@@ -266,14 +263,42 @@
           qbrContent: document.getElementById("qbrContent"),
           riskRankList: document.getElementById("riskRankList"),
           churnConfidenceSlot: document.getElementById("churnConfidenceSlot"),
-          peerCohortLine: document.getElementById("peerCohortLine"),
-          peerCohortSummary: document.getElementById("peerCohortSummary"),
+          peerBenchmarkInfoTip: document.getElementById("peerBenchmarkInfoTip"),
           peerBenchmarkList: document.getElementById("peerBenchmarkList"),
-          peerAnonymizationNote: document.getElementById("peerAnonymizationNote"),
           peerMetricFilter: document.getElementById("peerMetricFilter")
         };
 
         const peerState = { focus: "all" };
+        const dashboardAsOfDate = (function () {
+          const fromData = data && data.asOf ? new Date(`${data.asOf}T00:00:00`) : new Date();
+          return Number.isNaN(fromData.getTime()) ? new Date() : fromData;
+        })();
+
+        function formatDateLabel(dateValue) {
+          return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(dateValue);
+        }
+
+        function buildWindowDateLabels(totalDays, count) {
+          if (count <= 1) return [formatDateLabel(dashboardAsOfDate)];
+          const step = totalDays / (count - 1);
+          const labels = [];
+          for (let idx = 0; idx < count; idx += 1) {
+            const daysBack = Math.max(0, Math.round(totalDays - step * idx));
+            const pointDate = new Date(dashboardAsOfDate);
+            pointDate.setDate(dashboardAsOfDate.getDate() - daysBack);
+            labels.push(formatDateLabel(pointDate));
+          }
+          labels[labels.length - 1] = formatDateLabel(dashboardAsOfDate);
+          return labels;
+        }
+
+        function escapeAttr(value) {
+          return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/"/g, "&quot;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        }
 
         function updateSpoilerLabel(selectId, summaryId, defaultLabel, suffix) {
           const values = utils.parseMultiSelect(document.getElementById(selectId), ["all"]);
@@ -607,12 +632,17 @@
             "365": "365-day trend"
           };
           const periodLabel = periodLabelMap[filters.windowDays] || "30-day trend";
-          const xLabels = series.map(function (_, idx) {
-            return `P${idx + 1}`;
-          });
+          const totalDays = Number(filters.windowDays);
+          const xLabels = buildWindowDateLabels(totalDays, series.length);
           const slope = series.length > 1 ? series[series.length - 1] - series[series.length - 2] : 1;
           const forecast = [1, 2, 3].map(function (step) {
             return Number((series[series.length - 1] + slope * 0.7 * step).toFixed(1));
+          });
+          const dateStep = Math.max(1, Math.round(totalDays / Math.max(series.length - 1, 1)));
+          const forecastLabels = forecast.map(function (_, idx) {
+            const dateValue = new Date(dashboardAsOfDate);
+            dateValue.setDate(dashboardAsOfDate.getDate() + dateStep * (idx + 1));
+            return formatDateLabel(dateValue);
           });
 
           el.periodLabel.textContent = `${periodLabel} window`;
@@ -621,11 +651,11 @@
             height: 220,
             unit: "k",
             yLabel: "MRR ($k)",
-            xAxisName: "Period",
+            xAxisName: "Date",
             yAxisName: "MRR",
             xLabels: xLabels,
             forecastValues: forecast,
-            forecastLabels: ["F+1", "F+2", "F+3"],
+            forecastLabels: forecastLabels,
             lineColor: "#2f86eb",
             areaTint: "rgba(47, 134, 235, 0.12)"
           });
@@ -941,14 +971,54 @@
           return String(value);
         }
 
+        function bindPeerPointHover() {
+          const points = document.querySelectorAll(".peer-range[data-peer-tooltip], .peer-point[data-peer-tooltip], .peer-you[data-peer-tooltip]");
+          if (!points.length) return;
+
+          let tooltip = document.getElementById("peerPointTooltip");
+          if (!tooltip) {
+            tooltip = document.createElement("div");
+            tooltip.id = "peerPointTooltip";
+            tooltip.className = "chart-hover-tooltip";
+            document.body.appendChild(tooltip);
+          }
+
+          function moveTooltip(event) {
+            tooltip.style.left = `${event.clientX + 12}px`;
+            tooltip.style.top = `${event.clientY + 12}px`;
+          }
+
+          points.forEach(function (point) {
+            if (point.dataset.peerHoverBound === "1") return;
+            point.dataset.peerHoverBound = "1";
+
+            point.addEventListener("mouseenter", function (event) {
+              tooltip.textContent = point.getAttribute("data-peer-tooltip") || "";
+              tooltip.classList.add("show");
+              moveTooltip(event);
+            });
+
+            point.addEventListener("mousemove", function (event) {
+              moveTooltip(event);
+            });
+
+            point.addEventListener("mouseleave", function () {
+              tooltip.classList.remove("show");
+            });
+          });
+        }
+
         function renderPeerBenchmark() {
           const benchmarks = data.peerBenchmarks;
           if (!benchmarks || !el.peerBenchmarkList) return;
           initPeerMetricFilter();
 
-          el.peerCohortSummary.textContent = `Cohort: ${benchmarks.cohort.label}, sample ${benchmarks.cohort.sampleSize} MSPs`;
-          el.peerCohortLine.innerHTML = `<strong>Cohort definition:</strong> ${benchmarks.cohort.definition}`;
-          el.peerAnonymizationNote.textContent = benchmarks.cohort.anonymization;
+          if (el.peerBenchmarkInfoTip) {
+            const summary = `Cohort: ${benchmarks.cohort.label}, sample ${benchmarks.cohort.sampleSize} MSPs`;
+            const definition = `Cohort definition: ${benchmarks.cohort.definition}`;
+            const privacyNote = benchmarks.cohort.anonymization;
+            el.peerBenchmarkInfoTip.setAttribute("data-info", `${summary}\n\n${definition}\n\n${privacyNote}`);
+          }
 
           const metrics = peerState.focus === "all"
             ? benchmarks.metrics
@@ -978,23 +1048,27 @@
               const displayDelta = metric.unit === "$"
                 ? `$${Math.abs(Math.round(delta))}`
                 : `${Math.abs(delta).toFixed(1)}${metric.unit === "%" ? "pp" : ""}`;
+              const metricInfo = `${metric.formula} Source: ${metric.source}.`;
+              const rangeTooltip = `Peer 25th to 75th percentile: ${formatPeerValue(metric.peerP25, metric.unit)} to ${formatPeerValue(metric.peerP75, metric.unit)}`;
 
               return `
                 <div class="peer-row">
                   <div class="peer-row-head">
-                    <span class="peer-row-label">${metric.label}</span>
-                    <span class="peer-row-values">
-                      <span>You <strong>${formatPeerValue(metric.yourValue, metric.unit)}</strong></span>
-                      <span>Peer median <strong>${formatPeerValue(metric.peerP50, metric.unit)}</strong></span>
-                      <span class="${deltaClassName}">${displayDelta} ${deltaLabel} median</span>
-                    </span>
+                    <span class="peer-row-label">${metric.label} <span class="info-tip" data-info="${escapeAttr(metricInfo)}">i</span></span>
                   </div>
-                  <div class="peer-bar" title="Peer 25th to 75th percentile: ${formatPeerValue(metric.peerP25, metric.unit)} to ${formatPeerValue(metric.peerP75, metric.unit)}">
-                    <div class="peer-range" style="left:${leftPct.toFixed(1)}%; width:${(rightPct - leftPct).toFixed(1)}%"></div>
+                  <div class="peer-bar">
+                    <div class="peer-range" style="left:${leftPct.toFixed(1)}%; width:${(rightPct - leftPct).toFixed(1)}%" data-peer-tooltip="${escapeAttr(rangeTooltip)}"></div>
                     <div class="peer-median" style="left:${medianPct.toFixed(1)}%"></div>
-                    <div class="${youClassName}" style="left:${youPct.toFixed(1)}%" title="Your value: ${formatPeerValue(metric.yourValue, metric.unit)}"></div>
+                    <div class="peer-point peer-point-p25" style="left:${leftPct.toFixed(1)}%" data-peer-tooltip="Peer 25th percentile: ${formatPeerValue(metric.peerP25, metric.unit)}"></div>
+                    <div class="peer-point peer-point-median" style="left:${medianPct.toFixed(1)}%" data-peer-tooltip="Peer median: ${formatPeerValue(metric.peerP50, metric.unit)}"></div>
+                    <div class="peer-point peer-point-p75" style="left:${rightPct.toFixed(1)}%" data-peer-tooltip="Peer 75th percentile: ${formatPeerValue(metric.peerP75, metric.unit)}"></div>
+                    <div class="${youClassName}" style="left:${youPct.toFixed(1)}%" data-peer-tooltip="You: ${formatPeerValue(metric.yourValue, metric.unit)}"></div>
                   </div>
-                  <div class="tiny">${metric.formula} Source: ${metric.source}.</div>
+                  <div class="peer-row-values">
+                    <span>You <strong>${formatPeerValue(metric.yourValue, metric.unit)}</strong></span>
+                    <span>Peer median <strong>${formatPeerValue(metric.peerP50, metric.unit)}</strong></span>
+                    <span class="${deltaClassName}">${displayDelta} ${deltaLabel} median</span>
+                  </div>
                 </div>`;
             })
             .join("");
@@ -1009,6 +1083,7 @@
           renderMargin(tenants);
           renderChurnConfidence();
           renderPeerBenchmark();
+          bindPeerPointHover();
           renderDetail();
           utils.initInfoTips(document.body);
           utils.bindConfidenceBadges(document.body);

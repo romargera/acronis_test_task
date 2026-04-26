@@ -159,6 +159,7 @@
     const pointClass = cfg.pointClass || "line-point";
     const lineColor = cfg.lineColor || "#2f86eb";
     const areaTint = cfg.areaTint || "rgba(47, 134, 235, 0.12)";
+    const showArea = cfg.showArea !== false;
     const xAxisName = cfg.xAxisName || "Time";
     const yAxisName = cfg.yAxisName || yLabel || "Value";
     const xLabels = cfg.xLabels || values.map(function (_, idx) {
@@ -259,8 +260,8 @@
         <line class="chart-axis" x1="${leftPad}" y1="${topPad}" x2="${leftPad}" y2="${topPad + innerHeight}" />
         <line class="chart-grid" x1="${leftPad}" y1="${topPad + innerHeight * 0.33}" x2="${width - rightPad}" y2="${topPad + innerHeight * 0.33}" />
         <line class="chart-grid" x1="${leftPad}" y1="${topPad + innerHeight * 0.66}" x2="${width - rightPad}" y2="${topPad + innerHeight * 0.66}" />
-        ${areaPoints ? `<polygon points="${areaPoints}" fill="${areaTint}"></polygon>` : ""}
-        ${areaPoints ? `<polygon class="chart-area-hatch" points="${areaPoints}" fill="url(#${hatchId})"></polygon>` : ""}
+        ${showArea && areaPoints ? `<polygon points="${areaPoints}" fill="${areaTint}"></polygon>` : ""}
+        ${showArea && areaPoints ? `<polygon class="chart-area-hatch" points="${areaPoints}" fill="url(#${hatchId})"></polygon>` : ""}
         <text class="chart-label" x="${leftPad - 28}" y="${topPad + 8}">${(max).toFixed(0)}${unit}</text>
         <text class="chart-label" x="${leftPad - 28}" y="${topPad + innerHeight + 4}">${(min).toFixed(0)}${unit}</text>
         <text class="chart-label" x="${leftPad}" y="${height - 6}">${xStart}</text>

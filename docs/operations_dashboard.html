@@ -130,11 +130,6 @@
         <section class="split">
           <article class="card">
             <h2 class="card-title">Posture Trends <span class="info-tip" data-info="Operational trend lines for backup success, patch compliance, and threat activity. Point values are interactive for each datapoint.">i</span></h2>
-            <div class="legend">
-              <span class="legend-item"><span class="dot dot-primary"></span> Backup success</span>
-              <span class="legend-item"><span class="dot dot-warning"></span> Patch compliance</span>
-              <span class="legend-item"><span class="dot dot-danger"></span> Threat activity</span>
-            </div>
             <div class="chart-wrap">
               <div id="trendBackup"></div>
               <div id="trendPatch"></div>
@@ -346,15 +341,26 @@
           return values;
         }
 
-        function buildWindowLabels(totalDays, count) {
-          if (count <= 1) return ["today"];
-          const step = Math.max(1, Math.round(totalDays / (count - 1)));
+        const dashboardAsOfDate = (function () {
+          const fromData = data && data.asOf ? new Date(`${data.asOf}T00:00:00`) : new Date();
+          return Number.isNaN(fromData.getTime()) ? new Date() : fromData;
+        })();
+
+        function formatDateLabel(dateValue) {
+          return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(dateValue);
+        }
+
+        function buildWindowDateLabels(totalDays, count) {
+          if (count <= 1) return [formatDateLabel(dashboardAsOfDate)];
+          const step = totalDays / (count - 1);
           const labels = [];
           for (let idx = 0; idx < count; idx += 1) {
-            const daysBack = totalDays - step * idx;
-            labels.push(daysBack > 0 ? `-${daysBack}d` : "today");
+            const daysBack = Math.max(0, Math.round(totalDays - step * idx));
+            const pointDate = new Date(dashboardAsOfDate);
+            pointDate.setDate(dashboardAsOfDate.getDate() - daysBack);
+            labels.push(formatDateLabel(pointDate));
           }
-          labels[labels.length - 1] = "today";
+          labels[labels.length - 1] = formatDateLabel(dashboardAsOfDate);
           return labels;
         }
 
@@ -689,13 +695,13 @@
           const backupSeries = buildWindowedSeries(data.opsTrends.backup, totalDays, false);
           const patchSeries = buildWindowedSeries(data.opsTrends.patch, totalDays, false);
           const threatSeries = buildWindowedSeries(data.opsTrends.threats, totalDays, true);
-          const labels = buildWindowLabels(totalDays, backupSeries.length);
+          const labels = buildWindowDateLabels(totalDays, backupSeries.length);
           const backup = utils.createLineChart(backupSeries, {
             width: 1080,
             height: 220,
             unit: "%",
             yLabel: "Backup %",
-            xAxisName: "Day",
+            xAxisName: "Date",
             yAxisName: "Backup success",
             xLabels: labels,
             lineClass: "risk-spark",
@@ -708,26 +714,28 @@
             height: 220,
             unit: "%",
             yLabel: "Patch %",
-            xAxisName: "Day",
+            xAxisName: "Date",
             yAxisName: "Patch compliance",
             xLabels: labels,
             lineClass: "risk-spark-alt",
             pointClass: "line-point-alt",
             lineColor: "#f29f05",
-            areaTint: "rgba(242, 159, 5, 0.12)"
+            areaTint: "rgba(242, 159, 5, 0.12)",
+            showArea: false
           });
           const threats = utils.createLineChart(threatSeries, {
             width: 1080,
             height: 220,
             unit: " alerts",
             yLabel: "Critical alerts",
-            xAxisName: "Day",
+            xAxisName: "Date",
             yAxisName: "Alerts",
             xLabels: labels,
             lineClass: "risk-spark-danger",
             pointClass: "line-point-danger",
             lineColor: "#f15354",
-            areaTint: "rgba(241, 83, 84, 0.12)"
+            areaTint: "rgba(241, 83, 84, 0.12)",
+            showArea: false
           });
 
           elements.trendBackup.innerHTML = `<div class="tiny">Backup success trend (unit: %)</div>${backup}`;
@@ -887,18 +895,18 @@
             }
             storageSeries.push(pointValue);
           }
-          const storageLabels = buildWindowLabels(totalDays, storageSeries.length);
+          const storageLabels = buildWindowDateLabels(totalDays, storageSeries.length);
           const currentStorage = storageSeries[storageSeries.length - 1];
 
           elements.classicStorageCurrent.textContent = usesFallbackScope
             ? `Current size: ${currentStorage.toFixed(1)} GB (fallback all tenants)`
             : `Current size: ${currentStorage.toFixed(1)} GB`;
           elements.classicStorageChart.innerHTML = utils.createLineChart(storageSeries, {
-            width: 1080,
+            width: 760,
             height: 220,
             unit: " GB",
             yLabel: "Storage (GB)",
-            xAxisName: "Day",
+            xAxisName: "Date",
             yAxisName: "Storage",
             xLabels: storageLabels,
             lineClass: "risk-spark",
@@ -1069,7 +1077,7 @@
               </tbody>
             </table>
             <div class="section-actions">
-              <button class="btn btn-primary" id="dispatchAction" type="button">Dispatch to Tier 2</button>
+              <button class="btn btn-secondary" id="dispatchAction" type="button">Dispatch to Tier 2</button>
             </div>
           `;
 

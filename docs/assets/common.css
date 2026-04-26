@@ -1069,6 +1069,7 @@ a[href]:hover {
   padding: 10px 12px;
   font-size: var(--acv-font-size-body);
   line-height: 1.35;
+  white-space: pre-line;
   display: none;
 }
 
@@ -1177,8 +1178,8 @@ a[href]:hover {
 
 .peer-row-head {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+  justify-content: flex-start;
+  align-items: center;
   gap: 8px;
 }
 
@@ -1191,6 +1192,9 @@ a[href]:hover {
   display: flex;
   gap: 10px;
   align-items: baseline;
+  justify-content: center;
+  text-align: center;
+  flex-wrap: wrap;
   font-size: var(--acv-font-size-caption);
   color: var(--acv-color-text-secondary);
 }
@@ -1201,10 +1205,10 @@ a[href]:hover {
 
 .peer-bar {
   position: relative;
-  height: 14px;
+  height: 28px;
   background: var(--acv-color-surface-secondary, #eef1f6);
   border-radius: 999px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .peer-range {
@@ -1212,25 +1216,59 @@ a[href]:hover {
   top: 0;
   bottom: 0;
   background: rgba(47, 134, 235, 0.22);
+  cursor: pointer;
 }
 
 .peer-median {
   position: absolute;
-  top: -2px;
-  bottom: -2px;
-  width: 2px;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
   background: #1f5fad;
 }
 
 .peer-you {
   position: absolute;
-  top: -4px;
-  bottom: -4px;
-  width: 10px;
+  top: -8px;
+  bottom: -8px;
+  width: 12px;
   transform: translateX(-50%);
   border-radius: 999px;
   border: 2px solid #ffffff;
   box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+}
+
+.peer-you::before {
+  content: "\25BE";
+  position: absolute;
+  left: 50%;
+  top: -12px;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #1f5fad;
+  line-height: 1;
+}
+
+.peer-point {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  border: 1px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+}
+
+.peer-point-p25,
+.peer-point-p75 {
+  background: #6aa6ec;
+}
+
+.peer-point-median {
+  background: #1f5fad;
 }
 
 .peer-you-ahead {
@@ -1255,6 +1293,7 @@ a[href]:hover {
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
+  justify-content: center;
   font-size: var(--acv-font-size-caption);
   color: var(--acv-color-text-secondary);
   margin-top: 4px;
@@ -1364,4 +1403,3 @@ a[href]:hover {
 .score-rationale {
   color: var(--acv-color-text-secondary);
 }
-
